@@ -20,6 +20,6 @@ checkstyle_check:
 build:
   stage: build
   tags:
-    - sbt-java11
+    - sbt-jdk11
   script:
     - sbt clean compile
