@@ -1,9 +1,43 @@
-@@import org.webjars.play.WebJarsUtil
+@import ch.varani.briventory.BriventoryBuildInfo
+@import org.webjars.play.WebJarsUtil
 
 @(dbInitialized: Boolean, hasAdmin: Boolean)(implicit request: Http.Request, webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
 
-@main(messages("status.title"),
+@getStatus(status: Boolean) = @{
+  if(status)
+    <i class="far fa-check-circle text-success"></i>
+  else
+    <i class="fas fa-exclamation-circle text-danger"></i>
+}
+
+@getTips(status: Boolean, tips: Html) = {
+  @if(!status) {
+    <span class="text-danger tips">@tips</span>
+  }
+}
+
+@simple(messages("status.title"),
   routes.Assets.versioned("stylesheets/status.css") :: Nil) {
-  <p>@dbInitialized</p>
-  <p>@hasAdmin</p>
+  <div class="container-fluid">
+    <ul class="list-group">
+      <li class="list-group-item list-group-item-secondary d-flex justify-content-between align-items-center">
+        @messages("status.app.version")
+        <span>@BriventoryBuildInfo.version</span>
+      </li>
+      <li class="list-group-item">
+        <div class="d-flex justify-content-between align-items-center">
+          @messages("status.databaseVersion.description")
+          @getStatus(dbInitialized)
+        </div>
+        @getTips(dbInitialized, Html(messages("status.databaseVersion.tips")))
+      </li>
+      <li class="list-group-item">
+        <div class="d-flex justify-content-between align-items-center">
+          @messages("status.admin.description")
+          @getStatus(hasAdmin)
+        </div>
+        @getTips(hasAdmin, Html(messages("status.admin.tips", routes.Auth.adminSignUp())))
+      </li>
+    </ul>
+  </div>
 }

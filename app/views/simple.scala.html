@@ -1,0 +1,15 @@
+@import org.webjars.play.WebJarsUtil
+
+@(title: String, stylesheets: List[Call] = Nil)(content: Html)(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
+
+@main(title,
+  routes.Assets.versioned("stylesheets/simple.css") :: stylesheets.toList) {
+  <div class="simple">
+    <div class="title">
+      <img src="@routes.Assets.versioned("images/briventory.png")"></img><h1>Briventory</h1>
+    </div>
+    <div class="simple-container">
+    @content
+    </div>
+  </div>
+}

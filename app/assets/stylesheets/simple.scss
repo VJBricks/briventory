@@ -1,34 +1,37 @@
-.error {
+.simple {
   min-height: 100vh;
 
   background-image: linear-gradient(125deg, #8EACCF, #1BAA5F);
   color: #343434;
+}
 
+.simple .title {
   text-align: center;
 }
 
-.error h1 {
+.simple .title h1 {
   margin: 0;
   display: inline-block;
   vertical-align: middle;
 }
 
-.error img {
+.simple .title img {
   max-height: 40px;
   display: inline-block;
   vertical-align: middle;
 }
 
-.error-container {
+.simple-container {
   width: 100%;
   position: absolute;
 
   top: 50%;
   transform: translateY(-50%);
+
   text-align: center;
 }
 
-.error-container h1 {
+.simple-container h1 {
   margin: 0;
 
   font-size: 30vw;
@@ -39,4 +42,8 @@
 
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.simple-container .tips {
+  font-size: 0.9rem;
 }

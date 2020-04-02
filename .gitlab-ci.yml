@@ -1,16 +1,17 @@
 stages:
-  - complience
+  - dependencies
+  - style
   - build
 
 dependencies:
-  stage: complience
+  stage: dependencies
   tags:
     - sbt-jdk11
   script:
     - sbt dependencyUpdates
 
 checkstyle_check:
-  stage: complience
+  stage: style
   allow_failure: true
   tags:
     - sbt-jdk11
