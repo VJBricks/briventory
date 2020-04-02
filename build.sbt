@@ -1,9 +1,9 @@
-import scala.util.{Failure, Try}
+import scala.util.Failure
 
 name := """Briventory"""
 organization := "ch.varani"
 
-version := "0.1.0-SNAPSHOT"
+version := "1.0.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava, BuildInfoPlugin).settings(
   buildInfoKeys := Seq[BuildInfoKey](name, version),
@@ -115,3 +115,5 @@ jooqCodegen := {
 }
 
 sourceGenerators in Compile += jooqCodegen
+
+addCommandAlias("pipeline", ";dependencyUpdates;checkstyle;clean;compile")

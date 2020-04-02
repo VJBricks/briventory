@@ -1,0 +1,13 @@
+@@import org.webjars.play.WebJarsUtil
+
+@(title: String)(content: Html)(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
+
+@main(title,
+  routes.Assets.versioned("stylesheets/error.css") :: Nil) {
+  <div class="error">
+    <img src="@routes.Assets.versioned("images/briventory.png")"></img><h1>Briventory</h1>
+    <div class="error-container">
+    @content
+    </div>
+  </div>
+}

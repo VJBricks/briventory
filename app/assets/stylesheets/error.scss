@@ -1,0 +1,42 @@
+.error {
+  min-height: 100vh;
+
+  background-image: linear-gradient(125deg, #8EACCF, #1BAA5F);
+  color: #343434;
+
+  text-align: center;
+}
+
+.error h1 {
+  margin: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.error img {
+  max-height: 40px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.error-container {
+  width: 100%;
+  position: absolute;
+
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+}
+
+.error-container h1 {
+  margin: 0;
+
+  font-size: 30vw;
+  font-weight: 900;
+  letter-spacing: 2vw;
+
+  background-image: linear-gradient(215deg, #D44AAD, #FFFFE8);
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

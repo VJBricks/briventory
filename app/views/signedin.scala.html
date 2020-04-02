@@ -1,0 +1,12 @@
+@@import org.webjars.play.WebJarsUtil
+
+@(title: String)(content: Html)(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
+
+@main(title) {
+    <nav class="navbar"></nav>
+
+    <main>
+        @content
+    </main>
+}
+

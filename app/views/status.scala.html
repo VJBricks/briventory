@@ -1,0 +1,9 @@
+@@import org.webjars.play.WebJarsUtil
+
+@(dbInitialized: Boolean, hasAdmin: Boolean)(implicit request: Http.Request, webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
+
+@main(messages("status.title"),
+  routes.Assets.versioned("stylesheets/status.css") :: Nil) {
+  <p>@dbInitialized</p>
+  <p>@hasAdmin</p>
+}
