@@ -2,13 +2,13 @@
 
 @(title: String, stylesheets: List[Call] = Nil)(content: Html)(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
 
-@main(title,
-  routes.Assets.versioned("stylesheets/simple.css") :: stylesheets.toList) {
-  <div class="simple">
+@templates.main(title,
+  routes.Assets.versioned("stylesheets/lite.css") :: stylesheets.toList) {
+  <div class="lite">
     <div class="title">
       <img src="@routes.Assets.versioned("images/briventory.png")"></img><h1>Briventory</h1>
     </div>
-    <div class="simple-container">
+    <div class="lite-container">
     @content
     </div>
   </div>

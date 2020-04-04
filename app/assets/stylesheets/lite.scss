@@ -1,37 +1,35 @@
-.simple {
+.lite {
   min-height: 100vh;
 
   background-image: linear-gradient(125deg, #8EACCF, #1BAA5F);
   color: #343434;
 }
 
-.simple .title {
+.lite .title {
   text-align: center;
 }
 
-.simple .title h1 {
+.lite .title h1 {
   margin: 0;
   display: inline-block;
   vertical-align: middle;
 }
 
-.simple .title img {
+.lite .title img {
   max-height: 40px;
   display: inline-block;
   vertical-align: middle;
 }
 
-.simple-container {
+.lite-container {
   width: 100%;
-  position: absolute;
 
-  top: 50%;
-  transform: translateY(-50%);
+  padding: 3vh;
 
-  text-align: center;
+  text-align: initial;
 }
 
-.simple-container h1 {
+.lite-container h1 {
   margin: 0;
 
   font-size: 30vw;
@@ -44,6 +42,14 @@
   -webkit-text-fill-color: transparent;
 }
 
-.simple-container .tips {
+.lite-container .tips {
   font-size: 0.9rem;
+}
+
+.white-box {
+  padding: 2rem;
+
+  border-radius: 20px;
+
+  background-color: white;
 }
