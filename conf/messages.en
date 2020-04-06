@@ -1,4 +1,17 @@
 auth.signup=Sign Up
+auth.signup.password.tips=The password should have a minimal length of {0} characters and having a strength of {1}.
+auth.signup.password.strength=The actuel strength is:
+auth.signup.passwordRepetition.mismatch=The repetition is not matching the password.
+auth.signup.password.weak=The password does not respect the minimal strength of {0}.
+
+# Implicitly called by the form helper
+error.required=This field is required
+# Implicitly called by the form helper
+error.minLength=Minimum length: {0} characters
+# Implicitly called by the form helper
+error.maxLength=Maximum length: {0} characters
+# Implicitly called by the form helper
+error.email=This is not a valid e-mail address
 
 maintenance.title=Maintenance
 maintenance.string=This site is currently under maintenance

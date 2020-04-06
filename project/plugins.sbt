@@ -1,6 +1,5 @@
 // The Play plugin
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.1")
-addSbtPlugin("com.typesafe.sbt" % "sbt-play-enhancer" % "1.2.2")
 
 // Retrieves sbt variables values
 addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.9.0")

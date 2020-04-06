@@ -31,7 +31,8 @@ libraryDependencies ++= Seq(
   "org.jooq" % "jooq-codegen" % "3.13.1",
   "org.jooq" % "jooq-meta" % "3.13.1",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.3",
-  "org.semver" % "api" % "0.9.33"
+  "org.semver" % "api" % "0.9.33",
+  "com.nulab-inc" % "zxcvbn" % "1.3.0"
 )
 
 // WebJars
@@ -41,7 +42,8 @@ libraryDependencies ++= Seq(
   "org.webjars" % "jquery-ui" % "1.12.1",
   "org.webjars" % "popper.js" % "2.0.2",
   "org.webjars" % "bootstrap" % "4.4.1",
-  "org.webjars" % "font-awesome" % "5.13.0"
+  "org.webjars" % "font-awesome" % "5.13.0",
+  "org.webjars.bowergithub.dropbox" % "zxcvbn" % "4.4.2"
 )
 
 // Tests libraries

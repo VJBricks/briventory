@@ -1,7 +1,6 @@
-@import ch.varani.briventory.BriventoryBuildInfo
-@import org.webjars.play.WebJarsUtil
-
-@(title: String, stylesheets: List[Call] = Nil, javascripts: List[Call] = Nil, jsRoutes: List[Call] = Nil)(content: Html)(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
+@@import ch.varani.briventory.BriventoryBuildInfo
+import org.webjars.play.WebJarsUtil
+@(title: String, stylesheets: List[Call] = Nil, javascripts: List[Call] = Nil, jsRoutes: List[Call] = Nil, webJarsJsAssets: List[WebJarsUtil#WebJarAsset] = Nil)(content: Html)(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
 
 <!DOCTYPE html>
 <html lang="@messages.lang().code()">
@@ -35,6 +34,10 @@
 
     @webJarsUtil.locate("jquery", "jquery.min.js").script()
     @webJarsUtil.locate("bootstrap", "bootstrap.bundle.min.js").script()
+
+    @for(jsAssets <- webJarsJsAssets) {
+      @jsAssets.script()
+    }
 
     @for(route <- jsRoutes) {
       <script src="@route" type="text/javascript"></script>

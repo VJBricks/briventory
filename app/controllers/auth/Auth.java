@@ -1,6 +1,7 @@
 package controllers.auth;
 
 import org.webjars.play.WebJarsUtil;
+import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
 import play.mvc.Controller;
@@ -52,7 +53,14 @@ public final class Auth extends Controller {
   }
 
   public Result doAdminSignUp(final Http.Request request) {
-    return ok("doAdminSignUp");
+    Form<AdminSignUpForm> form = formFactory.form(AdminSignUpForm.class).bindFromRequest(request);
+    if (form.hasErrors())
+      return badRequest(views.html.auth.adminSignUp.render(form,
+                                                           request,
+                                                           webJarsUtil,
+                                                           messagesApi.preferred(request)));
+
+    return redirect(routes.Auth.signIn());
   }
 
 }

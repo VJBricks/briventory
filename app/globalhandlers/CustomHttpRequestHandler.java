@@ -33,7 +33,7 @@ public final class CustomHttpRequestHandler extends DefaultHttpRequestHandler {
   public HandlerForRequest handlerForRequest(final Http.RequestHeader requestHeader) {
     final boolean isInMaintenance = briventoryDB.isInMaintenance();
 
-    if (isInMaintenance && !requestHeader.uri().matches("^/(maintenance|status|auth|assets|webjars).*")) {
+    if (isInMaintenance && !requestHeader.uri().matches("^/(maintenance|status|auth|assets|webjars|robots.txt).*")) {
       Router minimalRouter = Router.empty();
       Http.Request request = requestHeader.withBody(null);
       Handler handler = minimalRouter.route(requestHeader).orElseGet(
