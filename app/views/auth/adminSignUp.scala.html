@@ -1,7 +1,7 @@
-@@import controllers.auth.AdminSignUpForm
-import database.Constraints
-import org.webjars.play.WebJarsUtil
-import views.html.helper.FieldConstructor
+@import controllers.auth.AdminSignUpForm
+@import database.Constraints
+@import org.webjars.play.WebJarsUtil
+@import views.html.helper.FieldConstructor
 
 @(form: play.data.Form[AdminSignUpForm])(implicit request: Http.Request, webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
 
