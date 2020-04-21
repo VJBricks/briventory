@@ -48,9 +48,17 @@
         <property name="message" value="Line has trailing spaces."/>
     </module>
 
+    <!-- Suppress warning on blocks of code that is surrounded by the following comments. -->
     <module name="SuppressWithPlainTextCommentFilter">
         <property name="offCommentFormat" value="CS BEGIN QUERY"/>
         <property name="onCommentFormat" value="CS END QUERY"/>
+    </module>
+
+    <!-- Suppression of files. -->
+    <!-- See https://checkstyle.sourceforge.io/config_filters.html#SuppressionFilter -->
+    <module name="SuppressionFilter">
+        <property name="file" value="varani_checkstyle_suppression.xml"/>
+        <property name="optional" value="false"/>
     </module>
 
     <!-- Checks for Size Violations.                    -->

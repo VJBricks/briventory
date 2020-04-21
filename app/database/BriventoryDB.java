@@ -3,10 +3,8 @@ package database;
 import ch.varani.briventory.BriventoryBuildInfo;
 import ch.varani.briventory.tables.records.RevisionRecord;
 import org.jooq.DSLContext;
-import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Result;
-import org.jooq.SQL;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.semver.Version;
@@ -48,12 +46,12 @@ public class BriventoryDB {
   }
 
   /**
-   * Runs the {@link SQL} query in the Briventory thread execution context.
+   * Executes a query in the Briventory database, using it's thread execution context.
    *
    * @param <T> the return type of the query.
    * @param function the {@link Function} that will execute the query.
    *
-   * @return the {@link CompletableFuture} containing the {@link Result} of {@link Record}.
+   * @return the {@link CompletableFuture} created to use the Briventory thread execution context.
    */
   public <T> CompletableFuture<T> query(final Function<DSLContext, T> function) {
 
@@ -64,12 +62,12 @@ public class BriventoryDB {
   }
 
   /**
-   * Runs the {@link SQL} query within a transaction.
+   * Executes the query within a transaction, in the Briventory database, using it's thread execution context.
    *
    * @param function the {@link Function} that will execute the query.
    * @param <T> the return type.
    *
-   * @return the {@link CompletableFuture} containing the {@link Result} of {@link Record}.
+   * @return the {@link CompletableFuture} created to use the Briventory thread execution context.
    */
   public <T> CompletableFuture<T> withTransaction(final Function<DSLContext, T> function) {
 
@@ -114,7 +112,7 @@ public class BriventoryDB {
    * </ul>
    */
   public boolean isInMaintenance() {
-    return isDatabaseInitialized() ||
+    return !isDatabaseInitialized() ||
            !hasActiveAdministrator();
   }
 
