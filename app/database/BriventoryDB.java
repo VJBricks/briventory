@@ -66,15 +66,16 @@ public class BriventoryDB {
   /**
    * Runs the {@link SQL} query within a transaction.
    *
-   * @param sql the {@link SQL} query.
+   * @param function the {@link Function} that will execute the query.
+   * @param <T> the return type.
    *
    * @return the {@link CompletableFuture} containing the {@link Result} of {@link Record}.
    */
-  public CompletableFuture<Result<Record>> withTransaction(final SQL sql) {
+  public <T> CompletableFuture<T> withTransaction(final Function<DSLContext, T> function) {
 
     return CompletableFuture.supplyAsync(() -> database.withTransaction(connection -> {
       DSLContext dialect = DSL.using(connection, SQLDialect.POSTGRES);
-      return dialect.fetch(sql);
+      return function.apply(dialect);
     }), executor);
   }
 

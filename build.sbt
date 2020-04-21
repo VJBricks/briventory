@@ -118,6 +118,6 @@ jooqCodegen := {
   jooqDynamicCodegen.value
 }
 
-// sourceGenerators in Compile += jooqCodegen
+sourceGenerators in Compile += jooqCodegen
 
 addCommandAlias("pipeline", ";dependencyUpdates;checkstyle;clean;compile")

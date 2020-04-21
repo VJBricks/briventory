@@ -3,16 +3,11 @@ package controllers.auth;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import ch.varani.briventory.tables.records.AdminRecord;
 import ch.varani.briventory.tables.records.UserRecord;
-import database.BriventoryDBContext;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
+import database.BriventoryDB;
 import org.webjars.play.WebJarsUtil;
-import play.api.db.Database;
 import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
-import play.libs.concurrent.HttpExecution;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -20,7 +15,6 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executor;
 
 import static ch.varani.briventory.Tables.ADMIN;
 import static ch.varani.briventory.Tables.USER;
@@ -40,10 +34,8 @@ public final class Auth extends Controller {
   private final MessagesApi messagesApi;
   /** The injected {@link FormFactory}. */
   private final FormFactory formFactory;
-  /** The {@link Executor} retrieved from the injected {@link BriventoryDBContext} instance. */
-  private final Executor executor;
-  /** The injected {@link Database} instance. */
-  private final Database database;
+  /** The injected {@link BriventoryDB} instance. */
+  private final BriventoryDB briventoryDB;
 
   /**
    * Creates a new {@link Auth} controller by injecting the parameters.
@@ -51,17 +43,15 @@ public final class Auth extends Controller {
    * @param webJarsUtil the {@link WebJarsUtil}.
    * @param messagesApi the {@link MessagesApi}.
    * @param formFactory the {@link FormFactory}.
-   * @param context the {@link BriventoryDBContext}.
-   * @param database the {@link Database}.
+   * @param briventoryDB the {@link BriventoryDB}.
    */
   @Inject
   public Auth(final WebJarsUtil webJarsUtil, final MessagesApi messagesApi, final FormFactory formFactory,
-              final BriventoryDBContext context, final Database database) {
+              final BriventoryDB briventoryDB) {
     this.webJarsUtil = webJarsUtil;
     this.messagesApi = messagesApi;
     this.formFactory = formFactory;
-    executor = HttpExecution.fromThread((Executor) context);
-    this.database = database;
+    this.briventoryDB = briventoryDB;
   }
 
   public Result signIn() {
@@ -88,21 +78,20 @@ public final class Auth extends Controller {
                                                              webJarsUtil,
                                                              messagesApi.preferred(request)));
 
-      return database.withTransaction(connection -> {
-        DSLContext dialect = DSL.using(connection, SQLDialect.POSTGRES);
+      return briventoryDB.withTransaction(context -> {
 
-        final UserRecord newUser = dialect.newRecord(USER);
+        final UserRecord newUser = context.newRecord(USER);
         newUser.setName(form.get().getName());
         newUser.setEmail(form.get().getEmail());
         newUser.setPassword(BCrypt.withDefaults().hashToString(BCRYPT_COST, form.get().getPassword().toCharArray()));
         newUser.store();
 
-        final AdminRecord newAdmin = dialect.newRecord(ADMIN);
+        final AdminRecord newAdmin = context.newRecord(ADMIN);
         newAdmin.setIduser(newUser.getId());
         newAdmin.store();
 
         return redirect(routes.Auth.signIn());
-      });
+      }).join();
 
     });
   }
