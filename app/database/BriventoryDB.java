@@ -10,21 +10,19 @@ import org.jooq.SQL;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.semver.Version;
-import play.Logger;
 import play.api.db.Database;
 import play.libs.concurrent.HttpExecution;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 import static ch.varani.briventory.tables.Admin.ADMIN;
 import static ch.varani.briventory.tables.Lockeduser.LOCKEDUSER;
 import static ch.varani.briventory.tables.Revision.REVISION;
 import static org.jooq.impl.DSL.count;
-
 
 @Singleton
 public class BriventoryDB {
@@ -50,19 +48,19 @@ public class BriventoryDB {
   }
 
   /**
-   * Runs the {@link SQL} query.
+   * Runs the {@link SQL} query in the Briventory thread execution context.
    *
-   * @param sql the {@link SQL} query.
+   * @param <T> the return type of the query.
+   * @param function the {@link Function} that will execute the query.
    *
    * @return the {@link CompletableFuture} containing the {@link Result} of {@link Record}.
    */
-  public CompletableFuture<Result<Record>> query(final SQL sql) {
+  public <T> CompletableFuture<T> query(final Function<DSLContext, T> function) {
 
-    return CompletableFuture.supplyAsync(() ->
-                                             database.withConnection(connection -> {
-                                               DSLContext dialect = DSL.using(connection, SQLDialect.POSTGRES);
-                                               return dialect.fetch(sql);
-                                             }), executor);
+    return CompletableFuture.supplyAsync(() -> database.withConnection(connection -> {
+      DSLContext dialect = DSL.using(connection, SQLDialect.POSTGRES);
+      return function.apply(dialect);
+    }), executor);
   }
 
   /**
@@ -74,11 +72,10 @@ public class BriventoryDB {
    */
   public CompletableFuture<Result<Record>> withTransaction(final SQL sql) {
 
-    return CompletableFuture.supplyAsync(() ->
-                                             database.withTransaction(connection -> {
-                                               DSLContext dialect = DSL.using(connection, SQLDialect.POSTGRES);
-                                               return dialect.fetch(sql);
-                                             }), executor);
+    return CompletableFuture.supplyAsync(() -> database.withTransaction(connection -> {
+      DSLContext dialect = DSL.using(connection, SQLDialect.POSTGRES);
+      return dialect.fetch(sql);
+    }), executor);
   }
 
   /**
@@ -86,47 +83,24 @@ public class BriventoryDB {
    * {@code false}.
    */
   public boolean isDatabaseInitialized() {
-    try {
-      return CompletableFuture.supplyAsync(() ->
-                                               database.withConnection(connection -> {
-                                                 DSLContext sql = DSL.using(connection, SQLDialect.POSTGRES);
-                                                 RevisionRecord revision = sql.selectFrom(REVISION).fetchAny();
-
-                                                 Version dbVersion = new Version(revision.getDatabase(), 0, 0);
-                                                 return dbVersion.isCompatible(APP_VERSION);
-                                               }),
-                                           executor).get();
-    } catch (ExecutionException e) {
-      return true;
-    } catch (InterruptedException e) {
-      Logger.of(BriventoryDB.class).error("Database call interrupted", e);
-      Thread.currentThread().interrupt();
-    }
-    return true;
+    return query(context -> {
+      RevisionRecord revision = context.selectFrom(REVISION).fetchAny();
+      Version dbVersion = new Version(revision.getDatabase(), 0, 0);
+      return dbVersion.isCompatible(APP_VERSION);
+    }).join();
   }
 
   /** @return {@code true} if the database contains at lease one non-locked administrator, otherwise {@code false}. */
   public boolean hasActiveAdministrator() {
-    try {
-      return CompletableFuture.supplyAsync(() ->
-                                               database.withConnection(connection -> {
-                                                 DSLContext sql = DSL.using(connection, SQLDialect.POSTGRES);
-                                                 Result<Record1<Integer>> result = sql.select(count())
-                                                                                      .from(ADMIN)
-                                                                                      .leftJoin(LOCKEDUSER)
-                                                                                      .on(ADMIN.IDUSER
-                                                                                              .eq(LOCKEDUSER.IDUSER))
-                                                                                      .where(LOCKEDUSER.IDUSER.isNull())
-                                                                                      .fetch();
-                                                 return result.get(0).component1() > 0;
-                                               }), executor).get();
-    } catch (ExecutionException e) {
-      return false;
-    } catch (InterruptedException e) {
-      Logger.of(BriventoryDB.class).error("Database call interrupted", e);
-      Thread.currentThread().interrupt();
-    }
-    return false;
+    return query(context -> {
+      Result<Record1<Integer>> result =
+          context.select(count())
+                 .from(ADMIN)
+                 .leftJoin(LOCKEDUSER).on(ADMIN.IDUSER.eq(LOCKEDUSER.IDUSER))
+                 .where(LOCKEDUSER.IDUSER.isNull())
+                 .fetch();
+      return result.get(0).component1() > 0;
+    }).join();
   }
 
   /**

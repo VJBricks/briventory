@@ -18,5 +18,21 @@
             <packageName>ch.varani.briventory</packageName>
             <directory>target/scala-2.13/src_managed/main/jooq</directory>
         </target>
+        <generate>
+            <daos>true</daos>
+            <pojos>true</pojos>
+            <pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>
+            <deprecated>false</deprecated>
+            <generatedAnnotation>true</generatedAnnotation>
+            <relations>true</relations>
+            <records>true</records>
+            <interfaces>true</interfaces>
+            <globalObjectReferences>true</globalObjectReferences>
+            <jpaAnnotations>true</jpaAnnotations>
+            <validationAnnotations>true</validationAnnotations>
+            <fluentSetters>true</fluentSetters>
+            <routines>true</routines>
+            <jpaAnnotations>true</jpaAnnotations>
+        </generate>
     </generator>
 </configuration>
