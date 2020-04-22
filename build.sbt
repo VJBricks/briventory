@@ -5,6 +5,7 @@ maintainer := "briventory@varani.ch"
 
 Common.settings
 Common.testSettings
+Common.checkstyleSettings
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava, BuildInfoPlugin).settings(
   buildInfoKeys := Seq[BuildInfoKey](name, version),
@@ -57,12 +58,7 @@ libraryDependencies ++= Seq(
 
 // Dependencies Check Directives
 dependencyUpdatesFailBuild := true
-
 dependencyUpdatesFilter -= moduleFilter(organization = "org.jacoco", name = "org.jacoco.agent")
-
-// Checkstyle Directives
-checkstyleConfigLocation := CheckstyleConfigLocation.File("varani_java_checks.xml")
-checkstyleSeverityLevel := Some(CheckstyleSeverityLevel.Error)
 
 // SonarQube parameters
 sonarProperties ++= Map(

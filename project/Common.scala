@@ -1,6 +1,8 @@
+import com.etsy.sbt.checkstyle.CheckstylePlugin.autoImport.{CheckstyleConfigLocation, CheckstyleSeverityLevel, checkstyleConfigLocation, checkstyleSeverityLevel}
+import com.timushev.sbt.updates.UpdatesPlugin.autoImport.{dependencyUpdatesFailBuild, dependencyUpdatesFilter}
 import play.sbt.PlayImport.{javaJdbc, javaJpa}
 import sbt.Keys.{javaOptions, javacOptions, publishArtifact, scalacOptions, _}
-import sbt._
+import sbt.{moduleFilter, _}
 
 object Common {
   val settings: Seq[Setting[_]] = Seq(
@@ -24,6 +26,12 @@ object Common {
     testOptions in Test := Seq(Tests.Argument(TestFrameworks.JUnit, "-a", "-v"))
   )
 
+  val checkstyleSettings: Seq[Setting[_]] = Seq(
+    // Checkstyle Directives
+    checkstyleConfigLocation := CheckstyleConfigLocation.File("varani_java_checks.xml"),
+    checkstyleSeverityLevel := Some(CheckstyleSeverityLevel.Error)
+  )
+
   val jpaDependency = Seq(
     javaJdbc,
     javaJpa,
@@ -35,4 +43,5 @@ object Common {
     "org.jooq" % "jooq-meta" % "3.13.1" % Compile,
     "org.jooq" % "jooq-meta-extensions" % "3.13.1" % Compile
   )
+
 }
