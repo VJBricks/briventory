@@ -27,7 +27,7 @@
   <logger name="play" level="WARN" />
   <logger name="application" level="WARN" />
   <logger name="globalhandlers" level="WARN" />
-  <logger name="org.jooq" level="WARN">
+  <logger name="org.jooq" level="ERROR">
     <appender-ref ref="STDOUT"/>
   </logger>
 

@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import static ch.varani.briventory.tables.User.USER;
+import static ch.varani.briventory.jooq.tables.User.USER;
 
 @ValidateWithDB
 public final class AdminSignUpForm implements ValidatableWithDB<List<ValidationError>> {

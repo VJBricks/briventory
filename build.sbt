@@ -1,27 +1,24 @@
 import scala.util.Failure
 
 name := """Briventory"""
-organization := "ch.varani"
+maintainer := "briventory@varani.ch"
 
-version := "1.0.0-SNAPSHOT"
+Common.settings
+Common.testSettings
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava, BuildInfoPlugin).settings(
   buildInfoKeys := Seq[BuildInfoKey](name, version),
   buildInfoObject := "BriventoryBuildInfo",
   buildInfoPackage := "ch.varani.briventory"
-)
+).aggregate(briventoryModels).dependsOn(briventoryModels)
 
-scalaVersion := "2.13.1"
+lazy val briventoryModels = project
 
-// Disable the ScalaDoc generation
-sources in (Compile,doc) := Seq.empty
-publishArtifact in (Compile, packageDoc) := false
+libraryDependencies += guice
 
-libraryDependencies ++= Seq(
-  guice,
-  javaJdbc,
-  javaJpa
-)
+libraryDependencies ++= Common.jpaDependency
+
+libraryDependencies ++= Common.jooqDependencies
 
 // Libraries
 libraryDependencies ++= Seq(
@@ -29,8 +26,6 @@ libraryDependencies ++= Seq(
   "commons-validator" % "commons-validator" % "1.6",
   "org.postgresql" % "postgresql" % "42.2.12",
   "org.jooq" % "jooq" % "3.13.1",
-  "org.jooq" % "jooq-codegen" % "3.13.1",
-  "org.jooq" % "jooq-meta" % "3.13.1",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.3",
   "org.semver" % "api" % "0.9.33",
   "me.gosimple" % "nbvcxz" % "1.4.3",
@@ -69,14 +64,6 @@ dependencyUpdatesFilter -= moduleFilter(organization = "org.jacoco", name = "org
 checkstyleConfigLocation := CheckstyleConfigLocation.File("varani_java_checks.xml")
 checkstyleSeverityLevel := Some(CheckstyleSeverityLevel.Error)
 
-// Make verbose tests
-testOptions in Test := Seq(Tests.Argument(TestFrameworks.JUnit, "-a", "-v"))
-
-// Treat warning as error
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
-javacOptions ++= Seq("-Xlint:all", "-Xlint:-processing", "-Werror")
-javaOptions ++= Seq("--illegal-access=warn")
-
 // SonarQube parameters
 sonarProperties ++= Map(
   "sonar.projectName"               -> System.getenv("CI_PROJECT_NAME"),
@@ -98,7 +85,8 @@ val jooqDynamicCodegen = Def.taskDyn {
   val jooqFiles = ((sourceManaged.value / "main/jooq") ** "*.java").get
   if (jooqFiles.isEmpty)
     Def.task {
-      val classpath = (managedClasspath in Compile).value.files
+      var classpath = (managedClasspath in Compile).value.files
+      classpath ++= (internalDependencyClasspath in Compile).value.files
       val options = Seq("briventory.xml")
       val result = runner.value.run("org.jooq.codegen.GenerationTool", classpath, options, streams.value.log)
       result match {

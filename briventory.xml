@@ -1,27 +1,46 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <configuration xmlns="http://www.jooq.org/xsd/jooq-codegen-3.13.0.xsd">
-    <jdbc>
-        <driver>org.postgresql.Driver</driver>
-        <url>jdbc:postgresql://localhost/briventory</url>
-        <user>briventory</user>
-        <password>foobar36</password>
-    </jdbc>
     <generator>
-        <name>org.jooq.codegen.JavaGenerator</name>
         <database>
-            <name>org.jooq.meta.postgres.PostgresDatabase</name>
-            <inputSchema>public</inputSchema>
-            <includes>.*</includes>
-            <excludes></excludes>
+            <!-- https://www.jooq.org/doc/latest/manual/code-generation/codegen-jpa/ -->
+            <name>org.jooq.meta.extensions.jpa.JPADatabase</name>
+
+            <properties>
+                <property>
+                    <key>packages</key>
+                    <value>ch.varani.briventory.models</value>
+                </property>
+                <!-- Whether JPA 2.1 AttributeConverters should be auto-mapped to jOOQ Converters.
+                 Custom <forcedType/> configurations will have a higher priority than these auto-mapped converters.
+                 This defaults to true. -->
+                <property>
+                    <key>useAttributeConverters</key>
+                    <value>true</value>
+                </property>
+                <!-- The default schema for unqualified objects:
+
+                 - public: all unqualified objects are located in the PUBLIC (upper case) schema
+                 - none: all unqualified objects are located in the default schema (default)
+
+                 This configuration can be overridden with the schema mapping feature -->
+                <property>
+                    <key>unqualifiedSchema</key>
+                    <value>none</value>
+                </property>
+
+            </properties>
+
         </database>
+
         <target>
-            <packageName>ch.varani.briventory</packageName>
+            <packageName>ch.varani.briventory.jooq</packageName>
             <directory>target/scala-2.13/src_managed/main/jooq</directory>
         </target>
+
         <generate>
-            <daos>true</daos>
-            <pojos>true</pojos>
-            <pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>
+            <!--<daos>true</daos>-->
+            <!--<pojos>true</pojos>-->
+            <!--<pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>-->
             <deprecated>false</deprecated>
             <generatedAnnotation>true</generatedAnnotation>
             <relations>true</relations>
@@ -32,7 +51,7 @@
             <validationAnnotations>true</validationAnnotations>
             <fluentSetters>true</fluentSetters>
             <routines>true</routines>
-            <jpaAnnotations>true</jpaAnnotations>
         </generate>
+
     </generator>
 </configuration>

@@ -1,8 +1,7 @@
 package controllers.auth;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
-import ch.varani.briventory.tables.records.AdminRecord;
-import ch.varani.briventory.tables.records.UserRecord;
+import ch.varani.briventory.models.Admin;
 import database.BriventoryDB;
 import org.webjars.play.WebJarsUtil;
 import play.data.Form;
@@ -15,9 +14,6 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-
-import static ch.varani.briventory.Tables.ADMIN;
-import static ch.varani.briventory.Tables.USER;
 
 /**
  * The {@code Auth} {@link Controller} handle everything related to the authentication in the App. It also handle the
@@ -78,17 +74,14 @@ public final class Auth extends Controller {
                                                              webJarsUtil,
                                                              messagesApi.preferred(request)));
 
-      return briventoryDB.withTransaction(context -> {
-
-        final UserRecord newUser = context.newRecord(USER);
-        newUser.setName(form.get().getName());
-        newUser.setEmail(form.get().getEmail());
-        newUser.setPassword(BCrypt.withDefaults().hashToString(BCRYPT_COST, form.get().getPassword().toCharArray()));
-        newUser.store();
-
-        final AdminRecord newAdmin = context.newRecord(ADMIN);
-        newAdmin.setIduser(newUser.getId());
-        newAdmin.store();
+      return briventoryDB.persist(entityManager -> {
+        final Admin admin = new Admin().setName(form.get().getName())
+                                       .setEmail(form.get().getEmail())
+                                       .setPassword(BCrypt.withDefaults()
+                                                          .hashToString(BCRYPT_COST, form.get()
+                                                                                         .getPassword()
+                                                                                         .toCharArray()));
+        entityManager.persist(admin);
 
         return redirect(routes.Auth.signIn());
       }).join();
