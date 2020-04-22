@@ -28,7 +28,7 @@ public class ValidateWithDBValidator implements PlayConstraintValidator<Validate
    * @param constraintAnnotation the {@link ValidateWithDB} annotation.
    */
   @Override
-  public void initialize(final ValidateWithDB constraintAnnotation) {}
+  public void initialize(final ValidateWithDB constraintAnnotation) { /* No-op. */}
 
   /**
    * Does this validator is valid.

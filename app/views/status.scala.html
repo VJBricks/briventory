@@ -5,9 +5,9 @@
 
 @getStatus(status: Boolean) = @{
   if(status)
-    <i class="far fa-check-circle text-success"></i>
+    <i class="far fa-check-circle text-success" aria-hidden="true"></i>
   else
-    <i class="fas fa-exclamation-circle text-danger"></i>
+    <i class="fas fa-exclamation-circle text-danger" aria-hidden="true"></i>
 }
 
 @getTips(status: Boolean, tips: Html) = {

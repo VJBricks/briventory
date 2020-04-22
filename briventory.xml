@@ -38,9 +38,6 @@
         </target>
 
         <generate>
-            <!--<daos>true</daos>-->
-            <!--<pojos>true</pojos>-->
-            <!--<pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>-->
             <deprecated>false</deprecated>
             <generatedAnnotation>true</generatedAnnotation>
             <relations>true</relations>

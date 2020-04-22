@@ -12,7 +12,6 @@ dependencies:
 
 checkstyle_check:
   stage: style
-  allow_failure: true
   tags:
     - sbt-jdk11
   script:

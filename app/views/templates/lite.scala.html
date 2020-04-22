@@ -1,4 +1,5 @@
-@import org.webjars.play.WebJarsUtil
+@import ch.varani.briventory.BriventoryBuildInfo
+import org.webjars.play.WebJarsUtil
 
 @(title: String, stylesheets: List[Call] = Nil, javascripts: List[Call] = Nil, webJarsJsAssets: List[WebJarsUtil#WebJarAsset] = Nil)(content: Html)(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
 
@@ -8,7 +9,8 @@
   webJarsJsAssets = webJarsJsAssets) {
   <div class="lite">
     <div class="title">
-      <img src="@routes.Assets.versioned("images/briventory.png")"></img><h1>Briventory</h1>
+      <img src="@routes.Assets.versioned("images/briventory.png")" alt="@BriventoryBuildInfo.name"></img><h1>
+      Briventory</h1>
     </div>
     <div class="lite-container">
     @content
