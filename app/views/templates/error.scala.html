@@ -1,8 +1,7 @@
-@import org.webjars.play.WebJarsUtil
+@this(lite: templates.lite)
+@(title: String, stylesheets: List[Call] = Nil)(content: Html)(implicit messages: play.i18n.Messages)
 
-@(title: String, stylesheets: List[Call] = Nil)(content: Html)(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
-
-@templates.lite(title,
+@lite(title,
   routes.Assets.versioned("stylesheets/error.css") :: stylesheets.toList) {
   @content
 }

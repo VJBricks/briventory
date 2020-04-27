@@ -1,32 +1,49 @@
-import scala.util.Failure
-
 name := """Briventory"""
 maintainer := "briventory@varani.ch"
 
-Common.settings
-Common.testSettings
-Common.checkstyleSettings
+// Common Settings
+scalaVersion := "2.13.2"
+
+organization := "ch.varani"
+version := "1.0.0-SNAPSHOT"
+
+// Disable the ScalaDoc generation
+sources in(Compile, doc) := Seq.empty
+publishArtifact in(Compile, packageDoc) := false
+
+// Treat warning as error
+scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
+javacOptions ++= Seq("-Xlint:all", "-Xlint:-processing", "-Werror")
+javaOptions ++= Seq("--illegal-access=warn")
+
+// Tests Settings
+testOptions in Test := Seq(Tests.Argument(TestFrameworks.JUnit, "-a", "-v"))
+
+// Checkstyle Directives
+checkstyleConfigLocation := CheckstyleConfigLocation.File("varani_java_checks.xml")
+checkstyleSeverityLevel := Some(CheckstyleSeverityLevel.Error)
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava, BuildInfoPlugin).settings(
   buildInfoKeys := Seq[BuildInfoKey](name, version),
   buildInfoObject := "BriventoryBuildInfo",
   buildInfoPackage := "ch.varani.briventory"
-).aggregate(briventoryModels).dependsOn(briventoryModels)
+)
 
-lazy val briventoryModels = project
-
+// Dependency Injection
 libraryDependencies += guice
 
-libraryDependencies ++= Common.jpaDependency
-
-libraryDependencies ++= Common.jooqDependencies
+// JPA Dependencies
+libraryDependencies ++= Seq(
+  javaJdbc,
+  javaJpa,
+  "org.hibernate" % "hibernate-core" % "5.4.14.Final"
+)
 
 // Libraries
 libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-text" % "1.8",
   "commons-validator" % "commons-validator" % "1.6",
   "org.postgresql" % "postgresql" % "42.2.12",
-  "org.jooq" % "jooq" % "3.13.1",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.3",
   "org.semver" % "api" % "0.9.33",
   "me.gosimple" % "nbvcxz" % "1.4.3",
@@ -59,49 +76,23 @@ libraryDependencies ++= Seq(
 // Dependencies Check Directives
 dependencyUpdatesFailBuild := true
 dependencyUpdatesFilter -= moduleFilter(organization = "org.jacoco", name = "org.jacoco.agent")
+dependencyUpdatesFilter -= moduleFilter(organization = "com.fasterxml.jackson.core", name = "jackson-databind")
 
 // SonarQube parameters
 sonarProperties ++= Map(
-  "sonar.projectName"               -> System.getenv("CI_PROJECT_NAME"),
-  "sonar.host.url"                  -> System.getenv("SONAR_HOST"),
-  "sonar.java.source"               -> "11",
-  "sonar.java.binaries"             -> "./target/scala-2.13/classes",
-  "sonar.java.test.binaries"        -> "./target/scala-2.13/test-classes",
-  "sonar.login"                     -> System.getenv("SONAR_TOKEN"),
-  "sonar.gitlab.commit_sha"         -> System.getenv("CI_COMMIT_SHA"),
-  "sonar.gitlab.ref_name"           -> System.getenv("CI_COMMIT_REF_NAME"),
-  "sonar.gitlab.project_id"         -> System.getenv("CI_PROJECT_ID"),
-  "sonar.gitlab.url"                -> System.getenv("GL_SERVER"),
-  "sonar.gitlab.user_token"         -> System.getenv("GL_TOKEN"),
-  "sonar.junit.reportsPath"         -> "./target/test-reports",
-  "sonar.jacoco.reportPaths"        -> "./target/scala-2.13/jacoco/data/jacoco.exec"
+  "sonar.projectName" -> System.getenv("CI_PROJECT_NAME"),
+  "sonar.host.url" -> System.getenv("SONAR_HOST"),
+  "sonar.java.source" -> "11",
+  "sonar.java.binaries" -> "./target/scala-2.13/classes",
+  "sonar.java.test.binaries" -> "./target/scala-2.13/test-classes",
+  "sonar.login" -> System.getenv("SONAR_TOKEN"),
+  "sonar.gitlab.commit_sha" -> System.getenv("CI_COMMIT_SHA"),
+  "sonar.gitlab.ref_name" -> System.getenv("CI_COMMIT_REF_NAME"),
+  "sonar.gitlab.project_id" -> System.getenv("CI_PROJECT_ID"),
+  "sonar.gitlab.url" -> System.getenv("GL_SERVER"),
+  "sonar.gitlab.user_token" -> System.getenv("GL_TOKEN"),
+  "sonar.junit.reportsPath" -> "./target/test-reports",
+  "sonar.jacoco.reportPaths" -> "./target/scala-2.13/jacoco/data/jacoco.exec"
 )
 
-val jooqDynamicCodegen = Def.taskDyn {
-  val jooqFiles = ((sourceManaged.value / "main/jooq") ** "*.java").get
-  if (jooqFiles.isEmpty)
-    Def.task {
-      var classpath = (managedClasspath in Compile).value.files
-      classpath ++= (internalDependencyClasspath in Compile).value.files
-      val options = Seq("briventory.xml")
-      val result = runner.value.run("org.jooq.codegen.GenerationTool", classpath, options, streams.value.log)
-      result match {
-        case Failure(e) => sys.error(e.getMessage)
-        case _ => None
-      }
-      ((sourceManaged.value / "main/jooq") ** "*.java").get
-    }
-  else
-    Def.task {
-      jooqFiles
-    }
-}
-
-lazy val jooqCodegen = taskKey[Seq[File]]("JOOQ Code Generation")
-jooqCodegen := {
-  jooqDynamicCodegen.value
-}
-
-sourceGenerators in Compile += jooqCodegen
-
-addCommandAlias("pipeline", ";dependencyUpdates;checkstyle;clean;compile")
+addCommandAlias("pipeline", ";clean;dependencyUpdates;checkstyle;compile;test")

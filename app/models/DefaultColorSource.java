@@ -1,4 +1,4 @@
-package ch.varani.briventory.models;
+package models;
 
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;

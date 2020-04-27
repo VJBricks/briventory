@@ -30,6 +30,9 @@
   <logger name="org.jooq" level="ERROR">
     <appender-ref ref="STDOUT"/>
   </logger>
+  <logger name="org.hibernate.SQL" level="ERROR" />
+  <logger name="org.hibernate.type" level="ERROR" />
+  <logger name="org.hibernate" level="ERROR" />
 
   <root level="WARN">
     <appender-ref ref="ASYNCFILE" />

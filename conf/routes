@@ -7,7 +7,7 @@ GET     /                         controllers.GlobalController.index(request: Re
 GET     /maintenance              controllers.GlobalController.maintenance(request: Request)
 GET     /status                   controllers.GlobalController.status(request: Request)
 
-GET     /auth/signin              controllers.auth.Auth.signIn
+GET     /auth/signin              controllers.auth.Auth.signIn(request: Request)
 POST    /auth/signin              controllers.auth.Auth.doSignIn(request: Request)
 GET     /auth/admin/signup        controllers.auth.Auth.adminSignUp(request: Request)
 POST    /auth/admin/signup        controllers.auth.Auth.doAdminSignUp(request: Request)

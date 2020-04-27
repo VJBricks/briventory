@@ -1,4 +1,4 @@
-package ch.varani.briventory.models;
+package models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,5 +16,12 @@ public class Revision {
 
   /** @return the database revision. */
   public int getDatabase() { return database; }
+
+  /**
+   * Sets the database revision.
+   *
+   * @param database the database revision.
+   */
+  public void setDatabase(final int database) { this.database = database; }
 
 }

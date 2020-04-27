@@ -1,10 +1,12 @@
 @import ch.varani.briventory.BriventoryBuildInfo
 @import org.webjars.play.WebJarsUtil
 
-@(title: String, stylesheets: List[Call] = Nil, javascripts: List[Call] = Nil, webJarsJsAssets: List[WebJarsUtil#WebJarAsset] = Nil)(content: Html)(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
+@this(main: templates.main)
+@(title: String, stylesheets: List[Call] = Nil, javascripts: List[Call] = Nil, webJarsJsAssets: List[WebJarsUtil#WebJarAsset] = Nil)(content: Html)(implicit messages: play.i18n.Messages)
 
-@templates.main(title,
-  routes.Assets.versioned("stylesheets/lite.css") :: stylesheets.toList,
+@main(
+  title = title,
+  stylesheets = routes.Assets.versioned("stylesheets/lite.css") :: stylesheets.toList,
   javascripts = javascripts,
   webJarsJsAssets = webJarsJsAssets) {
   <div class="lite">

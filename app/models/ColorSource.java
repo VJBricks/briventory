@@ -1,4 +1,4 @@
-package ch.varani.briventory.models;
+package models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
+import java.math.BigInteger;
 import java.net.URI;
 
 /** {@code ColorSource} represents an entity defining the color name and/or the color itself. */
@@ -19,7 +20,7 @@ public class ColorSource {
   /** The id of this {@link ColorSource}. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private BigInteger id;
   /** The name. */
   @Column(name = "name", nullable = false)
   private String name;
@@ -28,7 +29,7 @@ public class ColorSource {
   private URI url;
 
   /** @return the id of this {@link ColorSource}. */
-  public Long getId() { return id; }
+  public BigInteger getId() { return id; }
 
   /** @return the name of the source. */
   public String getName() { return name; }

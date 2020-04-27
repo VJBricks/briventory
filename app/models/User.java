@@ -1,4 +1,6 @@
-package ch.varani.briventory.models;
+package models;
+
+import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,15 +13,17 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.math.BigInteger;
 
 @Entity
 @Table(name = "user", schema = "public")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class User<T extends User<T>> {
+@DiscriminatorOptions(insert = false)
+public abstract class User {
   /** The id of this {@link User}. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private BigInteger id;
   /** The e-mail address. */
   @Column(name = "email", nullable = false)
   private String email;
@@ -35,20 +39,14 @@ public abstract class User<T extends User<T>> {
   private ColorSource defaultColorSource;
 
   /** @return the primary key of this {@link User}. */
-  public Long getId() { return id; }
+  public BigInteger getId() { return id; }
 
   /**
    * Sets the primary key.
    *
    * @param id the primary key value.
-   *
-   * @return this instance to chain calls.
    */
-  @SuppressWarnings("unchecked")
-  public T setId(final Long id) {
-    this.id = id;
-    return (T) this;
-  }
+  public void setId(final BigInteger id) { this.id = id; }
 
   /** @return the e-mail address of this {@link User}. */
   public String getEmail() { return email; }
@@ -57,14 +55,8 @@ public abstract class User<T extends User<T>> {
    * Sets the e-mail address.
    *
    * @param email the e-mail address.
-   *
-   * @return this instance to chain calls.
    */
-  @SuppressWarnings("unchecked")
-  public T setEmail(final String email) {
-    this.email = email;
-    return (T) this;
-  }
+  public void setEmail(final String email) { this.email = email; }
 
   /** @return the name of this {@link User}. */
   public String getName() { return name; }
@@ -73,14 +65,8 @@ public abstract class User<T extends User<T>> {
    * Sets the name.
    *
    * @param name the name.
-   *
-   * @return this instance to chain calls.
    */
-  @SuppressWarnings("unchecked")
-  public T setName(final String name) {
-    this.name = name;
-    return (T) this;
-  }
+  public void setName(final String name) { this.name = name; }
 
   /** @return the password. */
   public String getPassword() { return password; }
@@ -89,18 +75,21 @@ public abstract class User<T extends User<T>> {
    * Sets the password.
    *
    * @param password the password.
-   *
-   * @return this instance to chain calls.
    */
-  @SuppressWarnings("unchecked")
-  public T setPassword(final String password) {
-    this.password = password;
-    return (T) this;
-  }
+  public void setPassword(final String password) { this.password = password; }
 
   /** @return the user's default {@link ColorSource}. */
   public ColorSource getDefaultColorSource() {
     return defaultColorSource;
+  }
+
+  /**
+   * Sets the default {@link ColorSource}.
+   *
+   * @param colorSource the {@link ColorSource} to be used the default one.
+   */
+  public void setDefaultColorSource(final ColorSource colorSource) {
+    this.defaultColorSource = colorSource;
   }
 
 }

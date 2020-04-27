@@ -1,7 +1,8 @@
 @import ch.varani.briventory.BriventoryBuildInfo
 @import org.webjars.play.WebJarsUtil
 
-@(dbInitialized: Boolean, hasAdmin: Boolean)(implicit request: Http.Request, webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
+@this(lite: templates.lite)
+@(dbInitialized: Boolean, hasAdmin: Boolean)(implicit request: Http.Request, messages: play.i18n.Messages)
 
 @getStatus(status: Boolean) = @{
   if(status)
@@ -16,7 +17,7 @@
 }
 }
 
-@templates.lite(messages("status.title")) {
+@lite(messages("status.title")) {
   <div class="container-fluid">
     <ul class="list-group">
       <li class="list-group-item list-group-item-secondary d-flex justify-content-between align-items-center">

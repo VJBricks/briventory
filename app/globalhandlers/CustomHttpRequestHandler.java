@@ -31,16 +31,18 @@ public final class CustomHttpRequestHandler extends DefaultHttpRequestHandler {
 
   @Override
   public HandlerForRequest handlerForRequest(final Http.RequestHeader requestHeader) {
-    final boolean isInMaintenance = briventoryDB.isInMaintenance();
+    return briventoryDB.query(session -> {
+      final boolean isInMaintenance = briventoryDB.isInMaintenance(session);
 
-    if (isInMaintenance && !requestHeader.uri().matches("^/(maintenance|status|auth|assets|webjars|robots.txt).*")) {
-      Router minimalRouter = Router.empty();
-      Http.Request request = requestHeader.withBody(null);
-      Handler handler = minimalRouter.route(requestHeader).orElseGet(
-          () -> EssentialAction.of(rh -> Accumulator.done(globalController.maintenance(request))));
-      return new HandlerForRequest(requestHeader, handler);
-    }
-    return super.handlerForRequest(requestHeader);
+      if (isInMaintenance && !requestHeader.uri().matches("^/(maintenance|status|auth|assets|webjars|robots.txt).*")) {
+        Router minimalRouter = Router.empty();
+        Http.Request request = requestHeader.withBody(null);
+        Handler handler = minimalRouter.route(requestHeader).orElseGet(
+            () -> EssentialAction.of(rh -> Accumulator.done(globalController.maintenance(request))));
+        return new HandlerForRequest(requestHeader, handler);
+      }
+      return super.handlerForRequest(requestHeader);
+    }).join();
   }
 
 }

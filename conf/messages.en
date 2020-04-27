@@ -5,6 +5,13 @@ auth.signup.error.email.exist=the e-mail address is already in use
 auth.signup.error.password.weak=the password does not respect the minimal strength of {0}
 auth.signup.error.passwordRepetition.mismatch=The repetition is not matching the password
 
+auth.admin.signup.title=Administrator Sign Up
+
+auth.signin=Sign In
+auth.signin.title=Sign In
+auth.signin.error=An error occurs during the authentication process.
+auth.signin.error.badcredentials=Bad credentials, check your entries
+
 # Implicitly called by the form helper
 error.required=this field is required
 # Implicitly called by the form helper

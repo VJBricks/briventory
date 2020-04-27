@@ -1,7 +1,8 @@
 @import ch.varani.briventory.BriventoryBuildInfo
 @import org.webjars.play.WebJarsUtil
 
-@(title: String, stylesheets: List[Call] = Nil, javascripts: List[Call] = Nil, jsRoutes: List[Call] = Nil, webJarsJsAssets: List[WebJarsUtil#WebJarAsset] = Nil)(content: Html)(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
+@this(webJarsUtil: WebJarsUtil)
+@(title: String, stylesheets: List[Call] = Nil, javascripts: List[Call] = Nil, jsRoutes: List[Call] = Nil, webJarsJsAssets: List[WebJarsUtil#WebJarAsset] = Nil)(content: Html)(implicit messages: play.i18n.Messages)
 
 <!DOCTYPE html>
 <html lang="@messages.lang().code()">
@@ -23,7 +24,7 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="theme-color" content="#ffffff">
 
-    @webJarsUtil.locate("font-awesome", "all.min.css").css()
+    @webJarsUtil.locate("font-awesome", "all.css").css()
     @webJarsUtil.locate("bootstrap", "bootstrap.min.css").css()
     @styles = @{
       routes.Assets.versioned("stylesheets/main.css") :: stylesheets.toList

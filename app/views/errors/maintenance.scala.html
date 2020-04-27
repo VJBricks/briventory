@@ -1,8 +1,7 @@
-@import org.webjars.play.WebJarsUtil
+@this(error: templates.error)
+@()(implicit messages: play.i18n.Messages)
 
-@()(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
-
-@templates.error(messages("maintenance.title")) {
+@error(messages("maintenance.title")) {
   <h2>@messages("maintenance.string")</h2>
   <h1>503</h1>
   <h3>@messages("maintenance.substring")</h3>

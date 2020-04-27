@@ -1,8 +1,7 @@
-@import org.webjars.play.WebJarsUtil
+@this(main: templates.main)
+@(title: String)(content: Html)(implicit messages: play.i18n.Messages)
 
-@(title: String)(content: Html)(implicit webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
-
-@templates.main(title) {
+@main(title) {
   <nav class="navbar"></nav>
 
   <main>

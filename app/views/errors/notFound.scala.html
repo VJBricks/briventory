@@ -1,8 +1,7 @@
-@import org.webjars.play.WebJarsUtil
+@this(error: templates.error)
+@()(implicit request: Http.Request, messages: play.i18n.Messages)
 
-@()(implicit request: Http.Request, webJarsUtil: WebJarsUtil, messages: play.i18n.Messages)
-
-@templates.error(messages("notfound.title")) {
+@error(messages("notfound.title")) {
   <h2>@messages("notfound.string")</h2>
   <h1>404</h1>
   <a href="@routes.GlobalController.index"><h3>@messages("global.backHome")</h3></a>

@@ -1,15 +1,9 @@
 package database;
 
 import ch.varani.briventory.BriventoryBuildInfo;
-import ch.varani.briventory.jooq.tables.records.RevisionRecord;
-import org.jooq.DSLContext;
-import org.jooq.Record1;
-import org.jooq.Result;
-import org.jooq.SQLDialect;
-import org.jooq.conf.RenderNameCase;
-import org.jooq.impl.DSL;
+import models.Revision;
+import org.hibernate.Session;
 import org.semver.Version;
-import play.api.db.Database;
 import play.db.jpa.JPAApi;
 import play.libs.concurrent.HttpExecution;
 
@@ -19,11 +13,6 @@ import javax.persistence.EntityManager;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
-
-import static ch.varani.briventory.jooq.tables.Admin.ADMIN;
-import static ch.varani.briventory.jooq.tables.Lockeduser.LOCKEDUSER;
-import static ch.varani.briventory.jooq.tables.Revision.REVISION;
-import static org.jooq.impl.DSL.count;
 
 @Singleton
 public class BriventoryDB {
@@ -35,78 +24,90 @@ public class BriventoryDB {
   private final JPAApi jpaApi;
   /** The {@link Executor} retrieved from the injected {@link BriventoryDBContext} instance. */
   private final Executor executor;
-  /** The injected {@link Database} instance. */
-  private final Database database;
 
   /**
    * Creates a new instance of {@link BriventoryDB} instance using the injected parameters.
    *
    * @param jpaApi the {@link JPAApi} to persist objects.
    * @param context the {@link BriventoryDBContext} instance.
-   * @param database the {@link Database} instance.
    */
   @Inject
-  public BriventoryDB(final JPAApi jpaApi, final BriventoryDBContext context, final Database database) {
+  public BriventoryDB(final JPAApi jpaApi, final BriventoryDBContext context) {
     this.jpaApi = jpaApi;
     executor = HttpExecution.fromThread((Executor) context);
-    this.database = database;
   }
 
   /**
    * Executes a query in the Briventory database, using it's thread execution context.
    *
-   * @param <T> the return type of the query.
+   * @param <R> the return type of the query.
    * @param function the {@link Function} that will execute the query.
    *
    * @return the {@link CompletableFuture} created to use the Briventory database thread execution context.
    */
-  public <T> CompletableFuture<T> query(final Function<DSLContext, T> function) {
-
-    return CompletableFuture.supplyAsync(() -> database.withConnection(connection -> {
-      DSLContext dialect = DSL.using(connection, SQLDialect.POSTGRES);
-      dialect.settings().setRenderNameCase(RenderNameCase.LOWER);
-      return function.apply(dialect);
-    }), executor);
+  public final <R> CompletableFuture<R> query(final Function<Session, R> function) {
+    return CompletableFuture.supplyAsync(() -> jpaApi.withTransaction(entityManager -> {
+      final Session session = entityManager.unwrap(Session.class);
+      return function.apply(session);
+    }));
   }
 
   /**
    * Perists the objects into the database.
    *
    * @param function the {@link Function} that will persist the objects.
-   * @param <T> the return type.
+   * @param <R> the return type.
    *
    * @return the {@link CompletableFuture} created to use the Briventory database thread execution context.
    */
-  public <T> CompletableFuture<T> persist(final Function<EntityManager, T> function) {
-    return CompletableFuture.supplyAsync(() -> jpaApi.withTransaction(function::apply), executor);
+  public <R> CompletableFuture<R> persist(final Function<EntityManager, R> function) {
+    return CompletableFuture.supplyAsync(() -> jpaApi.withTransaction(function), executor);
   }
 
   /**
+   * Does the database has been initialized ?
+   *
+   * @param session the {@link Session} instance to execute the query.
+   *
    * @return {@code true} if the database is initialized and the version correspond to the App major version, otherwise
    * {@code false}.
    */
-  public boolean isDatabaseInitialized() {
-    return query(context -> {
-      RevisionRecord revision = context.selectFrom(REVISION).fetchAny();
+  public boolean isDatabaseInitialized(final Session session) {
+    try {
+      final Revision revision = session.createQuery("select r from Revision r", Revision.class)
+                                       .setCacheable(true)
+                                       .getSingleResult();
       Version dbVersion = new Version(revision.getDatabase(), 0, 0);
       return dbVersion.isCompatible(APP_VERSION);
-    }).join();
-  }
-
-  /** @return {@code true} if the database contains at lease one non-locked administrator, otherwise {@code false}. */
-  public boolean hasActiveAdministrator() {
-    return query(context -> {
-      Result<Record1<Integer>> result =
-          context.select(count())
-                 .from(ADMIN)
-                 .leftJoin(LOCKEDUSER).on(ADMIN.IDUSER.eq(LOCKEDUSER.IDUSER))
-                 .where(LOCKEDUSER.IDUSER.isNull())
-                 .fetch();
-      return result.get(0).component1() > 0;
-    }).join();
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   /**
+   * Does the database contains at least one non-locked administrator ?
+   *
+   * @param session the {@link Session} instance to execute the query.
+   *
+   * @return {@code true} if the database contains at least one non-locked administrator, otherwise {@code false}.
+   */
+  public boolean hasActiveAdministrator(final Session session) {
+    final long count = session.createQuery(
+        "select count(a) " +
+        "from Admin a " +
+        "left join LockedUser lu on a.id = lu.id " +
+        "where lu.id is null",
+        Long.class)
+                              .setCacheable(true)
+                              .getSingleResult();
+    return count > 0;
+  }
+
+  /**
+   * Does the App is in maintenance mode ?
+   *
+   * @param session the {@link Session} instance to execute the query.
+   *
    * @return {@code true} if the App should be considered as <em>in maintenance</em>, otherwise {@code false}. The
    * maintenance mode is enabled if:
    * <ul>
@@ -115,9 +116,9 @@ public class BriventoryDB {
    *   <li>there is not non-locked administrator.</li>
    * </ul>
    */
-  public boolean isInMaintenance() {
-    return !isDatabaseInitialized() ||
-           !hasActiveAdministrator();
+  public boolean isInMaintenance(final Session session) {
+    return !isDatabaseInitialized(session) ||
+           !hasActiveAdministrator(session);
   }
 
 }

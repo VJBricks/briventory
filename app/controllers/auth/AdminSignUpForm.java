@@ -9,9 +9,6 @@ import me.gosimple.nbvcxz.resources.Configuration;
 import me.gosimple.nbvcxz.resources.ConfigurationBuilder;
 import me.gosimple.nbvcxz.resources.Dictionary;
 import me.gosimple.nbvcxz.resources.DictionaryBuilder;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.impl.DSL;
 import play.data.validation.Constraints.Email;
 import play.data.validation.Constraints.MaxLength;
 import play.data.validation.Constraints.MinLength;
@@ -21,8 +18,6 @@ import play.data.validation.ValidationError;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
-import static ch.varani.briventory.jooq.tables.User.USER;
 
 @ValidateWithDB
 public final class AdminSignUpForm implements ValidatableWithDB<List<ValidationError>> {
@@ -117,21 +112,22 @@ public final class AdminSignUpForm implements ValidatableWithDB<List<ValidationE
   }
 
   private boolean emailAlreadyExists(final BriventoryDB briventoryDB) {
-    return briventoryDB.query(context -> {
-      Result<Record> result =
-          context.select()
-                 .from(USER)
-                 .where(DSL.trim(USER.EMAIL).equalIgnoreCase(email)).fetch();
-      return result.isNotEmpty();
-    }).join();
+    final int count = briventoryDB.query(
+        session ->
+            session.createQuery("select count(u) from User u where lower(u.email) = lower(:email)", Integer.class)
+                   .setParameter("email", email.trim())
+                   .getSingleResult()
+    ).join();
+
+    return count > 0;
   }
 
   @Override
   public List<ValidationError> validate(final BriventoryDB briventoryDB) {
     LinkedList<ValidationError> l = new LinkedList<>();
-    if (name.trim().isEmpty())
+    if (name.isBlank())
       l.add(new ValidationError("name", "error.required"));
-    if (email.trim().isEmpty())
+    if (email.isBlank())
       l.add(new ValidationError("email", "error.required"));
     if (emailAlreadyExists(briventoryDB))
       l.add(new ValidationError("email", "auth.signup.error.email.exist"));
