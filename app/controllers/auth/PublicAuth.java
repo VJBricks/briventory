@@ -13,13 +13,14 @@ import play.mvc.Result;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
- * The {@code Auth} {@link Controller} handle everything related to the authentication in the App. It also handle the
- * various sign up processes.
+ * The {@code PublicAuth} {@link Controller} handle everything related to the authentication in the App that doesn't
+ * need an existing session. It also handle the various sign up processes.
  */
-public final class Auth extends Controller {
+public final class PublicAuth extends Controller {
 
   // *******************************************************************************************************************
   // Constants
@@ -36,6 +37,8 @@ public final class Auth extends Controller {
   private final FormFactory formFactory;
   /** The injected {@link BriventoryDB} instance. */
   private final BriventoryDB briventoryDB;
+  /** The injected {@link SessionHelper} instance. */
+  private final SessionHelper sessionHelper;
 
   // *******************************************************************************************************************
   // Injected Templates
@@ -51,31 +54,63 @@ public final class Auth extends Controller {
   // *******************************************************************************************************************
 
   /**
-   * Creates a new {@link Auth} controller by injecting the parameters.
+   * Creates a new {@link PublicAuth} controller by injecting the parameters.
    *
    * @param messagesApi the {@link MessagesApi}.
    * @param formFactory the {@link FormFactory}.
    * @param briventoryDB the {@link BriventoryDB}.
+   * @param sessionHelper the {@link SessionHelper}.
    * @param signIn the {@link views.html.auth.signIn} template.
    * @param adminSignUp the {@link views.html.auth.adminSignUp} template.
    */
   @Inject
-  public Auth(final MessagesApi messagesApi, final FormFactory formFactory,
-              final BriventoryDB briventoryDB, final views.html.auth.signIn signIn,
-              final views.html.auth.adminSignUp adminSignUp) {
+  public PublicAuth(final MessagesApi messagesApi, final FormFactory formFactory, final BriventoryDB briventoryDB,
+                    final SessionHelper sessionHelper, final views.html.auth.signIn signIn,
+                    final views.html.auth.adminSignUp adminSignUp) {
     this.messagesApi = messagesApi;
     this.formFactory = formFactory;
     this.briventoryDB = briventoryDB;
+    this.sessionHelper = sessionHelper;
     this.signIn = signIn;
     this.adminSignUp = adminSignUp;
   }
 
-  public Result signIn(final Http.Request request) {
-    return ok(signIn.render(formFactory.form(SignInForm.class),
-                            messagesApi.preferred(request),
-                            request));
+  // *******************************************************************************************************************
+  // Sign In Matters
+  // *******************************************************************************************************************
+
+  /**
+   * Returns the {@link views.html.auth.signIn} view to the user.
+   *
+   * @param request the {@link Http.Request}.
+   * @param redirectUrl the redirect URL.
+   *
+   * @return the {@link views.html.auth.signIn} view, encapsulate into a {@link Result} instance.
+   */
+  public Result signIn(final Http.Request request, final Optional<String> redirectUrl) {
+    Form<SignInForm> form = formFactory.form(SignInForm.class);
+    if (redirectUrl.isPresent() && !redirectUrl.get().isBlank()) {
+      SignInForm signInForm = new SignInForm();
+      signInForm.setRedirectUrl(redirectUrl.get());
+      form = form.fill(signInForm);
+    }
+    return ok(signIn.render(form, messagesApi.preferred(request), request));
   }
 
+  /**
+   * Performs the sign in, using the form values retrieved into the request. The view encapsulated into the {@link
+   * Result} instance depends on the data validation:
+   * <ul>
+   *   <li>a <em>bad request</em> {@link Result} if the form contains errors or on wrong credentials;</li>
+   *   <li>the redirection to the index page if the authentication succeeded.</li>
+   * </ul>
+   * <p><strong>Note:</strong> this methods returns a {@link CompletionStage} due to the database connection to
+   * validate the credentials.</p>
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return see the description.
+   */
   public CompletionStage<Result> doSignIn(final Http.Request request) {
 
     return briventoryDB.query(session -> {
@@ -90,7 +125,7 @@ public final class Auth extends Controller {
                                 .getResultList();
 
       if (users.size() > 1) {
-        // TODO Send mail to maintainer if > 1
+        // TODO Send mail to maintainer if > 1, duplicates e-mail should never happen
         return badRequest(signIn.render(form.withGlobalError("auth.signin.error"),
                                         messagesApi.preferred(request),
                                         request));
@@ -111,17 +146,45 @@ public final class Auth extends Controller {
                                         request));
       }
 
-      return redirect(controllers.routes.GlobalController.index())
-          .addingToSession(request, "iduser", users.get(0).getId().toString());
+      final String redirectUrl = form.get().getRedirectUrl();
+      final Result result = redirectUrl == null || redirectUrl.isBlank() ?
+          redirect(controllers.routes.GlobalController.index()) :
+          redirect(redirectUrl);
+      return result.withSession(sessionHelper.withUser(users.get(0), request));
     });
   }
 
+  // *******************************************************************************************************************
+  // Administrator Sign Up Matters
+  // *******************************************************************************************************************
+
+  /**
+   * Returns the {@link views.html.auth.adminSignUp} view to the user.
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return the {@link views.html.auth.adminSignUp} view, encapsulate into a {@link Result} instance.
+   */
   public Result adminSignUp(final Http.Request request) {
     return ok(adminSignUp.render(formFactory.form(AdminSignUpForm.class),
                                  request,
                                  messagesApi.preferred(request)));
   }
 
+  /**
+   * Performs the administrator sign up, using the form values retrieved into the request. The view encapsulated into
+   * the {@link Result} instance depends on the data validation:
+   * <ul>
+   *   <li>a <em>bad request</em> {@link Result} if the form contains errors or on wrong credentials;</li>
+   *   <li>the redirection to the index page if the authentication succeeded.</li>
+   * </ul>
+   * <p><strong>Note:</strong> this methods returns a {@link CompletionStage} due to the database connection to
+   * validate the credentials.</p>
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return see the description.
+   */
   public CompletionStage<Result> doAdminSignUp(final Http.Request request) {
     return briventoryDB.persist(entityManager -> {
       Form<AdminSignUpForm> form = formFactory.form(AdminSignUpForm.class).bindFromRequest(request);
@@ -139,7 +202,7 @@ public final class Auth extends Controller {
                                                              .toCharArray()));
       entityManager.persist(admin);
 
-      return redirect(routes.Auth.signIn());
+      return redirect(routes.PublicAuth.signIn(Optional.empty()));
     });
   }
 

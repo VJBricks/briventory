@@ -1,6 +1,6 @@
 package globalhandlers;
 
-import controllers.GlobalController;
+import controllers.MaintenanceController;
 import database.BriventoryDB;
 import play.api.http.JavaCompatibleHttpRequestHandler;
 import play.api.mvc.Handler;
@@ -13,19 +13,33 @@ import play.routing.Router;
 
 import javax.inject.Inject;
 
+/**
+ * {@code CustomHttpRequestHandler} detects the initialization of the database. If it is correctly initialized, the App
+ * routes are used as usual. Otherwise, only some routes are provided and every thing else will be redirected to a
+ * maintenance page.
+ * <p>In maintenance mode, the following routes are allowed:</p>
+ * <ul>
+ *   <li>{@code /maintenance}</li>
+ *   <li>{@code /status}</li>
+ *   <li>{@code /auth}</li>
+ *   <li>{@code /assets}</li>
+ *   <li>{@code /webjars}</li>
+ *   <li>{@code /robots.txt}</li>
+ * </ul>
+ */
 public final class CustomHttpRequestHandler extends DefaultHttpRequestHandler {
 
-  /** The injected {@link controllers.GlobalController} instance. */
-  private final GlobalController globalController;
+  /** The injected {@link controllers.MaintenanceController} instance. */
+  private final MaintenanceController maintenanceController;
   /** The injected {@link database.BriventoryDB} instance. */
   private final BriventoryDB briventoryDB;
 
   @Inject
   public CustomHttpRequestHandler(final JavaCompatibleHttpRequestHandler underlying,
-                                  final GlobalController globalController,
+                                  final MaintenanceController maintenanceController,
                                   final BriventoryDB briventoryDB) {
     super(underlying);
-    this.globalController = globalController;
+    this.maintenanceController = maintenanceController;
     this.briventoryDB = briventoryDB;
   }
 
@@ -38,7 +52,7 @@ public final class CustomHttpRequestHandler extends DefaultHttpRequestHandler {
         Router minimalRouter = Router.empty();
         Http.Request request = requestHeader.withBody(null);
         Handler handler = minimalRouter.route(requestHeader).orElseGet(
-            () -> EssentialAction.of(rh -> Accumulator.done(globalController.maintenance(request))));
+            () -> EssentialAction.of(rh -> Accumulator.done(maintenanceController.maintenance(request))));
         return new HandlerForRequest(requestHeader, handler);
       }
       return super.handlerForRequest(requestHeader);

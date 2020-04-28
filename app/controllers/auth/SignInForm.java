@@ -20,6 +20,9 @@ public final class SignInForm implements Validatable<List<ValidationError>> {
   @Required
   private String password;
 
+  /** The redirect URL. */
+  private String redirectUrl;
+
   /** @return a {@link List} of {@link ValidationError} instances or an empty list if there is no error. */
   @Override
   public List<ValidationError> validate() {
@@ -53,5 +56,15 @@ public final class SignInForm implements Validatable<List<ValidationError>> {
    * @param password the password.
    */
   public void setPassword(final String password) { this.password = password; }
+
+  /** @return the redirect URL. */
+  public String getRedirectUrl() { return redirectUrl; }
+
+  /**
+   * Sets the redirect URL.
+   *
+   * @param redirectUrl the redirect URL.
+   */
+  public void setRedirectUrl(final String redirectUrl) { this.redirectUrl = redirectUrl; }
 
 }

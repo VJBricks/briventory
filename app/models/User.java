@@ -13,7 +13,6 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.math.BigInteger;
 
 @Entity
 @Table(name = "user", schema = "public")
@@ -23,7 +22,7 @@ public abstract class User {
   /** The id of this {@link User}. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private BigInteger id;
+  private Long id;
   /** The e-mail address. */
   @Column(name = "email", nullable = false)
   private String email;
@@ -39,14 +38,14 @@ public abstract class User {
   private ColorSource defaultColorSource;
 
   /** @return the primary key of this {@link User}. */
-  public BigInteger getId() { return id; }
+  public Long getId() { return id; }
 
   /**
    * Sets the primary key.
    *
    * @param id the primary key value.
    */
-  public void setId(final BigInteger id) { this.id = id; }
+  public void setId(final Long id) { this.id = id; }
 
   /** @return the e-mail address of this {@link User}. */
   public String getEmail() { return email; }

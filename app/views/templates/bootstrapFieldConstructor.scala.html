@@ -1,14 +1,18 @@
 @(elements: helper.FieldElements)
 
-<div class="form-group row @if(elements.hasErrors) {danger}">
-  <label class="col-sm-4 col-form-label" for="@elements.id">@elements.label</label>
-  <div class="col-sm-8">
-    @elements.input
-    @if(elements.infos.nonEmpty) {
-      <p class="form-message text-dark">@elements.infos.mkString(", ")</p>
-    }
-    @if(elements.errors.nonEmpty) {
-      <p class="form-message text-danger">@elements.errors.mkString(", ")</p>
-    }
+@if(elements.args.get(Symbol("class")).getOrElse("").equals("hidden")) {
+  @elements.input
+} else {
+  <div class="form-group row @if(elements.hasErrors) {danger}">
+    <label class="col-sm-4 col-form-label" for="@elements.id">@elements.label</label>
+    <div class="col-sm-8">
+      @elements.input
+      @if(elements.infos.nonEmpty) {
+        <p class="form-message text-dark">@elements.infos.mkString(", ")</p>
+      }
+      @if(elements.errors.nonEmpty) {
+        <p class="form-message text-danger">@elements.errors.mkString(", ")</p>
+      }
+    </div>
   </div>
-</div>
+}
