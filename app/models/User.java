@@ -1,5 +1,6 @@
 package models;
 
+import org.hibernate.Session;
 import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.Column;
@@ -13,6 +14,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.util.List;
 
 @Entity
 @Table(name = "user", schema = "public")
@@ -89,6 +91,35 @@ public abstract class User {
    */
   public void setDefaultColorSource(final ColorSource colorSource) {
     this.defaultColorSource = colorSource;
+  }
+
+  /**
+   * Retrives the {@link User} holding the id given.
+   *
+   * @param session the Hibernate {@link Session}.
+   * @param id the id.
+   *
+   * @return the {@link User} instance or {@code null}.
+   */
+  public static User findFromId(final Session session, final long id) {
+    return session.createQuery("select u from User u where u.id = :id", User.class)
+                  .setParameter("id", id)
+                  .getSingleResult();
+  }
+
+  /**
+   * Retrives all {@link User}s using the e-mail address given. Normally, e-mail addresses are unique, so a singleton
+   * list or an empty one should be returned by this method.
+   *
+   * @param session the Hibernate {@link Session}.
+   * @param email the e-mail address.
+   *
+   * @return a list of {@link User} instance.
+   */
+  public static List<User> findFromEmail(final Session session, final String email) {
+    return session.createQuery("select u from User u where u.email = :email", User.class)
+                  .setParameter("email", email)
+                  .getResultList();
   }
 
 }

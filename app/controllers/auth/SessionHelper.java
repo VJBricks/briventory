@@ -45,9 +45,7 @@ public final class SessionHelper {
     try {
       final long userId = Long.parseLong(userIdValue.get());
       final User user = briventoryDB.query(
-          session -> session.createQuery("select u from User u where u.id = :id", User.class)
-                            .setParameter("id", userId)
-                            .getSingleResult()
+          session -> User.findFromId(session, userId)
       ).join();
       return Optional.of(user.getEmail());
     } catch (Exception e) {

@@ -120,9 +120,7 @@ public final class PublicAuth extends Controller {
                                         messagesApi.preferred(request),
                                         request));
 
-      List<User> users = session.createQuery("select u from User u where u.email = :email", User.class)
-                                .setParameter("email", form.get().getEmail())
-                                .getResultList();
+      List<User> users = User.findFromEmail(session, form.get().getEmail());
 
       if (users.size() > 1) {
         // TODO Send mail to maintainer if > 1, duplicates e-mail should never happen
