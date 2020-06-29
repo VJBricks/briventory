@@ -1,6 +1,6 @@
 @this(signedin: views.html.signedin)
-@()(implicit messages: play.i18n.Messages)
+@(user: User)(implicit messages: play.i18n.Messages)
 
-@signedin(title = messages("minifigures.title")) {
+@signedin(title = messages("minifigures.title"), user) {
   <h1>@messages("minifigures.title")</h1>
 }
