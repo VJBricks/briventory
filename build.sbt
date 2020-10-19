@@ -36,17 +36,17 @@ libraryDependencies += guice
 libraryDependencies ++= Seq(
   javaJdbc,
   javaJpa,
-  "org.hibernate" % "hibernate-core" % "5.4.18.Final"
+  "org.hibernate" % "hibernate-core" % "5.4.22.Final"
 )
 
 // Libraries
 libraryDependencies ++= Seq(
-  "org.apache.commons" % "commons-text" % "1.8",
-  "commons-validator" % "commons-validator" % "1.6",
-  "org.postgresql" % "postgresql" % "42.2.14",
+  "org.apache.commons" % "commons-text" % "1.9",
+  "commons-validator" % "commons-validator" % "1.7",
+  "org.postgresql" % "postgresql" % "42.2.18",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.3",
   "org.semver" % "api" % "0.9.33",
-  "me.gosimple" % "nbvcxz" % "1.4.3",
+  "me.gosimple" % "nbvcxz" % "1.5.0",
   "at.favre.lib" % "bcrypt" % "0.9.0"
 )
 
@@ -55,22 +55,22 @@ libraryDependencies ++= Seq(
   "org.webjars" %% "webjars-play" % "2.8.0",
   "org.webjars" % "jquery" % "3.5.1",
   "org.webjars" % "jquery-ui" % "1.12.1",
-  "org.webjars" % "popper.js" % "2.0.2",
-  "org.webjars" % "bootstrap" % "4.5.0",
-  "org.webjars" % "font-awesome" % "5.13.0",
+  "org.webjars" % "popper.js" % "2.5.2",
+  "org.webjars" % "bootstrap" % "4.5.3",
+  "org.webjars" % "font-awesome" % "5.15.1",
   "org.webjars.bowergithub.dropbox" % "zxcvbn" % "4.4.2"
 )
 
 // Tests libraries
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++= Seq(
-  "org.assertj" % "assertj-core" % "3.16.1" % Test,
+  "org.assertj" % "assertj-core" % "3.17.2" % Test,
   "org.awaitility" % "awaitility" % "4.0.3" % Test,
   "net.aichler" % "jupiter-interface" % "0.8.3" % Test,
-  "org.junit.jupiter" % "junit-jupiter-api" % "5.6.2" % Test,
-  "org.junit.jupiter" % "junit-jupiter-engine" % "5.6.2" % Test,
-  "org.junit.jupiter" % "junit-jupiter-params" % "5.6.2" % Test,
-  "org.junit.platform" % "junit-platform-runner" % "1.6.2" % Test
+  "org.junit.jupiter" % "junit-jupiter-api" % "5.7.0" % Test,
+  "org.junit.jupiter" % "junit-jupiter-engine" % "5.7.0" % Test,
+  "org.junit.jupiter" % "junit-jupiter-params" % "5.7.0" % Test,
+  "org.junit.platform" % "junit-platform-runner" % "1.7.0" % Test
 )
 
 // Dependencies Check Directives
