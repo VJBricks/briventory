@@ -2,7 +2,7 @@ name := """Briventory"""
 maintainer := "briventory@varani.ch"
 
 // Common Settings
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.4"
 
 organization := "ch.varani"
 version := "1.0.0-SNAPSHOT"
@@ -36,7 +36,7 @@ libraryDependencies += guice
 libraryDependencies ++= Seq(
   javaJdbc,
   javaJpa,
-  "org.hibernate" % "hibernate-core" % "5.4.22.Final"
+  "org.hibernate" % "hibernate-core" % "5.4.27.Final"
 )
 
 // Libraries
@@ -55,7 +55,7 @@ libraryDependencies ++= Seq(
   "org.webjars" %% "webjars-play" % "2.8.0",
   "org.webjars" % "jquery" % "3.5.1",
   "org.webjars" % "jquery-ui" % "1.12.1",
-  "org.webjars" % "popper.js" % "2.5.2",
+  "org.webjars" % "popper.js" % "2.5.4",
   "org.webjars" % "bootstrap" % "4.5.3",
   "org.webjars" % "font-awesome" % "5.15.1",
   "org.webjars.bowergithub.dropbox" % "zxcvbn" % "4.4.2"
@@ -64,7 +64,7 @@ libraryDependencies ++= Seq(
 // Tests libraries
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++= Seq(
-  "org.assertj" % "assertj-core" % "3.17.2" % Test,
+  "org.assertj" % "assertj-core" % "3.18.1" % Test,
   "org.awaitility" % "awaitility" % "4.0.3" % Test,
   "net.aichler" % "jupiter-interface" % "0.8.3" % Test,
   "org.junit.jupiter" % "junit-jupiter-api" % "5.7.0" % Test,
