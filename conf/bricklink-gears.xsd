@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema version="1.1"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="blgears"
+           targetNamespace="blgears"
+           elementFormDefault="qualified"
+           xmlns:bl="bl">
+
+    <!-- Importing BrickLink Common types. -->
+    <xs:import namespace="bl" schemaLocation="bricklink.xsd"/>
+
+    <!-- Allowed values for the element ITEMTYPE. -->
+    <xs:simpleType name="itemType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="G"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- The composition of each item. -->
+    <xs:complexType name="gear">
+        <xs:sequence>
+            <xs:element name="ITEMTYPE" type="itemType"/>
+            <xs:element name="ITEMID" type="bl:mandatoryString"/>
+            <xs:element name="ITEMNAME" type="bl:mandatoryString"/>
+            <xs:element name="CATEGORY" type="xs:positiveInteger"/>
+            <xs:element name="ITEMYEAR" type="bl:positiveIntegerOrUnknownString"/>
+            <xs:element name="ITEMWEIGHT" type="bl:decimalOrEmptyString"/>
+            <xs:element name="ITEMDIMX" type="bl:decimalOrEmptyString"/>
+            <xs:element name="ITEMDIMY" type="bl:decimalOrEmptyString"/>
+            <xs:element name="ITEMDIMZ" type="bl:decimalOrEmptyString"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- The main element. -->
+    <xs:element name="CATALOG">
+        <xs:complexType>
+            <xs:sequence >
+                <xs:element name="ITEM" type="gear" maxOccurs="unbounded">
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

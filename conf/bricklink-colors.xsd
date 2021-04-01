@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<xs:schema version="1.1"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="blcolors"
+           targetNamespace="blcolors"
+           elementFormDefault="qualified"
+           xmlns:bl="bl">
+
+    <!-- Importing BrickLink Common types. -->
+    <xs:import namespace="bl" schemaLocation="bricklink.xsd"/>
+
+    <!-- The allowed values for COLORTYPE. -->
+    <xs:simpleType name="colorType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Solid"/>
+            <xs:enumeration value="N/A"/>
+            <xs:enumeration value="Transparent"/>
+            <xs:enumeration value="Chrome"/>
+            <xs:enumeration value="Pearl"/>
+            <xs:enumeration value="Satin"/>
+            <xs:enumeration value="Metallic"/>
+            <xs:enumeration value="Milky"/>
+            <xs:enumeration value="Glitter"/>
+            <xs:enumeration value="Speckle"/>
+            <xs:enumeration value="Modulex"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- A xs:string restriction to represent color hex values. -->
+    <xs:simpleType name="hexColor">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9A-Fa-f]+|[0-9]+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Union between bl:emptyString and hexColor. -->
+    <xs:simpleType name="hexColorOrEmptyString">
+        <xs:union memberTypes="bl:emptyString hexColor"/>
+    </xs:simpleType>
+
+    <!-- The composition of each item. -->
+    <xs:complexType name="color">
+        <xs:sequence>
+            <xs:element name="COLOR" type="xs:unsignedInt"/>
+            <xs:element name="COLORNAME" type="xs:string"/>
+            <xs:element name="COLORRGB" type="hexColorOrEmptyString"/>
+            <xs:element name="COLORTYPE" type="colorType"/>
+            <xs:element name="COLORCNTPARTS" type="bl:positiveIntegerOrEmptyString"/>
+            <xs:element name="COLORCNTSETS" type="bl:positiveIntegerOrEmptyString"/>
+            <xs:element name="COLORCNTWANTED" type="bl:positiveIntegerOrEmptyString"/>
+            <xs:element name="COLORCNTINV" type="bl:positiveIntegerOrEmptyString"/>
+            <xs:element name="COLORYEARFROM" type="bl:positiveIntegerOrEmptyString"/>
+            <xs:element name="COLORYEARTO" type="bl:positiveIntegerOrEmptyString"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- The main element. -->
+    <xs:element name="CATALOG">
+        <xs:complexType>
+            <xs:sequence >
+                <xs:element name="ITEM" type="color" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

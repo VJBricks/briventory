@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema version="1.1"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="blcodes"
+           targetNamespace="blcodes"
+           elementFormDefault="qualified"
+           xmlns:bl="bl">
+
+    <!-- Importing BrickLink Common types. -->
+    <xs:import namespace="bl" schemaLocation="bricklink.xsd"/>
+
+    <!-- Allowed values for ITEMTYPE. -->
+    <xs:simpleType name="itemType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="P"/>
+            <xs:enumeration value="G"/>
+            <xs:enumeration value="M"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Code that represents an unkown value. -->
+    <xs:simpleType name="unknownCode">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="0000000"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Union between xs:positiveInteger and unknownCode. -->
+    <xs:simpleType name="positiveIntegerOrUnknownCode">
+        <xs:union memberTypes="xs:positiveInteger unknownCode"/>
+    </xs:simpleType>
+
+    <!-- The composition of each item. -->
+    <xs:complexType name="code">
+        <xs:sequence>
+            <xs:element name="ITEMTYPE" type="itemType"/>
+            <xs:element name="ITEMID" type="bl:mandatoryString"/>
+            <xs:element name="COLOR" type="bl:mandatoryString"/>
+            <xs:element name="CODENAME" type="positiveIntegerOrUnknownCode"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- The main element. -->
+    <xs:element name="CODES">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="ITEM" type="code" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

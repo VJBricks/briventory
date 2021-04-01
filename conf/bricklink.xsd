@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Common types for any BrickLink XML files. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="bl"
+           xmlns="bl"
+           elementFormDefault="qualified">
+
+    <!-- xs:string limitation that only contains no character. -->
+    <xs:simpleType name="emptyString">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value=""/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- xs:string limitation that only contains the ? character. -->
+    <xs:simpleType name="unknownString">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="?"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Union between xs:positiveInteger and unknownString. -->
+    <xs:simpleType name="positiveIntegerOrUnknownString">
+        <xs:union memberTypes="xs:positiveInteger unknownString"/>
+    </xs:simpleType>
+
+    <!-- Union between xs:positiveInteger and emptyString. -->
+    <xs:simpleType name="positiveIntegerOrEmptyString">
+        <xs:union memberTypes="xs:positiveInteger emptyString"/>
+    </xs:simpleType>
+
+    <!-- Union between xs:decimal and emptyString. -->
+    <xs:simpleType name="decimalOrEmptyString">
+        <xs:union memberTypes="xs:decimal emptyString"/>
+    </xs:simpleType>
+
+    <!-- Strings that should have at least one character. -->
+    <xs:simpleType name="mandatoryString">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

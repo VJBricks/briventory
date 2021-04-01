@@ -1,6 +1,7 @@
 package globalhandlers;
 
 import play.Environment;
+import play.db.jpa.JPAApi;
 import play.inject.ApplicationLifecycle;
 
 import javax.inject.Inject;
@@ -21,9 +22,11 @@ public final class ApplicationStart {
    *
    * @param lifecycle the {@link ApplicationLifecycle} instance.
    * @param environment the {@link Environment} instance.
+   * @param jpaApi the {@link JPAApi} instance.
    */
   @Inject
-  public ApplicationStart(final ApplicationLifecycle lifecycle, final Environment environment) {
+  public ApplicationStart(final ApplicationLifecycle lifecycle, final Environment environment, final JPAApi jpaApi) {
+
   }
 
 }
