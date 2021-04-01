@@ -1,0 +1,8 @@
+@this(error: templates.error)
+@()(implicit request: Http.Request, messages: play.i18n.Messages)
+
+@error(messages("forbidden.title")) {
+  <h2>@messages("forbidden.string")</h2>
+  <h1>403</h1>
+  <a href="@routes.GlobalController.index()"><h3>@messages("global.backHome")</h3></a>
+}

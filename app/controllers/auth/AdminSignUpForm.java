@@ -112,9 +112,9 @@ public final class AdminSignUpForm implements ValidatableWithDB<List<ValidationE
   }
 
   private boolean emailAlreadyExists(final BriventoryDB briventoryDB) {
-    final int count = briventoryDB.query(
+    final long count = briventoryDB.query(
         session ->
-            session.createQuery("select count(u) from User u where lower(u.email) = lower(:email)", Integer.class)
+            session.createQuery("select count(u) from User u where lower(u.email) = lower(:email)", Long.class)
                    .setParameter("email", email.trim())
                    .getSingleResult()
     ).join();

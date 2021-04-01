@@ -117,7 +117,8 @@ public class BriventoryDB {
    * </ul>
    */
   public boolean isInMaintenance(final Session session) {
-    return !isDatabaseInitialized(session) ||
+    return !session.isConnected() ||
+           !isDatabaseInitialized(session) ||
            !hasActiveAdministrator(session);
   }
 

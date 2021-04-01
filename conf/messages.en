@@ -21,9 +21,18 @@ error.maxLength=maximum length: {0} characters
 # Implicitly called by the form helper
 error.email=this is not a valid e-mail address
 
+forbidden.title=Forbidden
+forbidden.string=You''re not allowed to access this resource.
+
+jdbcconnection.title=JDBC Connection
+jdbcconnection=The database connection cannot be established, check your config.
+
 maintenance.title=Maintenance
 maintenance.string=This site is currently under maintenance
 maintenance.substring=Come back soon
+
+notfound.title=Not found
+notfound.string=The resource has not been founded.
 
 status.databaseVersion.description=Database initialized and corresponding to the App major version
 status.databaseVersion.tips=Check if the database is reachable and inspect the application log file to get the error.
