@@ -2,7 +2,7 @@ name := """Briventory"""
 maintainer := "briventory@varani.ch"
 
 // Common Settings
-scalaVersion := "2.13.4"
+scalaVersion := "2.13.5"
 
 organization := "ch.varani"
 version := "1.0.0-SNAPSHOT"
@@ -36,14 +36,14 @@ libraryDependencies += guice
 libraryDependencies ++= Seq(
   javaJdbc,
   javaJpa,
-  "org.hibernate" % "hibernate-core" % "5.4.27.Final"
+  "org.hibernate" % "hibernate-core" % "5.4.30.Final"
 )
 
 // Libraries
 libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-text" % "1.9",
   "commons-validator" % "commons-validator" % "1.7",
-  "org.postgresql" % "postgresql" % "42.2.18",
+  "org.postgresql" % "postgresql" % "42.2.19",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.3",
   "org.semver" % "api" % "0.9.33",
   "me.gosimple" % "nbvcxz" % "1.5.0",
@@ -53,24 +53,24 @@ libraryDependencies ++= Seq(
 // WebJars
 libraryDependencies ++= Seq(
   "org.webjars" %% "webjars-play" % "2.8.0",
-  "org.webjars" % "jquery" % "3.5.1",
+  "org.webjars" % "jquery" % "3.6.0",
   "org.webjars" % "jquery-ui" % "1.12.1",
   "org.webjars" % "popper.js" % "2.5.4",
-  "org.webjars" % "bootstrap" % "4.5.3",
-  "org.webjars" % "font-awesome" % "5.15.1",
+  "org.webjars" % "bootstrap" % "4.6.0",
+  "org.webjars" % "font-awesome" % "5.15.2",
   "org.webjars.bowergithub.dropbox" % "zxcvbn" % "4.4.2"
 )
 
 // Tests libraries
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++= Seq(
-  "org.assertj" % "assertj-core" % "3.18.1" % Test,
+  "org.assertj" % "assertj-core" % "3.19.0" % Test,
   "org.awaitility" % "awaitility" % "4.0.3" % Test,
-  "net.aichler" % "jupiter-interface" % "0.8.3" % Test,
-  "org.junit.jupiter" % "junit-jupiter-api" % "5.7.0" % Test,
-  "org.junit.jupiter" % "junit-jupiter-engine" % "5.7.0" % Test,
-  "org.junit.jupiter" % "junit-jupiter-params" % "5.7.0" % Test,
-  "org.junit.platform" % "junit-platform-runner" % "1.7.0" % Test
+  "net.aichler" % "jupiter-interface" % "0.9.1" % Test,
+  "org.junit.jupiter" % "junit-jupiter-api" % "5.7.1" % Test,
+  "org.junit.jupiter" % "junit-jupiter-engine" % "5.7.1" % Test,
+  "org.junit.jupiter" % "junit-jupiter-params" % "5.7.1" % Test,
+  "org.junit.platform" % "junit-platform-runner" % "1.7.1" % Test
 )
 
 // Dependencies Check Directives
