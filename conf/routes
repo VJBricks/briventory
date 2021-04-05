@@ -3,15 +3,27 @@
 # ~~~~
 
 GET         /                         controllers.GlobalController.index(request: Request)
+GET         /credits                  controllers.PublicController.credits(request: Request)
 
 GET         /maintenance              controllers.MaintenanceController.maintenance(request: Request)
 GET         /status                   controllers.MaintenanceController.status(request: Request)
 
-GET         /auth/signin              controllers.auth.PublicAuth.signIn(request: Request, redirectUrl: java.util.Optional[String])
+GET         /auth/signin              controllers.auth.PublicAuth.signIn(request: Request, redirectUrl: String)
 POST        /auth/signin              controllers.auth.PublicAuth.doSignIn(request: Request)
 GET         /auth/admin/signup        controllers.auth.PublicAuth.adminSignUp(request: Request)
 POST        /auth/admin/signup        controllers.auth.PublicAuth.doAdminSignUp(request: Request)
 GET         /auth/signout             controllers.auth.SecuredAuth.signOut()
+
+GET         /settings/lockers         controllers.settings.SettingsController.lockers(request: Request)
+GET         /settings/lockertypes     controllers.settings.SettingsController.lockerTypes(request: Request)
+GET         /settings/bricklink       controllers.settings.SettingsController.bricklink(request: Request)
+GET         /settings/colors          controllers.settings.SettingsController.colors(request: Request)
+GET         /settings/categories      controllers.settings.SettingsController.categories(request: Request)
+GET         /settings/parts           controllers.settings.SettingsController.parts(request: Request)
+GET         /settings/sets            controllers.settings.SettingsController.sets(request: Request)
+GET         /settings/minifigures     controllers.settings.SettingsController.miniFigures(request: Request)
+GET         /settings/gears           controllers.settings.SettingsController.gears(request: Request)
+GET         /settings/elements        controllers.settings.SettingsController.elements(request: Request)
 
 GET         /mf                       controllers.MiniFiguresController.index(request: Request)
 
