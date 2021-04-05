@@ -87,11 +87,12 @@ public final class PublicAuth extends Controller {
    *
    * @return the {@link views.html.auth.signIn} view, encapsulate into a {@link Result} instance.
    */
-  public Result signIn(final Http.Request request, final Optional<String> redirectUrl) {
+  public Result signIn(final Http.Request request, final String redirectUrl) {
     Form<SignInForm> form = formFactory.form(SignInForm.class);
-    if (redirectUrl.isPresent() && !redirectUrl.get().isBlank()) {
+    Optional<String> url = Optional.ofNullable(redirectUrl);
+    if (url.isPresent() && !url.get().isBlank()) {
       SignInForm signInForm = new SignInForm();
-      signInForm.setRedirectUrl(redirectUrl.get());
+      signInForm.setRedirectUrl(url.get());
       form = form.fill(signInForm);
     }
     return ok(signIn.render(form, messagesApi.preferred(request), request));
@@ -200,7 +201,7 @@ public final class PublicAuth extends Controller {
                                                              .toCharArray()));
       entityManager.persist(admin);
 
-      return redirect(routes.PublicAuth.signIn(Optional.empty()));
+      return redirect(routes.PublicAuth.signIn(null));
     });
   }
 

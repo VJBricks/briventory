@@ -56,7 +56,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "jquery" % "3.6.0",
   "org.webjars" % "jquery-ui" % "1.12.1",
   "org.webjars" % "popper.js" % "2.5.4",
-  "org.webjars" % "bootstrap" % "4.6.0",
+  "org.webjars" % "bootstrap" % "5.0.0-beta3",
   "org.webjars" % "font-awesome" % "5.15.2",
   "org.webjars.bowergithub.dropbox" % "zxcvbn" % "4.4.2"
 )

@@ -50,7 +50,7 @@ public final class Secured extends Security.Authenticator {
    */
   @Override
   public Result onUnauthorized(final Http.Request request) {
-    return redirect(routes.PublicAuth.signIn(Optional.of(request.uri())));
+    return redirect(routes.PublicAuth.signIn(request.uri()));
   }
 
 }

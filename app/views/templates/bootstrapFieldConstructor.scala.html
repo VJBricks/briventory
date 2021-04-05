@@ -1,6 +1,6 @@
 @(elements: helper.FieldElements)
 
-@if(elements.args.get(Symbol("class")).getOrElse("").equals("hidden")) {
+@if(elements.args.getOrElse(Symbol("class"), "").equals("hidden")) {
   @elements.input
 } else {
   <div class="form-group row @if(elements.hasErrors) {danger}">

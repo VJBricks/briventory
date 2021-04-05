@@ -12,6 +12,8 @@ auth.signin.title=Sign In
 auth.signin.error=An error occurs during the authentication process.
 auth.signin.error.badcredentials=Bad credentials, check your entries
 
+briventory.title = Briventory
+
 # Implicitly called by the form helper
 error.required=this field is required
 # Implicitly called by the form helper
