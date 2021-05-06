@@ -1,15 +1,15 @@
 package globalhandlers;
 
 import controllers.MaintenanceController;
-import database.BriventoryDB;
 import play.api.http.JavaCompatibleHttpRequestHandler;
-import play.api.mvc.Handler;
 import play.http.DefaultHttpRequestHandler;
 import play.http.HandlerForRequest;
 import play.libs.streams.Accumulator;
 import play.mvc.EssentialAction;
 import play.mvc.Http;
 import play.routing.Router;
+import repositories.AdminRepository;
+import repositories.RevisionRepository;
 
 import javax.inject.Inject;
 
@@ -31,32 +31,36 @@ public final class CustomHttpRequestHandler extends DefaultHttpRequestHandler {
 
   /** The injected {@link controllers.MaintenanceController} instance. */
   private final MaintenanceController maintenanceController;
-  /** The injected {@link database.BriventoryDB} instance. */
-  private final BriventoryDB briventoryDB;
+  /** The injected {@link RevisionRepository} instance. */
+  private final RevisionRepository revisionRepository;
+  /** The injected {@link AdminRepository} instance. */
+  private final AdminRepository adminRepository;
 
   @Inject
   public CustomHttpRequestHandler(final JavaCompatibleHttpRequestHandler underlying,
                                   final MaintenanceController maintenanceController,
-                                  final BriventoryDB briventoryDB) {
+                                  final RevisionRepository revisionRepository,
+                                  final AdminRepository adminRepository) {
     super(underlying);
     this.maintenanceController = maintenanceController;
-    this.briventoryDB = briventoryDB;
+    this.revisionRepository = revisionRepository;
+    this.adminRepository = adminRepository;
   }
 
   @Override
   public HandlerForRequest handlerForRequest(final Http.RequestHeader requestHeader) {
-    return briventoryDB.query(session -> {
-      final boolean isInMaintenance = briventoryDB.isInMaintenance(session);
+    final boolean isDatabaseInitialized = revisionRepository.isDatabaseInitialized();
+    final boolean hasActiveAdministrator = adminRepository.hasActiveAdministrator();
+    final boolean maintenance = !isDatabaseInitialized || !hasActiveAdministrator;
 
-      if (isInMaintenance && !requestHeader.uri().matches("^/(maintenance|status|auth|assets|webjars|robots.txt).*")) {
-        Router minimalRouter = Router.empty();
-        Http.Request request = requestHeader.withBody(null);
-        Handler handler = minimalRouter.route(requestHeader).orElseGet(
-            () -> EssentialAction.of(rh -> Accumulator.done(maintenanceController.maintenance(request))));
-        return new HandlerForRequest(requestHeader, handler);
-      }
-      return super.handlerForRequest(requestHeader);
-    }).join();
+    if (maintenance && !requestHeader.uri().matches("^/(maintenance|status|auth|assets|webjars|robots.txt).*")) {
+      var minimalRouter = Router.empty();
+      var request = requestHeader.withBody(null);
+      var handler = minimalRouter.route(requestHeader).orElseGet(
+          () -> EssentialAction.of(rh -> Accumulator.done(maintenanceController.maintenance(request))));
+      return new HandlerForRequest(requestHeader, handler);
+    }
+    return super.handlerForRequest(requestHeader);
   }
 
 }

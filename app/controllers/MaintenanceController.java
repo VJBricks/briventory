@@ -1,15 +1,14 @@
 package controllers;
 
-import database.BriventoryDB;
-import play.i18n.Messages;
 import play.i18n.MessagesApi;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
+import repositories.AdminRepository;
+import repositories.RevisionRepository;
 
 import javax.inject.Inject;
-import java.util.concurrent.CompletionStage;
 
 public final class MaintenanceController extends Controller {
 
@@ -19,19 +18,21 @@ public final class MaintenanceController extends Controller {
 
   /** The injected {@link MessagesApi} instance. */
   private final MessagesApi messagesApi;
-  /** The injected {@link BriventoryDB} instance. */
-  private final BriventoryDB briventoryDB;
+  /** The injected {@link AdminRepository} instance. */
+  private final AdminRepository adminRepository;
+  /** The injected {@link RevisionRepository} instance. */
+  private final RevisionRepository revisionRepository;
 
   // *******************************************************************************************************************
   // Injected Templates
   // *******************************************************************************************************************
 
   /** The {@link views.html.errors.maintenance} template. */
-  private final views.html.errors.maintenance maintenance;
+  private final views.html.errors.maintenance maintenanceView;
   /** The {@link views.html.errors.badRequest} template. */
-  private final views.html.errors.badRequest badRequest;
+  private final views.html.errors.badRequest badRequestView;
   /** The {@link views.html.status} template. */
-  private final views.html.status status;
+  private final views.html.status statusView;
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -41,21 +42,24 @@ public final class MaintenanceController extends Controller {
    * Creates a new instance of {@link GlobalController} by injecting the necessary parameters.
    *
    * @param messagesApi the {@link MessagesApi} instance.
-   * @param briventoryDB the {@link BriventoryDB} instance.
-   * @param maintenance the {@link views.html.errors.maintenance} template.
-   * @param badRequest the {@link views.html.errors.badRequest} template.
-   * @param status the {@link views.html.status} template.
+   * @param adminRepository the {@link AdminRepository} instance.
+   * @param revisionRepository the {@link RevisionRepository} instance.
+   * @param maintenanceView the {@link views.html.errors.maintenance} template.
+   * @param badRequestView the {@link views.html.errors.badRequest} template.
+   * @param statusView the {@link views.html.status} template.
    */
   @Inject
-  public MaintenanceController(final MessagesApi messagesApi, final BriventoryDB briventoryDB,
-                               final views.html.errors.maintenance maintenance,
-                               final views.html.errors.badRequest badRequest,
-                               final views.html.status status) {
+  public MaintenanceController(final MessagesApi messagesApi, final AdminRepository adminRepository,
+                               final RevisionRepository revisionRepository,
+                               final views.html.errors.maintenance maintenanceView,
+                               final views.html.errors.badRequest badRequestView,
+                               final views.html.status statusView) {
     this.messagesApi = messagesApi;
-    this.briventoryDB = briventoryDB;
-    this.maintenance = maintenance;
-    this.badRequest = badRequest;
-    this.status = status;
+    this.adminRepository = adminRepository;
+    this.revisionRepository = revisionRepository;
+    this.maintenanceView = maintenanceView;
+    this.badRequestView = badRequestView;
+    this.statusView = statusView;
   }
 
   /**
@@ -67,7 +71,7 @@ public final class MaintenanceController extends Controller {
    */
   public Result maintenance(final Http.Request request) {
     return Results.status(Http.Status.SERVICE_UNAVAILABLE,
-                          maintenance.render(messagesApi.preferred(request)));
+                          maintenanceView.render(messagesApi.preferred(request)));
   }
 
   /**
@@ -77,18 +81,20 @@ public final class MaintenanceController extends Controller {
    *
    * @return the {@link views.html.status} page.
    */
-  public CompletionStage<Result> status(final Http.Request request) {
+  public Result status(final Http.Request request) {
 
-    return briventoryDB.query(session -> {
-      Messages messages = messagesApi.preferred(request);
-      if (!briventoryDB.isInMaintenance(session))
-        return badRequest(badRequest.render(request, messages));
+    final boolean isDatabaseInitialized = revisionRepository.isDatabaseInitialized();
+    final boolean hasActiveAdministrator = adminRepository.hasActiveAdministrator();
+    final boolean maintenance = !isDatabaseInitialized || !hasActiveAdministrator;
 
-      return ok(status.render(briventoryDB.isDatabaseInitialized(session),
-                              briventoryDB.hasActiveAdministrator(session),
-                              request,
-                              messages));
-    });
+    final var messages = messagesApi.preferred(request);
+    if (maintenance)
+      return badRequest(badRequestView.render(request, messages));
+
+    return ok(statusView.render(isDatabaseInitialized,
+                                hasActiveAdministrator,
+                                request,
+                                messages));
   }
 
 }

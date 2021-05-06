@@ -5,7 +5,6 @@ import controllers.forms.ValidateWithDB;
 import database.BriventoryDB;
 import database.Constraints;
 import me.gosimple.nbvcxz.Nbvcxz;
-import me.gosimple.nbvcxz.resources.Configuration;
 import me.gosimple.nbvcxz.resources.ConfigurationBuilder;
 import me.gosimple.nbvcxz.resources.Dictionary;
 import me.gosimple.nbvcxz.resources.DictionaryBuilder;
@@ -102,8 +101,8 @@ public final class AdminSignUpForm implements ValidatableWithDB<List<ValidationE
                            .createDictionary());
 
     // Create our configuration object and set our custom minimum entropy, and custom dictionary list
-    final double minimumEntroy = 40d;
-    Configuration configuration = new ConfigurationBuilder()
+    final var minimumEntroy = 40d;
+    var configuration = new ConfigurationBuilder()
         .setMinimumEntropy(minimumEntroy)
         .setDictionaries(dictionaryList)
         .createConfiguration();
@@ -131,7 +130,7 @@ public final class AdminSignUpForm implements ValidatableWithDB<List<ValidationE
       l.add(new ValidationError("email", "error.required"));
     if (emailAlreadyExists(briventoryDB))
       l.add(new ValidationError("email", "auth.signup.error.email.exist"));
-    final Nbvcxz nbvcxz = nbvcxz();
+    final var nbvcxz = nbvcxz();
     if (nbvcxz.estimate(password).getBasicScore() < Constraints.PASSWORD_MIN_STRENGTH)
       l.add(new ValidationError("password", "auth.signup.error.password.weak",
                                 Collections.singletonList(Constraints.PASSWORD_MIN_STRENGTH)));

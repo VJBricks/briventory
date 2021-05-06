@@ -3,7 +3,6 @@ package controllers;
 import controllers.auth.Secured;
 import controllers.auth.SessionHelper;
 import models.User;
-import play.i18n.Messages;
 import play.i18n.MessagesApi;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -71,9 +70,9 @@ public final class GlobalController extends Controller {
   public Result index(final Http.Request request) {
     final Optional<User> user = sessionHelper.retrieveUser(request);
     if (user.isPresent()) {
-      final Messages prefered = messagesApi.preferred(request);
+      final var preferred = messagesApi.preferred(request);
       return ok(index.render(user.get(),
-                             prefered));
+                             preferred));
     }
     return errorsController.forbidden(request);
 

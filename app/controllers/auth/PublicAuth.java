@@ -2,7 +2,7 @@ package controllers.auth;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import database.BriventoryDB;
-import models.Admin;
+import models.Administrator;
 import models.User;
 import play.data.Form;
 import play.data.FormFactory;
@@ -21,12 +21,6 @@ import java.util.concurrent.CompletionStage;
  * need an existing session. It also handle the various sign up processes.
  */
 public final class PublicAuth extends Controller {
-
-  // *******************************************************************************************************************
-  // Constants
-  // *******************************************************************************************************************
-  /** The cost for BCrypt. */
-  private static final int BCRYPT_COST = 13;
 
   // *******************************************************************************************************************
   // Injected Attributes
@@ -91,7 +85,7 @@ public final class PublicAuth extends Controller {
     Form<SignInForm> form = formFactory.form(SignInForm.class);
     Optional<String> url = Optional.ofNullable(redirectUrl);
     if (url.isPresent() && !url.get().isBlank()) {
-      SignInForm signInForm = new SignInForm();
+      var signInForm = new SignInForm();
       signInForm.setRedirectUrl(url.get());
       form = form.fill(signInForm);
     }
@@ -121,7 +115,7 @@ public final class PublicAuth extends Controller {
                                         messagesApi.preferred(request),
                                         request));
 
-      List<User> users = User.findFromEmail(session, form.get().getEmail());
+      List<User> users = User.findByEmail(session, form.get().getEmail());
 
       if (users.size() > 1) {
         // TODO Send mail to maintainer if > 1, duplicates e-mail should never happen
@@ -192,13 +186,10 @@ public final class PublicAuth extends Controller {
                                              request,
                                              messagesApi.preferred(request)));
 
-      final Admin admin = new Admin();
+      final var admin = new Administrator();
       admin.setName(form.get().getName());
       admin.setEmail(form.get().getEmail());
-      admin.setPassword(BCrypt.withDefaults()
-                              .hashToString(BCRYPT_COST, form.get()
-                                                             .getPassword()
-                                                             .toCharArray()));
+      admin.setClearPassword(form.get().getPassword());
       entityManager.persist(admin);
 
       return redirect(routes.PublicAuth.signIn(null));

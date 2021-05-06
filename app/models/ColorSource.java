@@ -1,6 +1,11 @@
 package models;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,6 +17,9 @@ import java.net.URI;
 
 /** {@code ColorSource} represents an entity defining the color name and/or the color itself. */
 @Entity
+@Embeddable
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "briventoryCache")
 @Table(name = "colorsource", schema = "public")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class ColorSource {

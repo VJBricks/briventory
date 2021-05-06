@@ -1,0 +1,56 @@
+<ehcache:config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xmlns:ehcache="http://www.ehcache.org/v3"
+                xmlns:jsr107="http://www.ehcache.org/v3/jsr107"
+                xsi:schemaLocation="
+                    http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.8.xsd
+                    http://www.ehcache.org/v3/jsr107 http://www.ehcache.org/schema/ehcache-107-ext-3.0.xsd">
+
+    <ehcache:service>
+        <!--<jsr107:defaults enable-management="true" enable-statistics="true">
+            <jsr107:cache name="briventoryCache" template="briventoryTemplate"/>
+        </jsr107:defaults>-->
+        <jsr107:defaults enable-management="true" enable-statistics="true"/>
+    </ehcache:service>
+
+    <ehcache:cache alias="briventoryCache" uses-template="briventoryTemplate"/>
+
+    <ehcache:cache-template name="briventoryTemplate">
+
+        <ehcache:expiry>
+            <ehcache:ttl unit="days">1</ehcache:ttl>
+        </ehcache:expiry>
+
+        <ehcache:listeners>
+            <ehcache:listener>
+                <ehcache:class>globalhandlers.CacheEventLogger</ehcache:class>
+                <ehcache:event-firing-mode>ASYNCHRONOUS</ehcache:event-firing-mode>
+                <ehcache:event-ordering-mode>UNORDERED</ehcache:event-ordering-mode>
+                <ehcache:events-to-fire-on>EVICTED</ehcache:events-to-fire-on>
+                <ehcache:events-to-fire-on>EXPIRED</ehcache:events-to-fire-on>
+                <ehcache:events-to-fire-on>REMOVED</ehcache:events-to-fire-on>
+                <ehcache:events-to-fire-on>CREATED</ehcache:events-to-fire-on>
+                <ehcache:events-to-fire-on>UPDATED</ehcache:events-to-fire-on>
+            </ehcache:listener>
+        </ehcache:listeners>
+
+
+        <ehcache:resources>
+            <ehcache:heap unit="GB">1</ehcache:heap>
+        </ehcache:resources>
+    </ehcache:cache-template>
+
+    <ehcache:cache alias="default-update-timestamps-region">
+        <ehcache:expiry>
+            <ehcache:none />
+        </ehcache:expiry>
+        <ehcache:heap>4096</ehcache:heap>
+    </ehcache:cache>
+
+    <ehcache:cache alias="default-query-results-region">
+        <ehcache:expiry>
+            <ehcache:tti unit="days">1</ehcache:tti>
+        </ehcache:expiry>
+        <ehcache:heap>1024</ehcache:heap>
+    </ehcache:cache>
+
+</ehcache:config>

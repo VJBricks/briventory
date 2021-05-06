@@ -2,6 +2,7 @@ stages:
   - dependencies
   - style
   - build
+  - test
 
 dependencies:
   stage: dependencies
@@ -23,3 +24,10 @@ build:
     - sbt-jdk11
   script:
     - sbt clean compile
+
+test:
+  stage: test
+  tags:
+    - sbt-jdk11
+  script:
+    - sbt test jacoco

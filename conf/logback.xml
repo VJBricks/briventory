@@ -24,15 +24,16 @@
     <appender-ref ref="STDOUT" />
   </appender>
 
-  <logger name="play" level="WARN" />
-  <logger name="application" level="WARN" />
-  <logger name="globalhandlers" level="WARN" />
-  <logger name="org.jooq" level="ERROR">
-    <appender-ref ref="STDOUT"/>
-  </logger>
+  <logger name="play" level="ERROR" />
+  <logger name="application" level="ERROR" />
+  <logger name="globalhandlers" level="ERROR" />
   <logger name="org.hibernate.SQL" level="ERROR" />
   <logger name="org.hibernate.type" level="ERROR" />
   <logger name="org.hibernate" level="ERROR" />
+  <logger name="org.hibernate.cache" level="ERROR"/>
+  <logger name="org.ehcache" level="ERROR" />
+  <logger name="models" level="DEBUG" />
+  <logger name="akka" level="ERROR" />
 
   <root level="WARN">
     <appender-ref ref="ASYNCFILE" />

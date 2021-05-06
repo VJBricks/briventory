@@ -1,26 +1,27 @@
 package database;
 
-import ch.varani.briventory.BriventoryBuildInfo;
-import models.Revision;
 import org.hibernate.Session;
-import org.semver.Version;
 import play.db.jpa.JPAApi;
 import play.libs.concurrent.HttpExecution;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.persistence.EntityManager;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
+import static java.util.concurrent.CompletableFuture.runAsync;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
+
 @Singleton
-public class BriventoryDB {
+public final class BriventoryDB {
 
-  /** The app version. */
-  private static final Version APP_VERSION = Version.parse(BriventoryBuildInfo.version());
+  /** The global cache region. */
+  public static final String CACHE_REGION = "briventoryCache";
+  /** The name of the persistence unit. */
+  private static final String PERSISTENCE_UNIT_NAME = "default";
 
-  /** The {@link JPAApi} to persist objects. */
+  /** The injected {@link JPAApi} instance. */
   private final JPAApi jpaApi;
   /** The {@link Executor} retrieved from the injected {@link BriventoryDBContext} instance. */
   private final Executor executor;
@@ -28,7 +29,7 @@ public class BriventoryDB {
   /**
    * Creates a new instance of {@link BriventoryDB} instance using the injected parameters.
    *
-   * @param jpaApi the {@link JPAApi} to persist objects.
+   * @param jpaApi the {@link JPAApi} instance.
    * @param context the {@link BriventoryDBContext} instance.
    */
   @Inject
@@ -45,81 +46,35 @@ public class BriventoryDB {
    *
    * @return the {@link CompletableFuture} created to use the Briventory database thread execution context.
    */
-  public final <R> CompletableFuture<R> query(final Function<Session, R> function) {
-    return CompletableFuture.supplyAsync(() -> jpaApi.withTransaction(entityManager -> {
-      final Session session = entityManager.unwrap(Session.class);
-      return function.apply(session);
-    }));
+  public <R> CompletableFuture<R> query(final Function<Session, R> function) {
+    return supplyAsync(() -> jpaApi.withTransaction(PERSISTENCE_UNIT_NAME, true, entityManager -> {
+      return function.apply(entityManager.unwrap(Session.class));
+    }), executor);
   }
 
   /**
-   * Perists the objects into the database.
+   * Persists the objects into the database.
    *
    * @param function the {@link Function} that will persist the objects.
    * @param <R> the return type.
    *
    * @return the {@link CompletableFuture} created to use the Briventory database thread execution context.
    */
-  public <R> CompletableFuture<R> persist(final Function<EntityManager, R> function) {
-    return CompletableFuture.supplyAsync(() -> jpaApi.withTransaction(function), executor);
+  public <R> CompletableFuture<R> persist(final Function<Session, R> function) {
+    return supplyAsync(() -> jpaApi.withTransaction(PERSISTENCE_UNIT_NAME, false, entityManager -> {
+      var session = entityManager.unwrap(Session.class);
+      var result = function.apply(session);
+      session.flush();
+      return result;
+    }), executor);
   }
 
-  /**
-   * Does the database has been initialized ?
-   *
-   * @param session the {@link Session} instance to execute the query.
-   *
-   * @return {@code true} if the database is initialized and the version correspond to the App major version, otherwise
-   * {@code false}.
-   */
-  public boolean isDatabaseInitialized(final Session session) {
-    try {
-      final Revision revision = session.createQuery("select r from Revision r", Revision.class)
-                                       .setCacheable(true)
-                                       .getSingleResult();
-      Version dbVersion = new Version(revision.getDatabase(), 0, 0);
-      return dbVersion.isCompatible(APP_VERSION);
-    } catch (Exception e) {
-      return false;
-    }
-  }
-
-  /**
-   * Does the database contains at least one non-locked administrator ?
-   *
-   * @param session the {@link Session} instance to execute the query.
-   *
-   * @return {@code true} if the database contains at least one non-locked administrator, otherwise {@code false}.
-   */
-  public boolean hasActiveAdministrator(final Session session) {
-    final long count = session.createQuery(
-        "select count(a) " +
-        "from Admin a " +
-        "left join LockedUser lu on a.id = lu.id " +
-        "where lu.id is null",
-        Long.class)
-                              .setCacheable(true)
-                              .getSingleResult();
-    return count > 0;
-  }
-
-  /**
-   * Does the App is in maintenance mode ?
-   *
-   * @param session the {@link Session} instance to execute the query.
-   *
-   * @return {@code true} if the App should be considered as <em>in maintenance</em>, otherwise {@code false}. The
-   * maintenance mode is enabled if:
-   * <ul>
-   *   <li>the database has not been initialized;</li>
-   *   <li>the database version does not correspond to the App major version;</li>
-   *   <li>there is not non-locked administrator.</li>
-   * </ul>
-   */
-  public boolean isInMaintenance(final Session session) {
-    return !session.isConnected() ||
-           !isDatabaseInitialized(session) ||
-           !hasActiveAdministrator(session);
+  public CompletableFuture<Void> remove(final Function<Session, Void> function) {
+    return runAsync(() -> jpaApi.withTransaction(PERSISTENCE_UNIT_NAME, false, entityManager -> {
+      var session = entityManager.unwrap(Session.class);
+      function.apply(session);
+      session.flush();
+    }));
   }
 
 }

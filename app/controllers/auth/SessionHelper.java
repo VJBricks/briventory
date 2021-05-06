@@ -51,10 +51,8 @@ public final class SessionHelper {
     if (userIdValue.isEmpty()) return Optional.empty();
 
     try {
-      final long userId = Long.parseLong(userIdValue.get());
-      final User user = briventoryDB.query(
-          session -> User.findFromId(session, userId)
-      ).join();
+      final var userId = Long.parseLong(userIdValue.get());
+      final var user = briventoryDB.query(session -> User.findFromId(session, userId)).join();
       return Optional.of(user);
     } catch (Exception e) {
       return Optional.empty();
@@ -74,8 +72,8 @@ public final class SessionHelper {
     if (userIdValue.isEmpty()) return Optional.empty();
 
     try {
-      final long userId = Long.parseLong(userIdValue.get());
-      final User user = briventoryDB.query(
+      final var userId = Long.parseLong(userIdValue.get());
+      final var user = briventoryDB.query(
           session -> User.findFromId(session, userId)
       ).join();
       return Optional.of(user.getEmail());

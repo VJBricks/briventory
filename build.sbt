@@ -8,22 +8,26 @@ organization := "ch.varani"
 version := "1.0.0-SNAPSHOT"
 
 // Disable the ScalaDoc generation
-sources in(Compile, doc) := Seq.empty
-publishArtifact in(Compile, packageDoc) := false
+Compile / doc / sources := Seq.empty
+Compile / packageDoc / publishArtifact := false
 
 // Treat warning as error
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 javacOptions ++= Seq("-Xlint:all", "-Xlint:-processing", "-Werror")
 javaOptions ++= Seq("--illegal-access=warn")
 
-// Tests Settings
-testOptions in Test := Seq(Tests.Argument(TestFrameworks.JUnit, "-a", "-v"))
+// Include public assets during tests
+Test / unmanagedResourceDirectories += baseDirectory(_ / "target/web/public/test").value
+Test / fork := false
+
+// Make verbose tests
+testOptions += Tests.Argument(jupiterTestFramework, "-v")
 
 // Checkstyle Directives
 checkstyleConfigLocation := CheckstyleConfigLocation.File("varani_java_checks.xml")
 checkstyleSeverityLevel := Some(CheckstyleSeverityLevel.Error)
 
-lazy val root = (project in file(".")).enablePlugins(PlayJava, BuildInfoPlugin).settings(
+lazy val root = project.in(file(".")).enablePlugins(PlayJava, BuildInfoPlugin).settings(
   buildInfoKeys := Seq[BuildInfoKey](name, version),
   buildInfoObject := "BriventoryBuildInfo",
   buildInfoPackage := "ch.varani.briventory"
@@ -36,14 +40,19 @@ libraryDependencies += guice
 libraryDependencies ++= Seq(
   javaJdbc,
   javaJpa,
-  "org.hibernate" % "hibernate-core" % "5.4.30.Final"
+  "org.hibernate" % "hibernate-core" % "5.4.31.Final",
+  //"org.glassfish" % "javax.el" % "3.0.1-b12",
+
+  /*"javax.cache" % "cache-api" % "1.1.1",*/
+  "org.hibernate" % "hibernate-jcache" % "5.4.31.Final",
+  "org.ehcache" % "ehcache" % "3.9.3"
 )
 
 // Libraries
 libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-text" % "1.9",
   "commons-validator" % "commons-validator" % "1.7",
-  "org.postgresql" % "postgresql" % "42.2.19",
+  "org.postgresql" % "postgresql" % "42.2.20",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.3",
   "org.semver" % "api" % "0.9.33",
   "me.gosimple" % "nbvcxz" % "1.5.0",
@@ -66,7 +75,7 @@ resolvers += Resolver.jcenterRepo
 libraryDependencies ++= Seq(
   "org.assertj" % "assertj-core" % "3.19.0" % Test,
   "org.awaitility" % "awaitility" % "4.0.3" % Test,
-  "net.aichler" % "jupiter-interface" % "0.9.1" % Test,
+  "net.aichler" % "jupiter-interface" % JupiterKeys.jupiterVersion.value % Test,
   "org.junit.jupiter" % "junit-jupiter-api" % "5.7.1" % Test,
   "org.junit.jupiter" % "junit-jupiter-engine" % "5.7.1" % Test,
   "org.junit.jupiter" % "junit-jupiter-params" % "5.7.1" % Test,
@@ -95,4 +104,4 @@ sonarProperties ++= Map(
   "sonar.jacoco.reportPaths" -> "./target/scala-2.13/jacoco/data/jacoco.exec"
 )
 
-addCommandAlias("pipeline", ";clean;dependencyUpdates;checkstyle;compile;test")
+addCommandAlias("pipeline", ";clean;dependencyUpdates;checkstyle;compile;test;jacoco")

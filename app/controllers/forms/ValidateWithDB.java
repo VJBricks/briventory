@@ -24,7 +24,7 @@ public @interface ValidateWithDB {
   /** Defines several {@code @ValidateWithDB} annotations on the same element. */
   @Target({TYPE, ANNOTATION_TYPE})
   @Retention(RUNTIME)
-  public @interface List {
+  @interface List {
     ValidateWithDB[] value();
 
   }
