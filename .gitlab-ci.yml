@@ -30,4 +30,4 @@ test:
   tags:
     - sbt-jdk11
   script:
-    - sbt test jacoco
+    - sbt jacoco

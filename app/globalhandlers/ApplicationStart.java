@@ -1,7 +1,9 @@
 package globalhandlers;
 
+import com.codahale.metrics.MetricRegistry;
+import com.zaxxer.hikari.HikariDataSource;
 import play.Environment;
-import play.db.jpa.JPAApi;
+import play.db.DBApi;
 import play.inject.ApplicationLifecycle;
 
 import javax.inject.Inject;
@@ -17,16 +19,21 @@ import javax.inject.Singleton;
 @Singleton
 public final class ApplicationStart {
 
+  /** The {@link MetricRegistry} instance. */
+  private final MetricRegistry metricRegistry = new MetricRegistry();
+
   /**
    * Creates a new instance of {@link ApplicationStart} using the injected parameters.
    *
    * @param lifecycle the {@link ApplicationLifecycle} instance.
    * @param environment the {@link Environment} instance.
-   * @param jpaApi the {@link JPAApi} instance.
+   * @param dbApi the {@link DBApi} instance.
    */
   @Inject
-  public ApplicationStart(final ApplicationLifecycle lifecycle, final Environment environment, final JPAApi jpaApi) {
-
+  public ApplicationStart(final ApplicationLifecycle lifecycle, final Environment environment, final DBApi dbApi) {
+    final var dataSource = dbApi.getDatabase("briventory").getDataSource();
+    if (dataSource instanceof HikariDataSource)
+      ((HikariDataSource) dataSource).setMetricRegistry(metricRegistry);
   }
 
 }

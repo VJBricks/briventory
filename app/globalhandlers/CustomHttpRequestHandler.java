@@ -8,7 +8,7 @@ import play.libs.streams.Accumulator;
 import play.mvc.EssentialAction;
 import play.mvc.Http;
 import play.routing.Router;
-import repositories.AdminRepository;
+import repositories.AdministratorsRepository;
 import repositories.RevisionRepository;
 
 import javax.inject.Inject;
@@ -33,24 +33,24 @@ public final class CustomHttpRequestHandler extends DefaultHttpRequestHandler {
   private final MaintenanceController maintenanceController;
   /** The injected {@link RevisionRepository} instance. */
   private final RevisionRepository revisionRepository;
-  /** The injected {@link AdminRepository} instance. */
-  private final AdminRepository adminRepository;
+  /** The injected {@link AdministratorsRepository} instance. */
+  private final AdministratorsRepository administratorsRepository;
 
   @Inject
   public CustomHttpRequestHandler(final JavaCompatibleHttpRequestHandler underlying,
                                   final MaintenanceController maintenanceController,
                                   final RevisionRepository revisionRepository,
-                                  final AdminRepository adminRepository) {
+                                  final AdministratorsRepository administratorsRepository) {
     super(underlying);
     this.maintenanceController = maintenanceController;
     this.revisionRepository = revisionRepository;
-    this.adminRepository = adminRepository;
+    this.administratorsRepository = administratorsRepository;
   }
 
   @Override
   public HandlerForRequest handlerForRequest(final Http.RequestHeader requestHeader) {
     final boolean isDatabaseInitialized = revisionRepository.isDatabaseInitialized();
-    final boolean hasActiveAdministrator = adminRepository.hasActiveAdministrator();
+    final boolean hasActiveAdministrator = administratorsRepository.hasActiveAdministrator();
     final boolean maintenance = !isDatabaseInitialized || !hasActiveAdministrator;
 
     if (maintenance && !requestHeader.uri().matches("^/(maintenance|status|auth|assets|webjars|robots.txt).*")) {

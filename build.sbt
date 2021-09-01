@@ -2,7 +2,7 @@ name := """Briventory"""
 maintainer := "briventory@varani.ch"
 
 // Common Settings
-scalaVersion := "2.13.5"
+scalaVersion := "2.13.6"
 
 organization := "ch.varani"
 version := "1.0.0-SNAPSHOT"
@@ -40,19 +40,24 @@ libraryDependencies += guice
 libraryDependencies ++= Seq(
   javaJdbc,
   javaJpa,
-  "org.hibernate" % "hibernate-core" % "5.4.31.Final",
-  //"org.glassfish" % "javax.el" % "3.0.1-b12",
+  "org.hibernate" % "hibernate-core" % "5.5.6",
+
+  /* Both dependencies below are necessary to have validator working. */
+  "org.glassfish" % "javax.el" % "3.0.1-b12",
+/*"org.hibernate" % "hibernate-validator" % "7.0.1.Final",*/
+  "javax.validation" % "validation-api" % "2.0.1.Final",
 
   /*"javax.cache" % "cache-api" % "1.1.1",*/
-  "org.hibernate" % "hibernate-jcache" % "5.4.31.Final",
-  "org.ehcache" % "ehcache" % "3.9.3"
+  "org.hibernate" % "hibernate-jcache" % "5.5.5.Final",
+  "org.ehcache" % "ehcache" % "3.9.5",
+  "io.dropwizard.metrics" % "metrics-core" % "4.2.3"
 )
 
 // Libraries
 libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-text" % "1.9",
   "commons-validator" % "commons-validator" % "1.7",
-  "org.postgresql" % "postgresql" % "42.2.20",
+  "org.postgresql" % "postgresql" % "42.2.23",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.3",
   "org.semver" % "api" % "0.9.33",
   "me.gosimple" % "nbvcxz" % "1.5.0",
@@ -61,25 +66,25 @@ libraryDependencies ++= Seq(
 
 // WebJars
 libraryDependencies ++= Seq(
-  "org.webjars" %% "webjars-play" % "2.8.0",
+  "org.webjars" %% "webjars-play" % "2.8.8",
   "org.webjars" % "jquery" % "3.6.0",
   "org.webjars" % "jquery-ui" % "1.12.1",
-  "org.webjars" % "popper.js" % "2.5.4",
-  "org.webjars" % "bootstrap" % "5.0.0-beta3",
-  "org.webjars" % "font-awesome" % "5.15.2",
+  "org.webjars" % "popper.js" % "2.9.3",
+  "org.webjars" % "bootstrap" % "5.1.0",
+  "org.webjars" % "font-awesome" % "5.15.3",
   "org.webjars.bowergithub.dropbox" % "zxcvbn" % "4.4.2"
 )
 
 // Tests libraries
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++= Seq(
-  "org.assertj" % "assertj-core" % "3.19.0" % Test,
-  "org.awaitility" % "awaitility" % "4.0.3" % Test,
+  "org.assertj" % "assertj-core" % "3.20.2" % Test,
+  "org.awaitility" % "awaitility" % "4.1.0" % Test,
   "net.aichler" % "jupiter-interface" % JupiterKeys.jupiterVersion.value % Test,
-  "org.junit.jupiter" % "junit-jupiter-api" % "5.7.1" % Test,
-  "org.junit.jupiter" % "junit-jupiter-engine" % "5.7.1" % Test,
-  "org.junit.jupiter" % "junit-jupiter-params" % "5.7.1" % Test,
-  "org.junit.platform" % "junit-platform-runner" % "1.7.1" % Test
+  "org.junit.jupiter" % "junit-jupiter-api" % "5.7.2" % Test,
+  "org.junit.jupiter" % "junit-jupiter-engine" % "5.7.2" % Test,
+  "org.junit.jupiter" % "junit-jupiter-params" % "5.7.2" % Test,
+  "org.junit.platform" % "junit-platform-runner" % "1.7.2" % Test
 )
 
 // Dependencies Check Directives

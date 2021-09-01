@@ -2,6 +2,11 @@ package repositories;
 
 import database.BriventoryDB;
 
+/**
+ * Base class for all immutable entities.
+ *
+ * @param <E> the type of the immutable entity handled.
+ */
 public abstract class ImmutableRepository<E> {
 
   /** The {@link BriventoryDB} instance. */

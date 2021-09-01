@@ -5,7 +5,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
-import repositories.AdminRepository;
+import repositories.AdministratorsRepository;
 import repositories.RevisionRepository;
 
 import javax.inject.Inject;
@@ -18,8 +18,8 @@ public final class MaintenanceController extends Controller {
 
   /** The injected {@link MessagesApi} instance. */
   private final MessagesApi messagesApi;
-  /** The injected {@link AdminRepository} instance. */
-  private final AdminRepository adminRepository;
+  /** The injected {@link AdministratorsRepository} instance. */
+  private final AdministratorsRepository administratorsRepository;
   /** The injected {@link RevisionRepository} instance. */
   private final RevisionRepository revisionRepository;
 
@@ -42,20 +42,20 @@ public final class MaintenanceController extends Controller {
    * Creates a new instance of {@link GlobalController} by injecting the necessary parameters.
    *
    * @param messagesApi the {@link MessagesApi} instance.
-   * @param adminRepository the {@link AdminRepository} instance.
+   * @param administratorsRepository the {@link AdministratorsRepository} instance.
    * @param revisionRepository the {@link RevisionRepository} instance.
    * @param maintenanceView the {@link views.html.errors.maintenance} template.
    * @param badRequestView the {@link views.html.errors.badRequest} template.
    * @param statusView the {@link views.html.status} template.
    */
   @Inject
-  public MaintenanceController(final MessagesApi messagesApi, final AdminRepository adminRepository,
+  public MaintenanceController(final MessagesApi messagesApi, final AdministratorsRepository administratorsRepository,
                                final RevisionRepository revisionRepository,
                                final views.html.errors.maintenance maintenanceView,
                                final views.html.errors.badRequest badRequestView,
                                final views.html.status statusView) {
     this.messagesApi = messagesApi;
-    this.adminRepository = adminRepository;
+    this.administratorsRepository = administratorsRepository;
     this.revisionRepository = revisionRepository;
     this.maintenanceView = maintenanceView;
     this.badRequestView = badRequestView;
@@ -84,7 +84,7 @@ public final class MaintenanceController extends Controller {
   public Result status(final Http.Request request) {
 
     final boolean isDatabaseInitialized = revisionRepository.isDatabaseInitialized();
-    final boolean hasActiveAdministrator = adminRepository.hasActiveAdministrator();
+    final boolean hasActiveAdministrator = administratorsRepository.hasActiveAdministrator();
     final boolean maintenance = !isDatabaseInitialized || !hasActiveAdministrator;
 
     final var messages = messagesApi.preferred(request);

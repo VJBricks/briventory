@@ -4,11 +4,14 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.Cacheable;
-import javax.persistence.Column;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapsId;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 @Entity
 @Cacheable
@@ -16,19 +19,34 @@ import javax.persistence.Transient;
 @Table(name = "lockeduser", schema = "public")
 public final class LockedUser {
 
-  /** The primary and foreign key for this {@link LockedUser}. */
-  /**
-   * @Id
-   * @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-   */
+  // *******************************************************************************************************************
+  // Attributes
+  // *******************************************************************************************************************
+
+  /** The id of the corresponding {@link User} entity. */
   @Id
-  @Column(name = "iduser")
-  private Long id;
-  @Transient
+  private Long idUser;
+
+  /** The corresponding {@link User} instance. */
+  @MapsId
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "iduser")
   private User user;
 
-  public User getUser() { return user; }
+  // *******************************************************************************************************************
+  // Getters & Setters
+  // *******************************************************************************************************************
 
-  public void setUser(final User user) { this.user = user; }
+  /** @return the locked {@link User} instance. */
+  User getUser() { return user; }
+
+  /**
+   * Sets the {@link User} that should be locked. Giving a {@code null} value unset the user.
+   *
+   * @param user the {@link User} instance.
+   */
+  void setUser(final User user) {
+    this.user = user;
+  }
 
 }

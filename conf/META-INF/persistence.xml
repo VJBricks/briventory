@@ -17,6 +17,7 @@
             <property name="hibernate.javax.cache.missing_cache_strategy" value="fail"/>
             <property name="hibernate.cache.use_structured_entries" value="true"/>
             <property name="javax.persistence.sharedCache.mode" value="ALL"/>
+            <property name="hibernate.show_sql" value="true"/>
         </properties>
 
     </persistence-unit>

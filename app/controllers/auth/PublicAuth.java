@@ -2,7 +2,6 @@ package controllers.auth;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import database.BriventoryDB;
-import models.Administrator;
 import models.User;
 import play.data.Form;
 import play.data.FormFactory;
@@ -186,11 +185,12 @@ public final class PublicAuth extends Controller {
                                              request,
                                              messagesApi.preferred(request)));
 
-      final var admin = new Administrator();
-      admin.setName(form.get().getName());
-      admin.setEmail(form.get().getEmail());
-      admin.setClearPassword(form.get().getPassword());
-      entityManager.persist(admin);
+      final var user = new User();
+      user.setName(form.get().getName());
+      user.setEmail(form.get().getEmail());
+      user.setClearPassword(form.get().getPassword());
+      user.setAdministrator(true);
+      entityManager.persist(user);
 
       return redirect(routes.PublicAuth.signIn(null));
     });

@@ -7,18 +7,34 @@ import org.hibernate.Session;
 import java.util.List;
 import java.util.concurrent.CompletionException;
 
+/**
+ * Base class for all mutable entities.
+ *
+ * @param <E> the type of the mutable entity handled.
+ */
 public abstract class MutableRepository<E> extends ImmutableRepository<E> {
 
+  /**
+   * Creates a new instance of {@link MutableRepository}.
+   *
+   * @param briventoryDB the {@link BriventoryDB} instance.
+   */
   protected MutableRepository(final BriventoryDB briventoryDB) {
     super(briventoryDB);
   }
 
+  /**
+   * Persists the entity into the database (save or update).
+   *
+   * @param entity the entity to persist.
+   */
   public final void persist(final E entity) {
     try {
       getBriventoryDB().persist(session -> {
         if (!shallPersist(session, entity))
           throw new BriventoryDBException(String.format("Persistence of entity %s is not allowed", entity));
-        session.saveOrUpdate(session.contains(entity) ? this : session.merge(entity));
+        session.saveOrUpdate(entity);
+        session.flush();
         return entity;
       }).join();
     } catch (CompletionException e) {
@@ -41,12 +57,17 @@ public abstract class MutableRepository<E> extends ImmutableRepository<E> {
     return true;
   }
 
+  /**
+   * Deletes the entity from the database.
+   *
+   * @param entity the entity to delete.
+   */
   public final void delete(final E entity) {
     try {
       getBriventoryDB().remove(session -> {
         if (!shallDelete(session, entity))
           throw new BriventoryDBException(String.format("Removal of entity %s is not allowed", entity));
-        session.remove(session.contains(entity) ? this : session.merge(entity));
+        session.remove(session.contains(entity) ? entity : session.merge(entity));
         session.flush();
         return null;
       }).join();
@@ -55,13 +76,18 @@ public abstract class MutableRepository<E> extends ImmutableRepository<E> {
     }
   }
 
+  /**
+   * Deletes the entities from the database.
+   *
+   * @param entities the {@link List} of entities to delete.
+   */
   public final void delete(final List<E> entities) {
     try {
       getBriventoryDB().remove(session -> {
         for (E entity : entities) {
           if (!shallDelete(session, entity))
             throw new BriventoryDBException(String.format("Removal of entity %s is not allowed", entity));
-          session.remove(session.contains(entity) ? this : session.merge(entity));
+          session.remove(session.contains(entity) ? entity : session.merge(entity));
           session.flush();
         }
         return null;

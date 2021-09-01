@@ -5,10 +5,10 @@ import database.Constraints;
 import org.hibernate.CacheMode;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.DiscriminatorOptions;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -17,11 +17,12 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Objects;
 
 import static database.BriventoryDB.CACHE_REGION;
 import static javax.persistence.GenerationType.IDENTITY;
@@ -34,7 +35,6 @@ import static org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE;
 @Cache(usage = READ_WRITE, region = "briventoryCache")
 @Table(name = "user", schema = "public")
 @Inheritance(strategy = JOINED)
-@DiscriminatorOptions(insert = false)
 public class User {
 
   // *******************************************************************************************************************
@@ -76,13 +76,20 @@ public class User {
   private ColorSource defaultColorSource;
 
   /** The state that this {@link User} is locked. */
-  /**@OneToOne(cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-  )
-  @JoinColumn(name = "id", referencedColumnName = "iduser")*/
-  @Transient
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
   private LockedUser lockedUser;
+
+  /** The state that this {@link User} is locked. */
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
+  private Administrator administrator;
+
+  // *******************************************************************************************************************
+  // Construction & Initialization
+  // *******************************************************************************************************************
+
+  /** Builds an empty {@link User} instance. */
+  public User() { /* No-op constructor */}
+
   // *******************************************************************************************************************
   // Object Overrides
   // *******************************************************************************************************************
@@ -90,7 +97,27 @@ public class User {
   /** {@inheritDoc} */
   @Override
   public String toString() {
-    return String.format("%s - %s <%s>", getClass().getName(), name, email);
+    return String.format("%s - %s <%s> (admin = %s, locked = %s)", getClass().getName(), name, email, isAdministrator(),
+                         isLocked());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, email, name, password, defaultColorSource, lockedUser);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean equals(final Object obj) {
+    if (obj == null) return false;
+    if (!getClass().equals(obj.getClass())) return false;
+    final var user = (User) obj;
+    if (id == null && user.id != null) return false;
+    if (id != null && user.id == null) return false;
+    if (id != null) return id.equals(user.id);
+    return name.equals(user.name) &&
+           email.equals(user.email);
   }
 
   // *******************************************************************************************************************
@@ -156,12 +183,14 @@ public class User {
    *
    * @param colorSource the {@link ColorSource} to be used the default one.
    */
-  public void setDefaultColorSource(final ColorSource colorSource) {
-    this.defaultColorSource = colorSource;
-  }
+  public void setDefaultColorSource(final ColorSource colorSource) { this.defaultColorSource = colorSource; }
 
-  /** @return {@code true} is this user is locked, otherwise {@code false}. */
-  public boolean isLocked() { return lockedUser == null; }
+  // *******************************************************************************************************************
+  // Locked Uses Matter
+  // *******************************************************************************************************************
+
+  /** @return {@code true} if this user is locked, otherwise {@code false}. */
+  public boolean isLocked() { return lockedUser != null; }
 
   /** Lock this {@link User}. */
   public void lock() {
@@ -175,12 +204,44 @@ public class User {
     lockedUser = null;
   }
 
+  /** @return the {@link LockedUser} instance or {@code null} if this user is not locked. */
+  public LockedUser getLockedUser() {
+    return lockedUser;
+  }
+
+  // *******************************************************************************************************************
+  // Administrators Matter
+  // *******************************************************************************************************************
+
+  /** @return {@code true} if this user is an administrator, otherwise {@code false}. */
+  public boolean isAdministrator() { return administrator != null; }
+
+  /**
+   * Add or remove the administration rights for this {@link User}.
+   *
+   * @param isAdministrator {@code true} to add administration rights, {@code false} to remove.
+   */
+  public final void setAdministrator(final boolean isAdministrator) {
+    if (isAdministrator && !isAdministrator()) {
+      administrator = new Administrator();
+      administrator.setUser(this);
+    } else if (!isAdministrator) {
+      administrator.setUser(null);
+      administrator = null;
+    }
+  }
+
+  /** @return the {@link Administrator} instance or {@code null} if this user is not an administrator. */
+  public Administrator getAdministrator() {
+    return administrator;
+  }
+
   // *******************************************************************************************************************
   // Data Retrieval
   // *******************************************************************************************************************
 
   /**
-   * Retrives the {@link User} holding the id given.
+   * Retrieves the {@link User} holding the id given.
    *
    * @param session the Hibernate {@link Session}.
    * @param id the id.
