@@ -5,7 +5,6 @@ import junit5.J5WithApplication;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import repositories.AdministratorsRepository;
 import repositories.UsersRepository;
 
 import java.util.LinkedList;
@@ -27,7 +26,6 @@ class AdminTest extends J5WithApplication {
   private static final String BARBARA_NAME = "Barbara Gordon";
   private static final String BARBARA_PASS = "barbara4";
 
-  private AdministratorsRepository administratorsRepository;
   private UsersRepository usersRepository;
 
   private final LinkedList<Long> ids = new LinkedList<>();
@@ -35,8 +33,6 @@ class AdminTest extends J5WithApplication {
   @BeforeEach
   public void setUp() {
     assertDoesNotThrow(() -> {
-      administratorsRepository = getApp().injector().instanceOf(AdministratorsRepository.class);
-      assertNotNull(administratorsRepository);
       usersRepository = getApp().injector().instanceOf(UsersRepository.class);
       assertNotNull(usersRepository);
       ids.clear();
@@ -156,7 +152,7 @@ class AdminTest extends J5WithApplication {
 
   @Test
   void adminInsertEmptyPassword() {
-    assertNotNull(administratorsRepository);
+    assertNotNull(usersRepository);
     assertThrows(BriventoryDBException.class, () -> { // NOSONAR
       User user = new User();
       user.setName(BARBARA_NAME);
@@ -177,7 +173,7 @@ class AdminTest extends J5WithApplication {
 
   @Test
   void adminLockUnlock() {
-    assertNotNull(administratorsRepository);
+    assertNotNull(usersRepository);
 
     assertDoesNotThrow(() -> {
       User user = new User();

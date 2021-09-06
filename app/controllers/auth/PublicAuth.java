@@ -9,10 +9,11 @@ import play.i18n.MessagesApi;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import repositories.UsersRepository;
 
 import javax.inject.Inject;
-import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -32,6 +33,8 @@ public final class PublicAuth extends Controller {
   private final BriventoryDB briventoryDB;
   /** The injected {@link SessionHelper} instance. */
   private final SessionHelper sessionHelper;
+  /** The injected {@link UsersRepository} instance. */
+  private final UsersRepository usersRepository;
 
   // *******************************************************************************************************************
   // Injected Templates
@@ -49,23 +52,25 @@ public final class PublicAuth extends Controller {
   /**
    * Creates a new {@link PublicAuth} controller by injecting the parameters.
    *
-   * @param messagesApi the {@link MessagesApi}.
-   * @param formFactory the {@link FormFactory}.
-   * @param briventoryDB the {@link BriventoryDB}.
-   * @param sessionHelper the {@link SessionHelper}.
+   * @param messagesApi the {@link MessagesApi} instance.
+   * @param formFactory the {@link FormFactory} instance.
+   * @param briventoryDB the {@link BriventoryDB} instance.
+   * @param sessionHelper the {@link SessionHelper} instance.
    * @param signIn the {@link views.html.auth.signIn} template.
    * @param adminSignUp the {@link views.html.auth.adminSignUp} template.
+   * @param usersRepository the {@link UsersRepository} instance.
    */
   @Inject
   public PublicAuth(final MessagesApi messagesApi, final FormFactory formFactory, final BriventoryDB briventoryDB,
                     final SessionHelper sessionHelper, final views.html.auth.signIn signIn,
-                    final views.html.auth.adminSignUp adminSignUp) {
+                    final views.html.auth.adminSignUp adminSignUp, final UsersRepository usersRepository) {
     this.messagesApi = messagesApi;
     this.formFactory = formFactory;
     this.briventoryDB = briventoryDB;
     this.sessionHelper = sessionHelper;
     this.signIn = signIn;
     this.adminSignUp = adminSignUp;
+    this.usersRepository = usersRepository;
   }
 
   // *******************************************************************************************************************
@@ -107,43 +112,35 @@ public final class PublicAuth extends Controller {
    */
   public CompletionStage<Result> doSignIn(final Http.Request request) {
 
-    return briventoryDB.query(session -> {
-      Form<SignInForm> form = formFactory.form(SignInForm.class).bindFromRequest(request);
-      if (form.hasErrors())
-        return badRequest(signIn.render(form,
-                                        messagesApi.preferred(request),
-                                        request));
+    Form<SignInForm> form = formFactory.form(SignInForm.class).bindFromRequest(request);
+    if (form.hasErrors()) {
+      return CompletableFuture.completedStage(badRequest(signIn.render(form, messagesApi.preferred(request), request)));
+    }
 
-      List<User> users = User.findByEmail(session, form.get().getEmail());
+    Optional<User> user = usersRepository.findByEmail(form.get().getEmail());
 
-      if (users.size() > 1) {
-        // TODO Send mail to maintainer if > 1, duplicates e-mail should never happen
-        return badRequest(signIn.render(form.withGlobalError("auth.signin.error"),
-                                        messagesApi.preferred(request),
-                                        request));
-      }
+    if (user.isEmpty()) {
+      return CompletableFuture.completedStage(
+          badRequest(signIn.render(form.withGlobalError("auth.signin.error.badcredentials"),
+                                   messagesApi.preferred(request),
+                                   request)));
+    }
 
-      if (users.isEmpty()) {
-        return badRequest(signIn.render(form.withGlobalError("auth.signin.error.badcredentials"),
-                                        messagesApi.preferred(request),
-                                        request));
-      }
+    final boolean passVerified = BCrypt.verifyer().verify(form.get().getPassword().getBytes(),
+                                                          user.get().getPassword().getBytes()).verified;
 
-      final boolean passVerified = BCrypt.verifyer().verify(form.get().getPassword().getBytes(),
-                                                            users.get(0).getPassword().getBytes()).verified;
+    if (!passVerified) {
+      return CompletableFuture.completedStage(
+          badRequest(signIn.render(form.withGlobalError("auth.signin.error.badcredentials"),
+                                   messagesApi.preferred(request),
+                                   request)));
+    }
 
-      if (!passVerified) {
-        return badRequest(signIn.render(form.withGlobalError("auth.signin.error.badcredentials"),
-                                        messagesApi.preferred(request),
-                                        request));
-      }
-
-      final String redirectUrl = form.get().getRedirectUrl();
-      final Result result = redirectUrl == null || redirectUrl.isBlank() ?
-          redirect(controllers.routes.GlobalController.index()) :
-          redirect(redirectUrl);
-      return result.withSession(sessionHelper.withUser(users.get(0), request));
-    });
+    final String redirectUrl = form.get().getRedirectUrl();
+    final Result result = redirectUrl == null || redirectUrl.isBlank() ?
+        redirect(controllers.routes.GlobalController.index()) :
+        redirect(redirectUrl);
+    return CompletableFuture.completedStage(result.withSession(sessionHelper.withUser(user.get(), request)));
   }
 
   // *******************************************************************************************************************

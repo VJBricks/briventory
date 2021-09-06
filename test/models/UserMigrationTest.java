@@ -4,7 +4,6 @@ import junit5.J5WithApplication;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import repositories.AdministratorsRepository;
 import repositories.UsersRepository;
 
 import java.util.LinkedList;
@@ -21,7 +20,6 @@ class UserMigrationTest extends J5WithApplication {
   private static final String HARLEY_NAME = "Harley Quinn";
   private static final String HARLEY_PASS = "hquinn685";
 
-  private AdministratorsRepository administratorsRepository;
   private UsersRepository usersRepository;
 
   private final LinkedList<Long> ids = new LinkedList<>();
@@ -29,8 +27,6 @@ class UserMigrationTest extends J5WithApplication {
   @BeforeEach
   public void setUp() {
     assertDoesNotThrow(() -> {
-      administratorsRepository = getApp().injector().instanceOf(AdministratorsRepository.class);
-      assertNotNull(administratorsRepository);
       usersRepository = getApp().injector().instanceOf(UsersRepository.class);
       assertNotNull(usersRepository);
       ids.clear();
@@ -50,7 +46,6 @@ class UserMigrationTest extends J5WithApplication {
   @Test
   void migrateUserToAdmin() {
     assertNotNull(usersRepository);
-    assertNotNull(administratorsRepository);
 
     User user = new User();
     user.setName(HARLEY_NAME);
@@ -69,7 +64,6 @@ class UserMigrationTest extends J5WithApplication {
 
   @Test
   void migrateAdminToUser() {
-    assertNotNull(administratorsRepository);
     assertNotNull(usersRepository);
 
     User user = new User();

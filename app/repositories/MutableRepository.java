@@ -43,6 +43,25 @@ public abstract class MutableRepository<E> extends ImmutableRepository<E> {
   }
 
   /**
+   * Persists the entity into the database (save or update).
+   *
+   * @param entity the entity to persist.
+   */
+  protected final void merge(final E entity) {
+    try {
+      getBriventoryDB().persist(session -> {
+        if (!shallPersist(session, entity))
+          throw new BriventoryDBException(String.format("Merge of entity %s is not allowed", entity));
+        session.merge(entity);
+        session.flush();
+        return entity;
+      }).join();
+    } catch (CompletionException e) {
+      throw new BriventoryDBException(String.format("Merge of entity %s failed", entity), e.getCause());
+    }
+  }
+
+  /**
    * Shall the given entity be persisted ? By default, this method returns {@code true}. The {@link Session} can be used
    * to perform checks in the database.
    * <p>If the entity cannot be persisted, a {@link BriventoryDBException} will be thrown during the persistence
@@ -53,9 +72,7 @@ public abstract class MutableRepository<E> extends ImmutableRepository<E> {
    *
    * @return {@code true} if the deletion succeeded, otherwise {@code false}.
    */
-  protected boolean shallPersist(final Session session, final E entity) {
-    return true;
-  }
+  protected boolean shallPersist(final Session session, final E entity) { return true; }
 
   /**
    * Deletes the entity from the database.
@@ -88,8 +105,8 @@ public abstract class MutableRepository<E> extends ImmutableRepository<E> {
           if (!shallDelete(session, entity))
             throw new BriventoryDBException(String.format("Removal of entity %s is not allowed", entity));
           session.remove(session.contains(entity) ? entity : session.merge(entity));
-          session.flush();
         }
+        session.flush();
         return null;
       }).join();
     } catch (CompletionException e) {
@@ -108,8 +125,6 @@ public abstract class MutableRepository<E> extends ImmutableRepository<E> {
    *
    * @return {@code true} if the deletion succeeded, otherwise {@code false}.
    */
-  protected boolean shallDelete(final Session session, final E entity) {
-    return true;
-  }
+  protected boolean shallDelete(final Session session, final E entity) { return true; }
 
 }

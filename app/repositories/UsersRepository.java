@@ -3,6 +3,7 @@ package repositories;
 import database.BriventoryDB;
 import models.User;
 import org.hibernate.CacheMode;
+import org.hibernate.Session;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,22 +16,47 @@ import static database.BriventoryDB.CACHE_REGION;
 public final class UsersRepository extends MutableRepository<User> {
 
   // *******************************************************************************************************************
-  // Injected Attributes
-  // *******************************************************************************************************************
-  /** The injected {@link LockedUserRepository} instance. */
-  private final LockedUserRepository lockedUserRepository;
-  /** The injected {@link AdministratorsRepository} instance. */
-  private final AdministratorsRepository administratorsRepository;
-
-  // *******************************************************************************************************************
   // Construction & Initialization
   // *******************************************************************************************************************
   @Inject
-  private UsersRepository(final BriventoryDB briventoryDB, final LockedUserRepository lockedUserRepository,
-                          final AdministratorsRepository administratorsRepository) {
+  private UsersRepository(final BriventoryDB briventoryDB) {
     super(briventoryDB);
-    this.lockedUserRepository = lockedUserRepository;
-    this.administratorsRepository = administratorsRepository;
+  }
+
+  // *******************************************************************************************************************
+  // MutableRepository Overrides
+  // *******************************************************************************************************************
+
+  /**
+   * Shall the given entity be persisted ? By default, this method returns {@code true}. The {@link Session} can be used
+   * to perform checks in the database.
+   * <p>If the entity cannot be persisted, a {@link database.BriventoryDBException} will be thrown during the
+   * persistence process.</p>
+   *
+   * @param session the {@link Session}.
+   * @param user the {@link User} to persist (insert or update).
+   *
+   * @return {@code true} if the deletion succeeded, otherwise {@code false}.
+   */
+  @Override
+  protected boolean shallPersist(final Session session, final User user) {
+    return hasActiveAdministrator(session, user);
+  }
+
+  /**
+   * Shall the given entity be deleted ? By default, this method returns {@code true}. The {@link Session} can be used
+   * to perform checks in the database.
+   * <p>If the entity cannot be deleted, a {@link database.BriventoryDBException} will be thrown during the deletion
+   * process.</p>
+   *
+   * @param session the {@link Session}.
+   * @param user the {@link User} to delete.
+   *
+   * @return {@code true} if the deletion succeeded, otherwise {@code false}.
+   */
+  @Override
+  protected boolean shallDelete(final Session session, final User user) {
+    return hasActiveAdministrator(session, user);
   }
 
   // *******************************************************************************************************************
@@ -38,20 +64,20 @@ public final class UsersRepository extends MutableRepository<User> {
   // *******************************************************************************************************************
   public void lock(final User user) {
     user.lock();
-    persist(user);
+    merge(user);
   }
 
   public void unlock(final User user) {
     if (user.isLocked()) {
-      lockedUserRepository.delete(user.getLockedUser());
       user.unlock();
+      merge(user);
     }
   }
 
   public List<User> getLockedUsers() {
     return getBriventoryDB().query(session -> session.createQuery("select u " +
                                                                   "from User u " +
-                                                                  "inner join LockedUser lu on u.id = lu.idUser",
+                                                                  "   inner join LockedUser lu on u.id = lu.id",
                                                                   User.class)
                                                      .setCacheMode(CacheMode.NORMAL)
                                                      .setCacheRegion(CACHE_REGION)
@@ -64,20 +90,32 @@ public final class UsersRepository extends MutableRepository<User> {
   // Administrator Matter
   // *******************************************************************************************************************
 
+  private static boolean hasActiveAdministrator(final Session session, final User concernedUser) {
+    if (concernedUser.getId() == null) return true;
+    final String query =
+        "select count(a) " +
+        "from User u" +
+        "   inner join Administrator a on u.id = a.id " +
+        "   left join LockedUser lu on u.id = lu.id " +
+        "where " +
+        "   u.id != :id and " +
+        "   lu.idUser is null";
+    final long count = session.createQuery(query, Long.class)
+                              .setParameter("id", concernedUser.getId())
+                              .setCacheable(false)
+                              .getSingleResult();
+    return count > 0;
+  }
+
   public void setAdministrator(final User user, final boolean isAdministrator) {
-    if (isAdministrator) {
-      user.setAdministrator(isAdministrator);
-      persist(user);
-    } else {
-      administratorsRepository.delete(user.getAdministrator());
-      user.setAdministrator(isAdministrator);
-    }
+    user.setAdministrator(isAdministrator);
+    merge(user);
   }
 
   public List<User> getAdministrators() {
     return getBriventoryDB().query(session -> session.createQuery("select u " +
                                                                   "from User u " +
-                                                                  "inner join Administrator a on u.id = a.id",
+                                                                  "   inner join Administrator a on u.id = a.id",
                                                                   User.class)
                                                      .setCacheMode(CacheMode.NORMAL)
                                                      .setCacheRegion(CACHE_REGION)
@@ -86,13 +124,34 @@ public final class UsersRepository extends MutableRepository<User> {
     ).join();
   }
 
+  /** @return {@code true} if the database contains at least one non-locked administrator, otherwise {@code false}. */
+  public boolean hasActiveAdministrator() {
+    return getBriventoryDB().query(session -> {
+      final String query =
+          "select count(a) " +
+          "from Administrator a " +
+          "   left join LockedUser lu on a.id = lu.id " +
+          "where lu.idUser is null";
+      final long count = session.createQuery(query, Long.class)
+                                .setCacheable(true)
+                                .setCacheRegion(CACHE_REGION)
+                                .getSingleResult();
+      return count > 0;
+    }).join();
+  }
+
+  // *******************************************************************************************************************
+  // Data Retrieval
+  // *******************************************************************************************************************
+
   /** @return all {@link User}s in the database. */
   public List<User> getAll() {
     return getBriventoryDB().query(session -> session.createQuery("select u from User u", User.class)
                                                      .setCacheMode(CacheMode.NORMAL)
                                                      .setCacheRegion(CACHE_REGION)
                                                      .setCacheable(true)
-                                                     .getResultList()).join();
+                                                     .getResultList())
+                            .join();
   }
 
   /**
@@ -122,14 +181,14 @@ public final class UsersRepository extends MutableRepository<User> {
    * @return a list of {@link User} instance.
    */
   public Optional<User> findByEmail(final String email) {
-    return getBriventoryDB()
-        .query(
-            session -> session.createQuery("select u from User u where u.email = :email", User.class)
-                              .setParameter("email", email)
-                              .setCacheMode(CacheMode.NORMAL)
-                              .setCacheRegion(CACHE_REGION)
-                              .setCacheable(true)
-                              .uniqueResultOptional()).join();
+    return getBriventoryDB().query(session ->
+                                       session.createQuery("select u from User u where u.email = :email", User.class)
+                                              .setParameter("email", email)
+                                              .setCacheMode(CacheMode.NORMAL)
+                                              .setCacheRegion(CACHE_REGION)
+                                              .setCacheable(true)
+                                              .uniqueResultOptional())
+                            .join();
   }
 
 }

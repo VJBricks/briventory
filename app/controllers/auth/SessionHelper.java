@@ -1,8 +1,8 @@
 package controllers.auth;
 
-import database.BriventoryDB;
 import models.User;
 import play.mvc.Http;
+import repositories.UsersRepository;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,16 +15,18 @@ public final class SessionHelper {
   /** The key into the {@link Http.Session} corresponding to the id of the user. */
   private static final String USER_ID_KEY = "iduser";
 
-  /** The injected {@link BriventoryDB} instance. */
-  private final BriventoryDB briventoryDB;
+  /** The injected {@link UsersRepository} instance. */
+  private final UsersRepository usersRepository;
 
   /**
    * Creates a new instance of {@link SessionHelper} by injecting the necessary parameters.
    *
-   * @param briventoryDB the {@link BriventoryDB}.
+   * @param usersRepository the {@link UsersRepository} instance.
    */
   @Inject
-  private SessionHelper(final BriventoryDB briventoryDB) { this.briventoryDB = briventoryDB; }
+  private SessionHelper(final UsersRepository usersRepository) {
+    this.usersRepository = usersRepository;
+  }
 
   /**
    * Adds the {@link User} id into the session.
@@ -52,8 +54,7 @@ public final class SessionHelper {
 
     try {
       final var userId = Long.parseLong(userIdValue.get());
-      final var user = briventoryDB.query(session -> User.findFromId(session, userId)).join();
-      return Optional.of(user);
+      return usersRepository.findById(userId);
     } catch (Exception e) {
       return Optional.empty();
     }
@@ -73,10 +74,8 @@ public final class SessionHelper {
 
     try {
       final var userId = Long.parseLong(userIdValue.get());
-      final var user = briventoryDB.query(
-          session -> User.findFromId(session, userId)
-      ).join();
-      return Optional.of(user.getEmail());
+      final Optional<User> user = usersRepository.findById(userId);
+      return user.map(User::getEmail);
     } catch (Exception e) {
       return Optional.empty();
     }

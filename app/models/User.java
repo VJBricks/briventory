@@ -2,8 +2,6 @@ package models;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import database.Constraints;
-import org.hibernate.CacheMode;
-import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.validator.constraints.Length;
 
@@ -21,7 +19,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import java.util.List;
 import java.util.Objects;
 
 import static database.BriventoryDB.CACHE_REGION;
@@ -234,53 +231,6 @@ public class User {
   /** @return the {@link Administrator} instance or {@code null} if this user is not an administrator. */
   public Administrator getAdministrator() {
     return administrator;
-  }
-
-  // *******************************************************************************************************************
-  // Data Retrieval
-  // *******************************************************************************************************************
-
-  /**
-   * Retrieves the {@link User} holding the id given.
-   *
-   * @param session the Hibernate {@link Session}.
-   * @param id the id.
-   *
-   * @return the {@link User} instance or {@code null}.
-   */
-  public static User findFromId(final Session session, final long id) {
-    return session.createQuery("select u from User u where u.id = :id", User.class)
-                  .setParameter("id", id)
-                  .setCacheMode(CacheMode.NORMAL)
-                  .setCacheRegion(CACHE_REGION)
-                  .setCacheable(true)
-                  .getSingleResult();
-  }
-
-  /**
-   * Retrieves all {@link User}s using the e-mail address given. Normally, e-mail addresses are unique, so a singleton
-   * list or an empty one should be returned by this method.
-   *
-   * @param session the Hibernate {@link Session}.
-   * @param email the e-mail address.
-   *
-   * @return a list of {@link User} instance.
-   */
-  public static List<User> findByEmail(final Session session, final String email) {
-    return session.createQuery("select u from User u where u.email = :email", User.class)
-                  .setParameter("email", email)
-                  .setCacheMode(CacheMode.NORMAL)
-                  .setCacheRegion(CACHE_REGION)
-                  .setCacheable(true)
-                  .getResultList();
-  }
-
-  public static List<User> getAll(final Session session) {
-    return session.createQuery("select u from User u", User.class)
-                  .setCacheMode(CacheMode.NORMAL)
-                  .setCacheRegion(CACHE_REGION)
-                  .setCacheable(true)
-                  .getResultList();
   }
 
 }

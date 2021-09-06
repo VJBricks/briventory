@@ -1,6 +1,5 @@
 package controllers;
 
-import database.BriventoryDB;
 import play.i18n.MessagesApi;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -17,8 +16,6 @@ public final class ErrorsController extends Controller {
 
   /** The injected {@link MessagesApi} instance. */
   private final MessagesApi messagesApi;
-  /** The injected {@link BriventoryDB} instance. */
-  private final BriventoryDB briventoryDB;
 
   // *******************************************************************************************************************
   // Injected Templates
@@ -39,18 +36,15 @@ public final class ErrorsController extends Controller {
    * Creates a new instance of {@link GlobalController} by injecting the necessary parameters.
    *
    * @param messagesApi the {@link MessagesApi} instance.
-   * @param briventoryDB the {@link BriventoryDB} instance.
    * @param badRequestTemplate the {@link views.html.errors.badRequest} template.
    * @param forbiddenTemplate the {@link views.html.errors.forbidden} template.
    * @param notFoundTemplate the {@link views.html.errors.notFound} template.
    */
   @Inject
-  public ErrorsController(final MessagesApi messagesApi, final BriventoryDB briventoryDB,
-                          final views.html.errors.badRequest badRequestTemplate,
+  public ErrorsController(final MessagesApi messagesApi, final views.html.errors.badRequest badRequestTemplate,
                           final views.html.errors.forbidden forbiddenTemplate,
                           final views.html.errors.notFound notFoundTemplate) {
     this.messagesApi = messagesApi;
-    this.briventoryDB = briventoryDB;
     this.badRequestTemplate = badRequestTemplate;
     this.forbiddenTemplate = forbiddenTemplate;
     this.notFoundTemplate = notFoundTemplate;
@@ -68,8 +62,7 @@ public final class ErrorsController extends Controller {
    * @return the {@link views.html.errors.badRequest} page.
    */
   public Result badRequest(final Http.Request request) {
-    return Results.status(Http.Status.BAD_REQUEST,
-                          badRequestTemplate.render(request, messagesApi.preferred(request)));
+    return Results.status(Http.Status.BAD_REQUEST, badRequestTemplate.render(request, messagesApi.preferred(request)));
   }
 
   /**
@@ -80,8 +73,7 @@ public final class ErrorsController extends Controller {
    * @return the {@link views.html.errors.forbidden} page.
    */
   public Result forbidden(final Http.Request request) {
-    return Results.status(Http.Status.FORBIDDEN,
-                          forbiddenTemplate.render(request, messagesApi.preferred(request)));
+    return Results.status(Http.Status.FORBIDDEN, forbiddenTemplate.render(request, messagesApi.preferred(request)));
   }
 
   /**
@@ -92,8 +84,7 @@ public final class ErrorsController extends Controller {
    * @return the {@link views.html.errors.notFound} page.
    */
   public Result notFound(final Http.Request request) {
-    return Results.status(Http.Status.NOT_FOUND,
-                          notFoundTemplate.render(request, messagesApi.preferred(request)));
+    return Results.status(Http.Status.NOT_FOUND, notFoundTemplate.render(request, messagesApi.preferred(request)));
   }
 
 }
