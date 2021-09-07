@@ -40,7 +40,7 @@ libraryDependencies += guice
 libraryDependencies ++= Seq(
   javaJdbc,
   javaJpa,
-  "org.hibernate" % "hibernate-core" % "5.5.6",
+  "org.hibernate" % "hibernate-core" % "5.5.7.Final",
 
   /* Both dependencies below are necessary to have validator working. */
   "org.glassfish" % "javax.el" % "3.0.1-b12",
@@ -49,7 +49,7 @@ libraryDependencies ++= Seq(
 
   /*"javax.cache" % "cache-api" % "1.1.1",*/
   "org.hibernate" % "hibernate-jcache" % "5.5.5.Final",
-  "org.ehcache" % "ehcache" % "3.9.5",
+  "org.ehcache" % "ehcache" % "3.9.6",
   "io.dropwizard.metrics" % "metrics-core" % "4.2.3"
 )
 
@@ -71,7 +71,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "jquery-ui" % "1.12.1",
   "org.webjars" % "popper.js" % "2.9.3",
   "org.webjars" % "bootstrap" % "5.1.0",
-  "org.webjars" % "font-awesome" % "5.15.3",
+  "org.webjars" % "font-awesome" % "5.15.4",
   "org.webjars.bowergithub.dropbox" % "zxcvbn" % "4.4.2"
 )
 
