@@ -7,7 +7,6 @@ import org.hibernate.event.spi.PreDeleteEventListener;
 import play.Logger;
 
 import javax.persistence.Cacheable;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -39,7 +38,7 @@ public final class Administrator implements PreDeleteEventListener {
 
   /** The corresponding {@link User} instance. */
   @MapsId
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "iduser")
   private User user;
 
