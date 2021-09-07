@@ -29,7 +29,7 @@ public final class LockedUser {
 
   /** The corresponding {@link User} instance. */
   @MapsId
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "iduser")
   private User user;
 

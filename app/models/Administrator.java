@@ -39,7 +39,7 @@ public final class Administrator implements PreDeleteEventListener {
 
   /** The corresponding {@link User} instance. */
   @MapsId
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "iduser")
   private User user;
 
