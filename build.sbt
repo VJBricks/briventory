@@ -1,8 +1,10 @@
+import scala.util.{Failure, Try}
+
 name := """Briventory"""
 maintainer := "briventory@varani.ch"
 
 // Common Settings
-scalaVersion := "2.13.6"
+scalaVersion := "2.13.8"
 
 organization := "ch.varani"
 version := "1.0.0-SNAPSHOT"
@@ -14,7 +16,7 @@ Compile / packageDoc / publishArtifact := false
 // Treat warning as error
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings")
 javacOptions ++= Seq("-Xlint:all", "-Xlint:-processing", "-Werror")
-javaOptions ++= Seq("--illegal-access=warn")
+javaOptions ++= Seq("--illegal-access=permit")
 
 // Include public assets during tests
 Test / unmanagedResourceDirectories += baseDirectory(_ / "target/web/public/test").value
@@ -30,35 +32,39 @@ checkstyleSeverityLevel := Some(CheckstyleSeverityLevel.Error)
 lazy val root = project.in(file(".")).enablePlugins(PlayJava, BuildInfoPlugin).settings(
   buildInfoKeys := Seq[BuildInfoKey](name, version),
   buildInfoObject := "BriventoryBuildInfo",
-  buildInfoPackage := "ch.varani.briventory"
+  buildInfoPackage := "utils"
 )
-
-// Dependency Injection
-libraryDependencies += guice
 
 // JPA Dependencies
 libraryDependencies ++= Seq(
   javaJdbc,
-  javaJpa,
-  "org.hibernate" % "hibernate-core" % "5.5.7.Final",
+
+  guice,
+  "com.google.inject" % "guice" % "5.0.1",
+
+  "javax.validation" % "validation-api" % "2.0.1.Final",
+  "jakarta.persistence" % "jakarta.persistence-api" % "3.0.0",
+  "jakarta.validation" % "jakarta.validation-api" % "3.0.1",
+  "org.jooq" % "jooq" % "3.16.2",
+  "org.jooq" % "jooq-codegen" % "3.16.2",
+  "org.jooq" % "jooq-meta" % "3.16.2",
 
   /* Both dependencies below are necessary to have validator working. */
   "org.glassfish" % "javax.el" % "3.0.1-b12",
-/*"org.hibernate" % "hibernate-validator" % "7.0.1.Final",*/
-  "javax.validation" % "validation-api" % "2.0.1.Final",
 
   /*"javax.cache" % "cache-api" % "1.1.1",*/
-  "org.hibernate" % "hibernate-jcache" % "5.5.5.Final",
-  "org.ehcache" % "ehcache" % "3.9.6",
-  "io.dropwizard.metrics" % "metrics-core" % "4.2.3"
+  "org.ehcache" % "ehcache" % "3.9.9",
+  "io.dropwizard.metrics" % "metrics-core" % "4.2.7"
 )
 
 // Libraries
 libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-text" % "1.9",
   "commons-validator" % "commons-validator" % "1.7",
-  "org.postgresql" % "postgresql" % "42.2.23",
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.3",
+  "org.postgresql" % "postgresql" % "42.3.1",
+  "org.hsqldb" % "hsqldb" % "2.6.1",
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.12.5",
+  "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.13.1",
   "org.semver" % "api" % "0.9.33",
   "me.gosimple" % "nbvcxz" % "1.5.0",
   "at.favre.lib" % "bcrypt" % "0.9.0"
@@ -68,9 +74,9 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= Seq(
   "org.webjars" %% "webjars-play" % "2.8.8",
   "org.webjars" % "jquery" % "3.6.0",
-  "org.webjars" % "jquery-ui" % "1.12.1",
+  "org.webjars" % "jquery-ui" % "1.13.0",
   "org.webjars" % "popper.js" % "2.9.3",
-  "org.webjars" % "bootstrap" % "5.1.0",
+  "org.webjars" % "bootstrap" % "5.1.3",
   "org.webjars" % "font-awesome" % "5.15.4",
   "org.webjars.bowergithub.dropbox" % "zxcvbn" % "4.4.2"
 )
@@ -78,13 +84,13 @@ libraryDependencies ++= Seq(
 // Tests libraries
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++= Seq(
-  "org.assertj" % "assertj-core" % "3.20.2" % Test,
-  "org.awaitility" % "awaitility" % "4.1.0" % Test,
+  "org.assertj" % "assertj-core" % "3.22.0" % Test,
+  "org.awaitility" % "awaitility" % "4.1.1" % Test,
   "net.aichler" % "jupiter-interface" % JupiterKeys.jupiterVersion.value % Test,
-  "org.junit.jupiter" % "junit-jupiter-api" % "5.7.2" % Test,
-  "org.junit.jupiter" % "junit-jupiter-engine" % "5.7.2" % Test,
-  "org.junit.jupiter" % "junit-jupiter-params" % "5.7.2" % Test,
-  "org.junit.platform" % "junit-platform-runner" % "1.7.2" % Test
+  "org.junit.jupiter" % "junit-jupiter-api" % "5.8.2" % Test,
+  "org.junit.jupiter" % "junit-jupiter-engine" % "5.8.2" % Test,
+  "org.junit.jupiter" % "junit-jupiter-params" % "5.8.2" % Test,
+  "org.junit.platform" % "junit-platform-runner" % "1.8.2" % Test
 )
 
 // Dependencies Check Directives
@@ -96,7 +102,7 @@ dependencyUpdatesFilter -= moduleFilter(organization = "com.fasterxml.jackson.co
 sonarProperties ++= Map(
   "sonar.projectName" -> System.getenv("CI_PROJECT_NAME"),
   "sonar.host.url" -> System.getenv("SONAR_HOST"),
-  "sonar.java.source" -> "11",
+  "sonar.java.source" -> "17",
   "sonar.java.binaries" -> "./target/scala-2.13/classes",
   "sonar.java.test.binaries" -> "./target/scala-2.13/test-classes",
   "sonar.login" -> System.getenv("SONAR_TOKEN"),
@@ -110,3 +116,29 @@ sonarProperties ++= Map(
 )
 
 addCommandAlias("pipeline", ";clean;dependencyUpdates;checkstyle;compile;test;jacoco")
+
+val jooqDynamicCodegen = Def.taskDyn {
+  val jooqFiles = ((sourceManaged.value / "main/jooq") ** "*.java").get
+  if (jooqFiles.isEmpty)
+    Def.task {
+      val classpath = (Compile / managedClasspath).value.files
+      val options = Seq("briventory.xml")
+      val result = runner.value.run("org.jooq.codegen.GenerationTool", classpath, options, streams.value.log)
+      result match {
+        case Failure(e) => sys.error(e.getMessage)
+        case _ => None
+      }
+      ((sourceManaged.value / "main/jooq") ** "*.java").get
+    }
+  else
+    Def.task {
+      jooqFiles
+    }
+}
+
+lazy val jooqCodegen = taskKey[Seq[File]]("JOOQ Code Generation")
+jooqCodegen := {
+  jooqDynamicCodegen.value
+}
+
+// Compile / sourceGenerators += jooqCodegen

@@ -1,3 +1,7 @@
+cache:
+  paths:
+    - .m2/repository
+
 stages:
   - dependencies
   - style
@@ -7,27 +11,27 @@ stages:
 dependencies:
   stage: dependencies
   tags:
-    - sbt-jdk11
+    - sbt-java17
   script:
     - sbt dependencyUpdates
 
 checkstyle_check:
   stage: style
   tags:
-    - sbt-jdk11
+    - sbt-java17
   script:
     - sbt checkstyle
 
 build:
   stage: build
   tags:
-    - sbt-jdk11
+    - sbt-java17
   script:
     - sbt clean compile
 
 test:
   stage: test
   tags:
-    - sbt-jdk11
+    - sbt-java17
   script:
     - sbt jacoco

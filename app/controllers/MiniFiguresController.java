@@ -1,8 +1,8 @@
 package controllers;
 
-import controllers.auth.Secured;
 import controllers.auth.SessionHelper;
-import models.User;
+import controllers.auth.SignedInAuthenticator;
+import models.Account;
 import play.i18n.MessagesApi;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -13,7 +13,7 @@ import javax.inject.Inject;
 import java.util.Optional;
 
 /** This controller handle all actions related to the Mini Figures. */
-@Security.Authenticated(Secured.class)
+@Security.Authenticated(SignedInAuthenticator.class)
 public final class MiniFiguresController extends Controller {
 
   /** The injected {@link MessagesApi} instance. */
@@ -47,9 +47,9 @@ public final class MiniFiguresController extends Controller {
    * @return the {@link Result} ecapsulating the {@link views.html.minifigures.index} page.
    */
   public Result index(final Http.Request request) {
-    final Optional<User> user = sessionHelper.retrieveUser(request);
-    if (user.isPresent())
-      return ok(index.render(user.get(), messagesApi.preferred(request)));
+    final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
+    if (optionalAccount.isPresent())
+      return ok(index.render(optionalAccount.get(), messagesApi.preferred(request)));
     return badRequest();
   }
 

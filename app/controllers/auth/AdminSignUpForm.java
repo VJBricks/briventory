@@ -1,8 +1,7 @@
 package controllers.auth;
 
-import controllers.forms.ValidatableWithDB;
-import controllers.forms.ValidateWithDB;
-import database.BriventoryDB;
+import controllers.forms.ValidatableWithAccountsRepository;
+import controllers.forms.ValidateWithAccountsRepository;
 import database.Constraints;
 import me.gosimple.nbvcxz.Nbvcxz;
 import me.gosimple.nbvcxz.resources.ConfigurationBuilder;
@@ -13,18 +12,24 @@ import play.data.validation.Constraints.MaxLength;
 import play.data.validation.Constraints.MinLength;
 import play.data.validation.Constraints.Required;
 import play.data.validation.ValidationError;
+import repositories.AccountsRepository;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-@ValidateWithDB
-public final class AdminSignUpForm implements ValidatableWithDB<List<ValidationError>> {
+@ValidateWithAccountsRepository
+public final class AdminSignUpForm implements ValidatableWithAccountsRepository<List<ValidationError>> {
 
-  /** The name. */
+  /** The first name. */
   @Required
   @MaxLength(Constraints.NAME_DOMAIN_LENGTH)
-  private String name;
+  private String firstname;
+
+  /** The last name. */
+  @Required
+  @MaxLength(Constraints.NAME_DOMAIN_LENGTH)
+  private String lastname;
 
   /** The e-mail address. */
   @Required
@@ -41,16 +46,28 @@ public final class AdminSignUpForm implements ValidatableWithDB<List<ValidationE
   @Required
   private String passwordRepetition;
 
-  /** @return the name. */
-  public String getName() { return name; }
+  /** @return the first name. */
+  public String getFirstname() { return firstname; }
+
+  /** @return the last name. */
+  public String getLastname() { return lastname; }
 
   /**
-   * Sets the name.
+   * Sets the first name.
    *
-   * @param name the name.
+   * @param firstname the first name.
    */
-  public void setName(final String name) {
-    this.name = name;
+  public void setFirstname(final String firstname) {
+    this.firstname = firstname;
+  }
+
+  /**
+   * Sets the last name.
+   *
+   * @param lastname the last name.
+   */
+  public void setLastname(final String lastname) {
+    this.lastname = lastname;
   }
 
   /** @return the e-mail address. */
@@ -96,39 +113,31 @@ public final class AdminSignUpForm implements ValidatableWithDB<List<ValidationE
     dictionaryList.add(new DictionaryBuilder()
                            .setDictionaryName("exclude")
                            .setExclusion(true)
-                           .addWord(name, 0)
+                           .addWord(firstname, 0)
+                           .addWord(lastname, 0)
                            .addWord(email, 0)
                            .createDictionary());
 
     // Create our configuration object and set our custom minimum entropy, and custom dictionary list
-    final var minimumEntroy = 40d;
+    final var minimumEntry = 40d;
     var configuration = new ConfigurationBuilder()
-        .setMinimumEntropy(minimumEntroy)
+        .setMinimumEntropy(minimumEntry)
         .setDictionaries(dictionaryList)
         .createConfiguration();
 
     return new Nbvcxz(configuration);
   }
 
-  private boolean emailAlreadyExists(final BriventoryDB briventoryDB) {
-    final long count = briventoryDB.query(
-        session ->
-            session.createQuery("select count(u) from User u where lower(u.email) = lower(:email)", Long.class)
-                   .setParameter("email", email.trim())
-                   .getSingleResult()
-    ).join();
-
-    return count > 0;
-  }
-
   @Override
-  public List<ValidationError> validate(final BriventoryDB briventoryDB) {
+  public List<ValidationError> validate(final AccountsRepository accountsRepository) {
     LinkedList<ValidationError> l = new LinkedList<>();
-    if (name.isBlank())
-      l.add(new ValidationError("name", "error.required"));
+    if (firstname.isBlank())
+      l.add(new ValidationError("firstname", "error.required"));
+    if (lastname.isBlank())
+      l.add(new ValidationError("lastname", "error.required"));
     if (email.isBlank())
       l.add(new ValidationError("email", "error.required"));
-    if (emailAlreadyExists(briventoryDB))
+    if (accountsRepository.emailAlreadyExists(email))
       l.add(new ValidationError("email", "auth.signup.error.email.exist"));
     final var nbvcxz = nbvcxz();
     if (nbvcxz.estimate(password).getBasicScore() < Constraints.PASSWORD_MIN_STRENGTH)

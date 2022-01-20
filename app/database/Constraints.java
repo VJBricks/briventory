@@ -16,6 +16,9 @@ public final class Constraints {
   /** The minimal strength of new passwords. */
   public static final int PASSWORD_MIN_STRENGTH = 4;
 
+  /** The charactere length of the domain {@code dtoken}. */
+  public static final int TOKEN_DOMAIN_LENGTH = 64;
+
   /** The character length of the domain {@code durl}. */
   public static final int URL_DOMAIN_LENGTH = 4096;
 

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<configuration xmlns="http://www.jooq.org/xsd/jooq-codegen-3.7.0.xsd">
+    <jdbc>
+        <driver>org.postgresql.Driver</driver>
+        <url>jdbc:postgresql://localhost/briventory</url>
+        <user>briventory</user>
+        <password>briventory</password>
+    </jdbc>
+    <generator>
+        <name>org.jooq.codegen.JavaGenerator</name>
+        <database>
+            <name>org.jooq.meta.postgres.PostgresDatabase</name>
+            <inputSchema>public</inputSchema>
+            <includes>.*</includes>
+        </database>
+
+        <generate>
+            <pojos>false</pojos>
+            <routines>true</routines>
+            <domaines>true</domaines>
+            <fluentSetters>true</fluentSetters>
+
+            <generatedAnnotation>true</generatedAnnotation>
+            <generatedAnnotationType>DETECT_FROM_JDK</generatedAnnotationType>
+            <generatedAnnotationDate>true</generatedAnnotationDate>
+
+            <nullableAnnotation>true</nullableAnnotation>
+            <!--<nullableAnnotationType>javax.annotation.Nullable</nullableAnnotationType>-->
+            <nonnullAnnotation>true</nonnullAnnotation>
+            <!--<nonnullAnnotationType>javax.annotation.Nonnull</nonnullAnnotationType>-->
+
+            <generatedSerialVersionUID>HASH</generatedSerialVersionUID>
+
+            <jpaAnnotations>true</jpaAnnotations>
+            <jpaVersion>2.2</jpaVersion>
+
+            <validationAnnotations>true</validationAnnotations>
+
+            <constructorPropertiesAnnotation>true</constructorPropertiesAnnotation>
+            <constructorPropertiesAnnotationOnPojos>true</constructorPropertiesAnnotationOnPojos>
+            <constructorPropertiesAnnotationOnRecords>true</constructorPropertiesAnnotationOnRecords>
+        </generate>
+
+        <target>
+            <packageName>jooq</packageName>
+            <directory>app</directory>
+            <encoding>UTF-8</encoding>
+        </target>
+    </generator>
+</configuration>

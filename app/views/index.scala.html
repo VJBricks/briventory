@@ -1,6 +1,6 @@
 @this(signedin: templates.signedin)
-@(user: User)(implicit messages: play.i18n.Messages)
+@(account: Account)(implicit messages: play.i18n.Messages)
 
-@signedin(title = messages("briventory.title"), user) {
+@signedin(title = messages("briventory.title"), account) {
   <p>Welcome back on Briventory</p>
 }

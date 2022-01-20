@@ -1,0 +1,18 @@
+@(elements: helper.FieldElements)
+
+@if(elements.args.getOrElse(Symbol("type"), "").equals("hidden")) {
+  @elements.input
+} else {
+  <div class="mb-3 row @if(elements.hasErrors) {danger}">
+    <label class="form-label" for="@elements.id">@elements.label</label>
+    <div class="col-sm-8">
+      @elements.input
+      @if(elements.infos.nonEmpty) {
+        <p class="form-message text-dark">@elements.infos.mkString(", ")</p>
+      }
+      @if(elements.errors.nonEmpty) {
+        <p class="form-message text-danger">@elements.errors.mkString(", ")</p>
+      }
+    </div>
+  </div>
+}

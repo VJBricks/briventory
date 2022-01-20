@@ -1,80 +1,181 @@
 package database;
 
-import org.hibernate.Session;
-import play.db.jpa.JPAApi;
+import globalhandlers.ExceptionManager;
+import models.Entity;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SQLDialect;
+import org.jooq.Table;
+import org.jooq.UpdatableRecord;
+import org.jooq.impl.DSL;
+import play.db.Database;
 import play.libs.concurrent.HttpExecution;
+import repositories.DeletableEntityHandler;
+import repositories.Repository;
+import repositories.StorableEntityHandler;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
-import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
+/**
+ * {@code BriventoryDB} is the entry point to perform database manipulations. This class is intends to be used in a
+ * dependency injected environment.
+ */
 @Singleton
 public final class BriventoryDB {
 
-  /** The global cache region. */
-  public static final String CACHE_REGION = "briventoryCache";
-  /** The name of the persistence unit. */
-  private static final String PERSISTENCE_UNIT_NAME = "default";
-
-  /** The injected {@link JPAApi} instance. */
-  private final JPAApi jpaApi;
+  // *******************************************************************************************************************
+  // Attributes
+  // *******************************************************************************************************************
+  /** The injected {@link Database} instance. */
+  private final Database database;
   /** The {@link Executor} retrieved from the injected {@link BriventoryDBContext} instance. */
   private final Executor executor;
+  /** The injected {@link ExceptionManager} to handle exceptions. */
+  private final ExceptionManager exceptionManager;
+
+  // *******************************************************************************************************************
+  // Construction & Initialization
+  // *******************************************************************************************************************
 
   /**
    * Creates a new instance of {@link BriventoryDB} instance using the injected parameters.
    *
-   * @param jpaApi the {@link JPAApi} instance.
+   * @param database the {@link Database} instance.
    * @param context the {@link BriventoryDBContext} instance.
+   * @param exceptionManager the {@link ExceptionManager} instance.
    */
   @Inject
-  public BriventoryDB(final JPAApi jpaApi, final BriventoryDBContext context) {
-    this.jpaApi = jpaApi;
+  public BriventoryDB(final Database database, final BriventoryDBContext context,
+                      final ExceptionManager exceptionManager) {
+    this.database = database;
     executor = HttpExecution.fromThread((Executor) context);
+    this.exceptionManager = exceptionManager;
   }
 
   /**
-   * Executes a query in the Briventory database, using it's thread execution context.
+   * Executes a query in the Briventory database, using its thread execution context.
    *
-   * @param <R> the return type of the query.
    * @param function the {@link Function} that will execute the query.
+   * @param <R> the precise subtype of the {@link Record}.
    *
-   * @return the {@link CompletableFuture} created to use the Briventory database thread execution context.
+   * @return an instance of {@link R}.
    */
-  public <R> CompletableFuture<R> query(final Function<Session, R> function) {
-    return supplyAsync(() -> jpaApi.withTransaction(PERSISTENCE_UNIT_NAME, true, entityManager -> {
-      return function.apply(entityManager.unwrap(Session.class));
-    }), executor);
+  public <R> R query(final Function<DSLContext, R> function) {
+    try {
+      return supplyAsync(() -> database.withConnection(connection -> {
+        final var dslContext = DSL.using(connection, SQLDialect.POSTGRES);
+        return function.apply(dslContext);
+      }), executor).join();
+    } catch (Exception e) {
+      final BriventoryDBException briventoryDBException = new BriventoryDBException("Query failure", e);
+      exceptionManager.handleDatabaseException(briventoryDBException);
+      throw briventoryDBException;
+    }
   }
 
   /**
-   * Persists the objects into the database.
+   * Creates a new and empty {@link Record}, according the {@link Table} provided.
    *
-   * @param function the {@link Function} that will persist the objects.
-   * @param <R> the return type.
+   * @param table the {@link Table} to define the {@link Record} type.
+   * @param <R> the precise subtype of the {@link Record}.
    *
-   * @return the {@link CompletableFuture} created to use the Briventory database thread execution context.
+   * @return a new and empty {@link Record}.
    */
-  public <R> CompletableFuture<R> persist(final Function<Session, R> function) {
-    return supplyAsync(() -> jpaApi.withTransaction(PERSISTENCE_UNIT_NAME, false, entityManager -> {
-      var session = entityManager.unwrap(Session.class);
-      var result = function.apply(session);
-      session.flush();
-      return result;
-    }), executor);
+  public <R extends Record> R createRecord(final Table<R> table) {
+    try {
+      return database.withTransaction(connection -> {
+        final var dslContext = DSL.using(connection, SQLDialect.POSTGRES);
+        return dslContext.newRecord(table);
+      });
+    } catch (Exception e) {
+      final BriventoryDBException briventoryDBException = new BriventoryDBException("Query failure", e);
+      exceptionManager.handleDatabaseException(briventoryDBException);
+      throw briventoryDBException;
+    }
   }
 
-  public CompletableFuture<Void> remove(final Function<Session, Void> function) {
-    return runAsync(() -> jpaApi.withTransaction(PERSISTENCE_UNIT_NAME, false, entityManager -> {
-      var session = entityManager.unwrap(Session.class);
-      function.apply(session);
-      session.flush();
-    }));
+  /**
+   * Stores the {@link E} into the database.
+   *
+   * @param storableEntityHandler the {@link StorableEntityHandler} that will handle the storage process.
+   * @param entity the {@link E} to store.
+   * @param <E> the precise subtype of the {@link Entity}.
+   * @param <R> the precise subtype of the {@link Record}.
+   */
+  public <E extends Entity<? extends Repository>, R extends UpdatableRecord<R>> void store(
+      final StorableEntityHandler<E, R> storableEntityHandler,
+      final E entity) {
+    try {
+      supplyAsync(() -> database.withTransaction(connection -> {
+        final var dslContext = DSL.using(connection, SQLDialect.POSTGRES);
+        storableEntityHandler.store(dslContext, entity);
+        return null;
+      }), executor).join();
+    } catch (Exception e) {
+      final BriventoryDBException briventoryDBException =
+          new BriventoryDBException(String.format("The persistence of entity %s has failed", entity), e);
+      exceptionManager.handleDatabaseException(briventoryDBException);
+      throw briventoryDBException;
+    }
+  }
+
+  /**
+   * Deletes the {@link E} from the database.
+   *
+   * @param deletableEntityHandler the {@link DeletableEntityHandler} that will handle the deletion process.
+   * @param entity the {@link E} to delete.
+   * @param <E> the precise subtype of the {@link Entity}.
+   * @param <R> the precise subtype of the {@link Record}.
+   */
+  public <E extends Entity<? extends Repository>, R extends UpdatableRecord<R>> void delete(
+      final DeletableEntityHandler<E, R> deletableEntityHandler,
+      final E entity) {
+    try {
+      supplyAsync(() -> database.withTransaction(connection -> {
+        final var dslContext = DSL.using(connection, SQLDialect.POSTGRES);
+        deletableEntityHandler.delete(dslContext, entity);
+        return null;
+      }), executor).join();
+    } catch (Exception e) {
+      final BriventoryDBException briventoryDBException =
+          new BriventoryDBException(String.format("The deletion of entity %s has failed", entity), e);
+      exceptionManager.handleDatabaseException(briventoryDBException);
+      throw briventoryDBException;
+    }
+  }
+
+  /**
+   * Deletes a {@link List} of {@link E} instances from the database.
+   *
+   * @param deletableEntityHandler the {@link DeletableEntityHandler} that will handle the deletion process.
+   * @param entities the {@link List} of {@link E} instances to delete.
+   * @param <E> the precise subtype of the {@link Entity}.
+   * @param <R> the precise subtype of the {@link Record}.
+   */
+  public <E extends Entity<? extends Repository>, R extends UpdatableRecord<R>> void delete(
+      final DeletableEntityHandler<E, R> deletableEntityHandler,
+      final List<E> entities) {
+    try {
+      supplyAsync(() -> database.withTransaction(connection -> {
+        final var dslContext = DSL.using(connection, SQLDialect.POSTGRES);
+        for (E entity : entities)
+          deletableEntityHandler.delete(dslContext, entity);
+        return null;
+      }), executor).join();
+    } catch (Exception e) {
+      final BriventoryDBException briventoryDBException =
+          new BriventoryDBException(
+              String.format("The deletion of the list of the following entities has failed: %s", entities),
+              e);
+      exceptionManager.handleDatabaseException(briventoryDBException);
+      throw briventoryDBException;
+    }
   }
 
 }

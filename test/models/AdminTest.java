@@ -5,200 +5,254 @@ import junit5.J5WithApplication;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import repositories.UsersRepository;
+import repositories.AccountsRepository;
 
 import java.util.LinkedList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class AdminTest extends J5WithApplication {
 
-  private static final String JOKER_EMAIL = "joker@vilain.gc";
-  private static final String JOKER_NAME = "The Joker";
+  // *******************************************************************************************************************
+  // Test data
+  // *******************************************************************************************************************
+
+  private static final String BRUCE_EMAIL = "bruce.wayne@night.gotham.com";
+  private static final String BRUCE_FIRSTNAME = "Bruce";
+  private static final String BRUCE_LASTNAME = "Wayne";
+  private static final String BRUCE_PASS = "I am Batman !!";
+
+  private static final String JOKER_EMAIL = "joker@vilain.gotham.com";
+  private static final String JOKER_FIRSTNAME = "The";
+  private static final String JOKER_LASTNAME = "Joker";
   private static final String JOKER_PASS = "joker493";
 
-  private static final String KATHY_EMAIL = "kathy.kane@city.gc";
-  private static final String KATHY_NAME = "Kathy Kane";
+  private static final String KATHY_EMAIL = "kathy.kane@city.gotham.com";
+  private static final String KATHY_FIRSTNAME = "Kathy";
+  private static final String KATHY_LASTNAME = "Kane";
   private static final String KATHY_PASS = "kathy233";
 
-  private static final String BARBARA_EMAIL = "barbara.gordon@city.gc";
-  private static final String BARBARA_NAME = "Barbara Gordon";
+  private static final String BARBARA_EMAIL = "barbara.gordon@city.gotham.com";
+  private static final String BARBARA_FIRSTNAME = "Barbara";
+  private static final String BARBARA_LASTNAME = "Gordon";
   private static final String BARBARA_PASS = "barbara4";
 
-  private UsersRepository usersRepository;
+  // *******************************************************************************************************************
+  // Injected Attributes
+  // *******************************************************************************************************************
+  /** The injected {@link AccountsRepository} instance. */
+  private AccountsRepository accountsRepository;
 
+  // *******************************************************************************************************************
+  // Attributes
+  // *******************************************************************************************************************
   private final LinkedList<Long> ids = new LinkedList<>();
 
+  // *******************************************************************************************************************
+  // Global test methods.
+  // *******************************************************************************************************************
   @BeforeEach
   public void setUp() {
     assertDoesNotThrow(() -> {
-      usersRepository = getApp().injector().instanceOf(UsersRepository.class);
-      assertNotNull(usersRepository);
+      accountsRepository = getApp().injector().instanceOf(AccountsRepository.class);
+      assertNotNull(accountsRepository);
       ids.clear();
+
+      if (!accountsRepository.hasActiveAdministrator()) {
+        Account account = accountsRepository.buildInstance()
+                                            .setFirstname(BRUCE_FIRSTNAME)
+                                            .setLastname(BRUCE_LASTNAME)
+                                            .setEmail(BRUCE_EMAIL)
+                                            .setClearPassword(BRUCE_PASS)
+                                            .setAdministrator(true)
+                                            .setLocked(false);
+        accountsRepository.store(account);
+      }
     });
   }
 
   @AfterEach
   public void tearDown() {
     assertDoesNotThrow(() -> {
-      assertNotNull(usersRepository);
-      ids.forEach(id -> usersRepository.findById(id).ifPresent(usersRepository::delete));
-      usersRepository.findByEmail(KATHY_EMAIL).ifPresent(usersRepository::delete);
-      usersRepository.findByEmail(BARBARA_EMAIL).ifPresent(usersRepository::delete);
-      usersRepository.findByEmail(JOKER_EMAIL).ifPresent(usersRepository::delete);
+      assertNotNull(accountsRepository);
+      ids.forEach(id -> accountsRepository.findById(id).ifPresent(accountsRepository::delete));
+      accountsRepository.findByEmail(KATHY_EMAIL).ifPresent(accountsRepository::delete);
+      accountsRepository.findByEmail(BARBARA_EMAIL).ifPresent(accountsRepository::delete);
+      accountsRepository.findByEmail(JOKER_EMAIL).ifPresent(accountsRepository::delete);
     });
   }
 
+  // *******************************************************************************************************************
+  // Test methods.
+  // *******************************************************************************************************************
   @Test
   void adminInsertRemove() {
-    assertNotNull(usersRepository);
+    assertNotNull(accountsRepository);
     assertDoesNotThrow(() -> {
-      User user = new User();
-      user.setName(KATHY_NAME);
-      user.setEmail(KATHY_EMAIL);
-      user.setClearPassword(KATHY_PASS);
-      user.setAdministrator(true);
-      usersRepository.persist(user);
-      if (user.getId() != null && !ids.contains(user.getId())) ids.add(user.getId());
+      Account account = accountsRepository.buildInstance()
+                                          .setFirstname(KATHY_FIRSTNAME)
+                                          .setLastname(KATHY_LASTNAME)
+                                          .setEmail(KATHY_EMAIL)
+                                          .setClearPassword(KATHY_PASS)
+                                          .setAdministrator(true);
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
     });
 
-    final var kathy = usersRepository.findByEmail(KATHY_EMAIL);
+    final var kathy = accountsRepository.findByEmail(KATHY_EMAIL);
     assertTrue(kathy.isPresent());
     assertEquals(KATHY_EMAIL, kathy.get().getEmail());
 
-    assertDoesNotThrow(() -> usersRepository.delete(kathy.get()));
+    assertDoesNotThrow(() -> accountsRepository.delete(kathy.get()));
   }
 
   @Test
-  void adminInsertMissingName() {
-    assertNotNull(usersRepository);
+  void adminInsertMissingFirstname() {
+    assertNotNull(accountsRepository);
     assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      User user = new User();
-      user.setEmail(BARBARA_EMAIL);
-      user.setClearPassword(BARBARA_PASS);
-      user.setAdministrator(true);
-      usersRepository.persist(user);
-      if (user.getId() != null && !ids.contains(user.getId())) ids.add(user.getId());
+      Account account = accountsRepository.buildInstance()
+                                          .setLastname(BARBARA_LASTNAME)
+                                          .setEmail(BARBARA_EMAIL)
+                                          .setClearPassword(BARBARA_PASS)
+                                          .setAdministrator(true);
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
+    });
+  }
+
+  @Test
+  void adminInsertMissingLastname() {
+    assertNotNull(accountsRepository);
+    assertThrows(BriventoryDBException.class, () -> { // NOSONAR
+      Account account = accountsRepository.buildInstance()
+                                          .setFirstname(BARBARA_FIRSTNAME)
+                                          .setEmail(BARBARA_EMAIL)
+                                          .setClearPassword(BARBARA_PASS)
+                                          .setAdministrator(true);
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
 
   @Test
   void adminInsertEmptyName() {
-    assertNotNull(usersRepository);
+    assertNotNull(accountsRepository);
     assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      User user = new User();
-      user.setEmail(BARBARA_EMAIL);
-      user.setClearPassword(BARBARA_PASS);
-      user.setAdministrator(true);
-      usersRepository.persist(user);
-      if (user.getId() != null && !ids.contains(user.getId())) ids.add(user.getId());
+      Account account = accountsRepository.buildInstance()
+                                          .setEmail(BARBARA_EMAIL)
+                                          .setClearPassword(BARBARA_PASS)
+                                          .setAdministrator(true);
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
 
   @Test
   void adminInsertMissingEmail() {
-    assertNotNull(usersRepository);
+    assertNotNull(accountsRepository);
     assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      User user = new User();
-      user.setName(BARBARA_NAME);
-      user.setClearPassword(BARBARA_PASS);
-      user.setAdministrator(true);
-      usersRepository.persist(user);
-      if (user.getId() != null && !ids.contains(user.getId())) ids.add(user.getId());
+      Account account = accountsRepository.buildInstance()
+                                          .setFirstname(BARBARA_FIRSTNAME)
+                                          .setLastname(BARBARA_LASTNAME)
+                                          .setClearPassword(BARBARA_PASS)
+                                          .setAdministrator(true);
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
 
   @Test
   void adminInsertEmptyEmail() {
-    assertNotNull(usersRepository);
+    assertNotNull(accountsRepository);
     assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      User user = new User();
-      user.setName("Barbara Gordon");
-      user.setEmail("");
-      user.setClearPassword(BARBARA_PASS);
-      user.setAdministrator(true);
-      usersRepository.persist(user);
-      if (user.getId() != null && !ids.contains(user.getId())) ids.add(user.getId());
+      Account account = accountsRepository.buildInstance()
+                                          .setFirstname(BARBARA_FIRSTNAME)
+                                          .setLastname(BARBARA_LASTNAME)
+                                          .setEmail("")
+                                          .setClearPassword(BARBARA_PASS)
+                                          .setAdministrator(true);
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
 
   @Test
   void adminInsertBadEmail() {
-    assertNotNull(usersRepository);
+    assertNotNull(accountsRepository);
     assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      User user = new User();
-      user.setName(BARBARA_NAME);
-      user.setEmail("barbara.gordon-city.gc");
-      user.setClearPassword(BARBARA_PASS);
-      user.setAdministrator(true);
-      usersRepository.persist(user);
-      if (user.getId() != null && !ids.contains(user.getId())) ids.add(user.getId());
+      Account account = accountsRepository.buildInstance()
+                                          .setFirstname(BARBARA_FIRSTNAME)
+                                          .setLastname(BARBARA_LASTNAME)
+                                          .setEmail("barbara.gordon-city.gc")
+                                          .setClearPassword(BARBARA_PASS)
+                                          .setAdministrator(true);
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
 
   @Test
   void adminInsertMissingPassword() {
-    assertNotNull(usersRepository);
+    assertNotNull(accountsRepository);
     assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      User user = new User();
-      user.setName(BARBARA_NAME);
-      user.setEmail(BARBARA_EMAIL);
-      user.setAdministrator(true);
-      usersRepository.persist(user);
-      if (user.getId() != null && !ids.contains(user.getId())) ids.add(user.getId());
+      Account account = accountsRepository.buildInstance()
+                                          .setFirstname(BARBARA_FIRSTNAME)
+                                          .setLastname(BARBARA_LASTNAME)
+                                          .setEmail(BARBARA_EMAIL)
+                                          .setAdministrator(true);
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
 
   @Test
   void adminInsertEmptyPassword() {
-    assertNotNull(usersRepository);
+    assertNotNull(accountsRepository);
     assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      User user = new User();
-      user.setName(BARBARA_NAME);
-      user.setEmail(BARBARA_EMAIL);
-      user.setAdministrator(true);
-      usersRepository.persist(user);
-      if (user.getId() != null && !ids.contains(user.getId())) ids.add(user.getId());
+      Account account = accountsRepository.buildInstance()
+                                          .setFirstname(BARBARA_FIRSTNAME)
+                                          .setLastname(BARBARA_LASTNAME)
+                                          .setEmail(BARBARA_EMAIL)
+                                          .setAdministrator(true);
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
 
   @Test
   void adminRemoveAll() {
-    assertNotNull(usersRepository);
+    assertNotNull(accountsRepository);
     assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      usersRepository.delete(usersRepository.getAdministrators());
+      accountsRepository.delete(accountsRepository.getAdministrators());
     });
   }
 
   @Test
   void adminLockUnlock() {
-    assertNotNull(usersRepository);
+    assertNotNull(accountsRepository);
 
     assertDoesNotThrow(() -> {
-      User user = new User();
-      user.setName(JOKER_NAME);
-      user.setEmail(JOKER_EMAIL);
-      user.setClearPassword(JOKER_PASS);
-      user.setAdministrator(true);
+      Account account = accountsRepository.buildInstance()
+                                          .setFirstname(JOKER_FIRSTNAME)
+                                          .setLastname(JOKER_LASTNAME)
+                                          .setEmail(JOKER_EMAIL)
+                                          .setClearPassword(JOKER_PASS)
+                                          .setAdministrator(true);
 
-      usersRepository.persist(user);
-      if (user.getId() != null && !ids.contains(user.getId())) ids.add(user.getId());
-      assertFalse(user.isLocked());
-      List<User> locked = usersRepository.getLockedUsers();
-      assertFalse(locked.contains(user));
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
 
-      usersRepository.lock(user);
-      if (user.getId() != null && !ids.contains(user.getId())) ids.add(user.getId());
-      assertTrue(user.isLocked());
-      locked = usersRepository.getLockedUsers();
-      assertTrue(locked.contains(user));
+      assertFalse(accountsRepository.isLocked(account));
 
-      usersRepository.unlock(user);
-      if (user.getId() != null && !ids.contains(user.getId())) ids.add(user.getId());
-      assertFalse(user.isLocked());
-      locked = usersRepository.getLockedUsers();
-      assertFalse(locked.contains(user));
+      account.setLocked(true);
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
+      assertTrue(accountsRepository.isLocked(account));
+
+      account.setLocked(false);
+      accountsRepository.store(account);
+      if (!ids.contains(account.getId())) ids.add(account.getId());
+      assertFalse(accountsRepository.isLocked(account));
     });
 
   }

@@ -34,6 +34,11 @@ public final class ApplicationStart {
     final var dataSource = dbApi.getDatabase("briventory").getDataSource();
     if (dataSource instanceof HikariDataSource)
       ((HikariDataSource) dataSource).setMetricRegistry(metricRegistry);
+
+    lifecycle.addStopHook(() -> {
+      dbApi.shutdown();
+      return null;
+    });
   }
 
 }

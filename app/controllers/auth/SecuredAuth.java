@@ -9,7 +9,7 @@ import play.mvc.Security;
  * The {@code SecuredAuth} {@link Controller} handle everything related to the authentication in the App that needs an
  * existing session.
  */
-@Security.Authenticated(Secured.class)
+@Security.Authenticated(SignedInAuthenticator.class)
 public final class SecuredAuth extends Controller {
 
   /** @return the redirection to the index page with an empty session. */

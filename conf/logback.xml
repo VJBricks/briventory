@@ -34,6 +34,7 @@
   <logger name="org.ehcache" level="ERROR" />
   <logger name="models" level="DEBUG" />
   <logger name="akka" level="ERROR" />
+  <logger name="org.jooq" level="ERROR" />
 
   <root level="WARN">
     <appender-ref ref="ASYNCFILE" />
