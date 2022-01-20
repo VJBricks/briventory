@@ -2,12 +2,14 @@
 @import database.Constraints
 @import org.webjars.play.WebJarsUtil
 @import views.html.helper.FieldConstructor
+@import play.data.Form
+@import play.i18n.Messages
 
 @this(lite: templates.lite, webJarsUtil: WebJarsUtil)
-@(form: play.data.Form[AdminSignUpForm])(implicit request: Http.Request, messages: play.i18n.Messages)
+@(form: Form[AdminSignUpForm])(implicit request: Http.Request, messages: Messages)
 
 @implicitField = @{
-  FieldConstructor(templates.bootstrapFieldConstructor.f)
+  FieldConstructor(bootstrapFieldConstructor.f)
 }
 
 @lite(title = messages("auth.admin.signup.title"),
@@ -18,19 +20,23 @@
     <div class="row h-100 justify-content-center align-items-center">
       <div class="white-box col-10 col-md-8 col-lg-6">
         <p class="form-title">@messages("auth.admin.signup.title")</p>
-        @helper.form(action = controllers.auth.routes.PublicAuth.doAdminSignUp()) {
+        @helper.form(action = controllers.auth.routes.PublicAuthController.doAdminSignUp()) {
           @helper.CSRF.formField
-          @helper.inputText(form("name"),
+          @helper.inputText(form("firstname"),
             Symbol("class") -> "form-control",
-            Symbol("_label") -> messages("users.name"),
+            Symbol("_label") -> messages("account.firstname"),
+            Symbol("_showConstraints") -> false)
+          @helper.inputText(form("lastname"),
+            Symbol("class") -> "form-control",
+            Symbol("_label") -> messages("account.lastname"),
             Symbol("_showConstraints") -> false)
           @helper.inputText(form("email"),
             Symbol("class") -> "form-control",
-            Symbol("_label") -> messages("users.email"),
+            Symbol("_label") -> messages("account.email"),
             Symbol("_showConstraints") -> false)
           @helper.inputPassword(form("password"),
             Symbol("class") -> "form-control",
-            Symbol("_label") -> messages("users.password"),
+            Symbol("_label") -> messages("account.password"),
             Symbol("_help") -> messages("auth.signup.password.tips",
               Constraints.PASSWORD_MIN_LENGTH,
               Constraints.PASSWORD_MIN_STRENGTH))

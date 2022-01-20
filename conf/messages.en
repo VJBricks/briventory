@@ -1,3 +1,11 @@
+lego.disclamer = LEGO is a trademark of the LEGO Group, which does not sponsor, authorize or endorse this web site.
+
+button.search.caption = Search
+button.save.caption = Save
+button.update.caption = Update
+
+search.title = Search
+
 auth.signup=Sign Up
 auth.signup.password.tips=The password should have a minimal length of {0} characters and having a strength of {1}.
 auth.signup.password.strength=The actual strength is:
@@ -42,7 +50,45 @@ status.admin.description=At least one active administrator
 status.admin.tips=<a class="text-danger" href="{0}">Add a new administrator by following this link</a>
 status.app.version=Version
 
+user.activity.title = Activity
+user.activity.explained = Shows you
+
+user.settings.title = Settings
+user.settings.explained = This page allows you to change the settings relative to yourself.
+
+user.settings.credentials.title = Credentials and personal information
+user.settings.credentials.explained = Change your credentials or personal information, using the forms below.
+user.settings.credentials.email.label = E-mail address
+user.settings.credentials.name.label = Name
+
+user.settings.bricklink.sync.title = BrickLink Synchronization
+user.settings.bricklink.sync.explained = <p>Set or update the various token to sync with BrickLink. You can obtain them from the <a href="https://www.bricklink.com/v2/api/register_consumer.page">Consumer Registration</a> page.</p><p>To get more information about the BrickLink API, go to the <a href="https://www.bricklink.com/v3/api.page">BrickLink API</a> page.</p>
+
+user.signout.title = Sign Out
+user.admin.title = Administration
+admin.members.title = Manage Members
+admin.settings.title = Application Settings
+
 users.name=Name
 users.email=E-mail address
 users.password=Password
 users.passwordRepetition=Password confirmation
+
+inventory.title = Inventory
+inventory.items.title = Items
+inventory.partout.title = Part Out
+inventory.settings.title = Inventory Settings
+inventory.sync.title = Sync
+inventory.tools.title = Tools
+inventory.tools.consolidation.title = Consolidation
+
+mocs.title = MOCs
+mocs.models.title = Models
+mocs.wantedlist.title = Wanted Lists
+
+orders.title = Orders
+orders.received.title = Received
+orders.placed.title = Placed
+orders.settings.title = Orders Settings
+
+accounting.title = Accounting

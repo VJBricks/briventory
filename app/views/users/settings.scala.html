@@ -1,0 +1,109 @@
+@import controllers.accounts.{EmailForm, NameForm}
+@import play.data.Form
+@import views.html.helper.FieldConstructor
+
+@this(signedin: templates.signedin)
+@(account: Account,
+        emailForm: Form[EmailForm],
+        nameForm: Form[NameForm])(implicit request: Http.Request, messages: play.i18n.Messages)
+
+@implicitField = @{
+  FieldConstructor(singleLineFormConstructor.f)
+}
+
+@signedin(title = messages("user.settings.title"), account) {
+  <div class="container-fluid">
+
+    <h2>@messages("user.settings.title")</h2>
+    <p>@Html(messages("user.settings.explained"))</p>
+
+    <div class="accordion" id="settingsAccordion">
+
+      <div class="accordion-item">
+        <h2 class="accordion-header collapsed" id="credentials">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#credentialsCollapse" aria-expanded="false" aria-controls="credentialsCollapse">
+          @messages("user.settings.credentials.title")
+          </button>
+        </h2>
+        <div id="credentialsCollapse" class="accordion-collapse collapse" aria-labelledby="credentials" data-bs-parent="#settingsAccordion">
+          <div class="accordion-body">
+            <p>@Html(messages("user.settings.credentials.explained"))</p>
+            <hr>
+
+              @helper.form(action = controllers.accounts.routes.AccountsController.updateEmail(), Symbol("id") -> "email") {
+                @helper.CSRF.formField
+                @helper.inputText(emailForm("email"),
+                  Symbol("class") -> "form-control",
+                  Symbol("type") -> "email",
+                  Symbol("_label") -> messages("user.settings.credentials.email.label"),
+                  Symbol("_button") -> messages("button.update.caption"),
+                  Symbol("_showConstraints") -> false)
+              }
+
+              @helper.form(action = controllers.accounts.routes.AccountsController.updateName(), Symbol("id") -> "name") {
+                @helper.CSRF.formField
+                @helper.inputText(nameForm("name"),
+                  Symbol("class") -> "form-control",
+                  Symbol("_label") -> messages("user.settings.credentials.name.label"),
+                  Symbol("_button") -> messages("button.update.caption"),
+                  Symbol("_showConstraints") -> false)
+              }
+
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="bricklink">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bricklinkCollapse" aria-expanded="false" aria-controls="bricklinkCollapse">
+          @messages("user.settings.bricklink.sync.title")
+          </button>
+        </h2>
+        <div id="bricklinkCollapse" class="accordion-collapse collapse" aria-labelledby="bricklink" data-bs-parent="#settingsAccordion">
+          <div class="accordion-body">
+            <p>@Html(messages("user.settings.bricklink.sync.explained"))</p>
+            <hr>
+            <strong>This is the first item's accordion body.</strong>
+            It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>
+            .accordion-body</code>, though the transition does limit overflow.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="rebrickable">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#rebrickableCollapse" aria-expanded="false" aria-controls="rebrickableCollapse">
+          @messages("user.settings.rebrickable.sync.title")
+          </button>
+        </h2>
+        <div id="rebrickableCollapse" class="accordion-collapse collapse" aria-labelledby="rebrickable" data-bs-parent="#settingsAccordion">
+          <div class="accordion-body">
+            <p>@Html(messages("user.settings.rebrickable.sync.explained"))</p>
+            <hr>
+            <strong>This is the first item's accordion body.</strong>
+            It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>
+            .accordion-body</code>, though the transition does limit overflow.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h2 class="accordion-header collapsed" id="brickset">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bricksetCollapse" aria-expanded="false" aria-controls="bricksetCollapse">
+          @messages("user.settings.brickset.sync.title")
+          </button>
+        </h2>
+        <div id="bricksetCollapse" class="accordion-collapse collapse" aria-labelledby="brickset" data-bs-parent="#settingsAccordion">
+          <div class="accordion-body">
+            <p>@Html(messages("user.settings.brickset.sync.explained"))</p>
+            <hr>
+            <strong>This is the first item's accordion body.</strong>
+            It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>
+            .accordion-body</code>, though the transition does limit overflow.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}

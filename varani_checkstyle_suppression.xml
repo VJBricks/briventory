@@ -6,4 +6,5 @@
 
 <suppressions>
     <suppress files="[\\/]target[\\/]" checks="[a-zA-Z0-9]*"/>
+    <suppress files="[/\\]jooq[/\\]" checks=".*" />
 </suppressions>

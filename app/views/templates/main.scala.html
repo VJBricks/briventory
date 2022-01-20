@@ -1,4 +1,4 @@
-@import ch.varani.briventory.BriventoryBuildInfo
+@import utils.BriventoryBuildInfo
 @import org.webjars.play.WebJarsUtil
 
 @this(webJarsUtil: WebJarsUtil)
@@ -55,5 +55,18 @@
   </head>
   <body>
     @content
+
+  <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 px-3 my-4 border-top">
+    <div class="col-md-6 d-flex align-items-center">
+      <a href="https://www.varani.ch/briventory" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
+        <img src="@routes.Assets.versioned("images/varani_logo_small.png")" alt="Varani.ch Logo" width="133" height="25" class="d-inline-block align-text-top">
+      </a>
+      <span class="text-muted">© 2022 varani.ch | @messages("lego.disclamer")</span>
+    </div>
+
+    <ul class="nav col-md-3 justify-content-end list-unstyled d-flex">
+      <li class="ms-3"><a class="text-muted" href="@routes.PublicController.credits()"><i aria-hidden="true" class="fab fa-osi"></i></a></li>
+    </ul>
+  </footer>
   </body>
 </html>

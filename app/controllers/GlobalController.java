@@ -1,8 +1,8 @@
 package controllers;
 
-import controllers.auth.Secured;
 import controllers.auth.SessionHelper;
-import models.User;
+import controllers.auth.SignedInAuthenticator;
+import models.Account;
 import play.i18n.MessagesApi;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -13,7 +13,7 @@ import javax.inject.Inject;
 import java.util.Optional;
 
 /** This controller contains global actions. */
-@Security.Authenticated(Secured.class)
+@Security.Authenticated(SignedInAuthenticator.class)
 public final class GlobalController extends Controller {
 
   // *******************************************************************************************************************
@@ -68,11 +68,10 @@ public final class GlobalController extends Controller {
    * @return the {@link views.html.index} page.
    */
   public Result index(final Http.Request request) {
-    final Optional<User> user = sessionHelper.retrieveUser(request);
-    if (user.isPresent()) {
+    final Optional<Account> accountOptional = sessionHelper.retrieveAccount(request);
+    if (accountOptional.isPresent()) {
       final var preferred = messagesApi.preferred(request);
-      return ok(index.render(user.get(),
-                             preferred));
+      return ok(index.render(accountOptional.get(), preferred));
     }
     return errorsController.forbidden(request);
 

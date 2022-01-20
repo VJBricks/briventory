@@ -1,19 +1,21 @@
 @import controllers.auth.SignInForm
 @import views.html.helper.FieldConstructor
+@import play.data.Form
+@import play.i18n.Messages
 
 @this(lite: templates.lite)
-@(form: play.data.Form[SignInForm])(implicit messages: play.i18n.Messages, request: Http.Request)
+@(form: Form[SignInForm])(implicit messages: Messages, request: Http.Request)
 
   @implicitField = @{
-    FieldConstructor(templates.bootstrapFieldConstructor.f)
+    FieldConstructor(bootstrapFieldConstructor.f)
   }
 
   @lite(title = messages("auth.signin.title")) {
 
     <div class="container-fluid">
       <div class="row h-100 justify-content-center align-items-center">
-        <div class="white-box col-10 col-md-8 col-lg-6">
-          <p class="form-title">@messages("auth.signin.title")</p>
+        <div class="light-gray-box col-10 col-md-8 col-lg-6">
+          <h2 class="form-title">@messages("auth.signin.title")</h2>
           @if(form.hasGlobalErrors) {
             <div class="alert alert-danger" role="alert">
             @for(error <- form.globalErrors) {
@@ -21,24 +23,28 @@
             }
             </div>
           }
-          @helper.form(action = controllers.auth.routes.PublicAuth.doSignIn()) {
+          @helper.form(action = controllers.auth.routes.PublicAuthController.doSignIn()) {
             @helper.CSRF.formField
             @helper.input(form("redirectUrl"),
               Symbol("class") -> "hidden") { (id, name, value, args) =>
               <input type="hidden" name="@name" id="@id" value="@value" @toHtmlArgs(args)>
             }
-            @helper.inputText(form("email"),
-              Symbol("class") -> "form-control",
-              Symbol("_label") -> messages("users.email"),
-              Symbol("_showConstraints") -> false)
-            @helper.inputPassword(form("password"),
-              Symbol("class") -> "form-control",
-              Symbol("_label") -> messages("users.password"),
-              Symbol("_showConstraints") -> false)
+            <div class="row mb-3">
+              @helper.inputText(form("email"),
+                Symbol("class") -> "form-control",
+                Symbol("_label") -> messages("users.email"),
+                Symbol("_showConstraints") -> false)
+            </div>
+            <div class="row mb-3">
+              @helper.inputPassword(form("password"),
+                Symbol("class") -> "form-control",
+                Symbol("_label") -> messages("users.password"),
+                Symbol("_showConstraints") -> false)
+            </div>
 
             <div class="form-group row">
               <div class="col-12">
-                <button type="submit" class="btn btn-primary float-right">@messages("auth.signin")</button>
+                <button type="submit" class="btn btn-primary float-end">@messages("auth.signin")</button>
               </div>
             </div>
           }

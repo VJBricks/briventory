@@ -1,4 +1,4 @@
-@import ch.varani.briventory.BriventoryBuildInfo
+@import utils.BriventoryBuildInfo
 
 @this(lite: templates.lite)
 @(dbInitialized: Boolean, hasAdmin: Boolean)(implicit request: Http.Request, messages: play.i18n.Messages)
@@ -35,7 +35,7 @@
           @messages("status.admin.description")
           @getStatus(hasAdmin)
         </div>
-        @getTips(hasAdmin, Html(messages("status.admin.tips", controllers.auth.routes.PublicAuth.adminSignUp())))
+        @getTips(hasAdmin, Html(messages("status.admin.tips", controllers.auth.routes.PublicAuthController.adminSignUp())))
       </li>
     </ul>
   </div>

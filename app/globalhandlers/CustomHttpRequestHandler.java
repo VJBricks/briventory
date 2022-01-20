@@ -8,8 +8,8 @@ import play.libs.streams.Accumulator;
 import play.mvc.EssentialAction;
 import play.mvc.Http;
 import play.routing.Router;
-import repositories.RevisionRepository;
-import repositories.UsersRepository;
+import repositories.ConfigurationRepository;
+import repositories.AccountsRepository;
 
 import javax.inject.Inject;
 
@@ -31,16 +31,16 @@ public final class CustomHttpRequestHandler extends DefaultHttpRequestHandler {
 
   /** The injected {@link controllers.MaintenanceController} instance. */
   private final MaintenanceController maintenanceController;
-  /** The injected {@link RevisionRepository} instance. */
-  private final RevisionRepository revisionRepository;
-  /** The injected {@link UsersRepository} instance. */
-  private final UsersRepository usersRepository;
+  /** The injected {@link ConfigurationRepository} instance. */
+  private final ConfigurationRepository revisionRepository;
+  /** The injected {@link AccountsRepository} instance. */
+  private final AccountsRepository usersRepository;
 
   @Inject
   public CustomHttpRequestHandler(final JavaCompatibleHttpRequestHandler underlying,
                                   final MaintenanceController maintenanceController,
-                                  final RevisionRepository revisionRepository,
-                                  final UsersRepository usersRepository) {
+                                  final ConfigurationRepository revisionRepository,
+                                  final AccountsRepository usersRepository) {
     super(underlying);
     this.maintenanceController = maintenanceController;
     this.revisionRepository = revisionRepository;
@@ -49,9 +49,16 @@ public final class CustomHttpRequestHandler extends DefaultHttpRequestHandler {
 
   @Override
   public HandlerForRequest handlerForRequest(final Http.RequestHeader requestHeader) {
-    final boolean isDatabaseInitialized = revisionRepository.isDatabaseInitialized();
-    final boolean hasActiveAdministrator = usersRepository.hasActiveAdministrator();
-    final boolean maintenance = !isDatabaseInitialized || !hasActiveAdministrator;
+
+    boolean maintenance = false;
+
+    try {
+      final boolean isDatabaseInitialized = revisionRepository.isDatabaseInitialized();
+      final boolean hasActiveAdministrator = usersRepository.hasActiveAdministrator();
+      maintenance = !isDatabaseInitialized || !hasActiveAdministrator;
+    } catch (Exception e) {
+      maintenance = true;
+    }
 
     if (maintenance && !requestHeader.uri().matches("^/(maintenance|status|auth|assets|webjars|robots.txt).*")) {
       var minimalRouter = Router.empty();
