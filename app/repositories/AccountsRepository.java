@@ -11,10 +11,17 @@ import models.Account;
 import models.BricklinkTokens;
 import models.BricksetTokens;
 import models.RebrickableTokens;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.jooq.DSLContext;
 import org.jooq.RecordMapper;
 import org.jooq.RecordUnmapper;
+import orm.repositories.DeletableEntityHandler;
+import orm.repositories.DeleteAction;
+import orm.repositories.EntityAction;
+import orm.repositories.EntityReloader;
+import orm.repositories.Repository;
+import orm.repositories.StorableEntityHandler;
+import orm.repositories.StoreAction;
+import play.data.validation.ValidationError;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -158,7 +165,7 @@ public final class AccountsRepository extends Repository {
   // Storage & Deletion
   // *******************************************************************************************************************
   /** {@link StorableEntityHandler} for the administrator flag. */
-  private final StorableEntityHandler<Account, AdministratorRecord> storeAdministratorHandler =
+  private final StorableEntityHandler<ValidationError, Account, AdministratorRecord> storeAdministratorHandler =
       new StorableEntityHandler<>(administratorUnmapper, administratorReloader, ADMINISTRATOR) { };
 
   /** {@link DeletableEntityHandler} for the administrator flag. */
@@ -166,7 +173,7 @@ public final class AccountsRepository extends Repository {
       new DeletableEntityHandler<>(administratorUnmapper, ADMINISTRATOR) { };
 
   /** {@link StorableEntityHandler} for the administrator flag. */
-  private final StorableEntityHandler<Account, LockedAccountRecord> storeLockedAccountHandler =
+  private final StorableEntityHandler<ValidationError, Account, LockedAccountRecord> storeLockedAccountHandler =
       new StorableEntityHandler<>(lockedAccountUnmapper, lockedAccountReloader, LOCKED_ACCOUNT) { };
 
   /** {@link DeletableEntityHandler} for the administrator flag. */
@@ -174,27 +181,8 @@ public final class AccountsRepository extends Repository {
       new DeletableEntityHandler<>(lockedAccountUnmapper, LOCKED_ACCOUNT) { };
 
   /** {@link StorableEntityHandler} for the {@link Account} entity. */
-  private final StorableEntityHandler<Account, AccountRecord> storeAccountHandler =
+  private final StorableEntityHandler<ValidationError, Account, AccountRecord> storeAccountHandler =
       new StorableEntityHandler<>(accountsUnmapper, accountsReloader, ACCOUNT) {
-        /** Validates the attributes of an {@link Account}.
-         *
-         * @param account the {@link Account} to validate.
-         * @return {@code true} if the attributes contains seamless good data, otherwise {@code false}.
-         */
-        private boolean isValid(final Account account) {
-          return account.getFirstname() != null && !account.getFirstname().isBlank() &&
-                 account.getLastname() != null && !account.getLastname().isBlank() &&
-                 account.getPassword() != null && !account.getPassword().isBlank() &&
-                 account.getEmail() != null && !account.getEmail().isBlank() &&
-                 EmailValidator.getInstance(true, true).isValid(account.getEmail());
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        protected boolean shallStore(final DSLContext dslContext, final Account account) {
-          return super.shallStore(dslContext, account) &&
-                 isValid(account);
-        }
 
         /** {@inheritDoc} */
         @Override

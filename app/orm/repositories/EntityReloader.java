@@ -1,6 +1,6 @@
-package repositories;
+package orm.repositories;
 
-import models.Entity;
+import orm.models.Entity;
 import org.jooq.Record;
 
 /**

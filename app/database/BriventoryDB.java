@@ -1,22 +1,24 @@
 package database;
 
 import globalhandlers.ExceptionManager;
-import models.Entity;
+import orm.models.Entity;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SQLDialect;
 import org.jooq.Table;
 import org.jooq.UpdatableRecord;
 import org.jooq.impl.DSL;
+import orm.models.IStorableEntity;
 import play.db.Database;
 import play.libs.concurrent.HttpExecution;
-import repositories.DeletableEntityHandler;
-import repositories.Repository;
-import repositories.StorableEntityHandler;
+import orm.repositories.DeletableEntityHandler;
+import orm.repositories.Repository;
+import orm.repositories.StorableEntityHandler;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
@@ -105,11 +107,12 @@ public final class BriventoryDB {
    *
    * @param storableEntityHandler the {@link StorableEntityHandler} that will handle the storage process.
    * @param entity the {@link E} to store.
+   * @param <V> the type of the errors instances, produced during the validation of the entity.
    * @param <E> the precise subtype of the {@link Entity}.
    * @param <R> the precise subtype of the {@link Record}.
    */
-  public <E extends Entity<? extends Repository>, R extends UpdatableRecord<R>> void store(
-      final StorableEntityHandler<E, R> storableEntityHandler,
+  public <V, E extends Entity<? extends Repository> & IStorableEntity<V>, R extends UpdatableRecord<R>> void store(
+      final StorableEntityHandler<V, E, R> storableEntityHandler,
       final E entity) {
     try {
       supplyAsync(() -> database.withTransaction(connection -> {
@@ -118,8 +121,16 @@ public final class BriventoryDB {
         return null;
       }), executor).join();
     } catch (Exception e) {
-      final BriventoryDBException briventoryDBException =
-          new BriventoryDBException(String.format("The persistence of entity %s has failed", entity), e);
+      BriventoryDBException briventoryDBException;
+      if (e instanceof BriventoryDBException alreadyWellTyped) {
+        briventoryDBException = alreadyWellTyped;
+      } else if (e instanceof CompletionException completionException &&
+                 completionException.getCause() instanceof BriventoryDBException innerException) {
+        briventoryDBException = innerException;
+      } else {
+        briventoryDBException = new BriventoryDBException(
+            String.format("The persistence of entity %s has failed", entity), e);
+      }
       exceptionManager.handleDatabaseException(briventoryDBException);
       throw briventoryDBException;
     }

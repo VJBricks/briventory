@@ -1,12 +1,18 @@
 package models;
 
+import orm.models.Entity;
+import orm.models.IStorableEntity;
+import play.data.validation.ValidationError;
 import repositories.ColorSourcesRepository;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * The {@code ColorsSource} class is the representation of the table {@code colors_source} in the <em>Briventory</em>
  * database.
  */
-public final class ColorsSource extends Entity<ColorSourcesRepository> {
+public final class ColorsSource extends Entity<ColorSourcesRepository> implements IStorableEntity<ValidationError> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -29,6 +35,21 @@ public final class ColorsSource extends Entity<ColorSourcesRepository> {
    */
   public ColorsSource(final ColorSourcesRepository repository) {
     super(repository);
+  }
+
+  // *******************************************************************************************************************
+  // Entity Overrides
+  // *******************************************************************************************************************
+
+  /** {@inheritDoc} */
+  @Override
+  public List<ValidationError> isValid() {
+    List<ValidationError> errors = new LinkedList<>();
+    if (name == null || name.isBlank())
+      errors.add(new ValidationError("name", "colorsSource.error.name.empty"));
+    if (url == null || url.isBlank())
+      errors.add(new ValidationError("url", "colorsSource.error.url.empty"));
+    return errors;
   }
 
   // *******************************************************************************************************************

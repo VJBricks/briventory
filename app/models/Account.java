@@ -1,13 +1,19 @@
 package models;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import org.apache.commons.validator.routines.EmailValidator;
+import orm.models.Entity;
+import orm.models.IStorableEntity;
+import play.data.validation.ValidationError;
 import repositories.AccountsRepository;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 /** The {@code Account} class is the representation of the table {@code account} in the <em>Briventory</em> database. */
-public final class Account extends Entity<AccountsRepository> {
+public final class Account extends Entity<AccountsRepository> implements IStorableEntity<ValidationError> {
 
   // *******************************************************************************************************************
   // Constants
@@ -85,6 +91,27 @@ public final class Account extends Entity<AccountsRepository> {
     return firstname.equals(account.firstname) &&
            lastname.equals(account.lastname) &&
            email.equals(account.email);
+  }
+
+  // *******************************************************************************************************************
+  // Entity Overrides
+  // *******************************************************************************************************************
+
+  /** {@inheritDoc} */
+  @Override
+  public List<ValidationError> isValid() {
+    List<ValidationError> errors = new LinkedList<>();
+    if (firstname == null || firstname.isBlank())
+      errors.add(new ValidationError("firstname", "account.error.firstname.empty"));
+    if (lastname == null || lastname.isBlank())
+      errors.add(new ValidationError("lastname", "account.error.lastname.empty"));
+    if (password == null || password.isBlank())
+      errors.add(new ValidationError("password", "account.error.password.empty"));
+    if (email == null || email.isBlank())
+      errors.add(new ValidationError("email", "account.error.email.empty"));
+    if (!EmailValidator.getInstance().isValid(email))
+      errors.add(new ValidationError("email", "account.error.email.invald"));
+    return errors;
   }
 
   // *******************************************************************************************************************

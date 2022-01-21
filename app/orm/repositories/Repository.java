@@ -1,9 +1,10 @@
-package repositories;
+package orm.repositories;
 
 import database.BriventoryDB;
-import models.Entity;
+import orm.models.Entity;
 import org.jooq.DSLContext;
 import org.jooq.UpdatableRecord;
+import orm.models.IStorableEntity;
 
 import java.util.List;
 import java.util.function.Function;
@@ -48,11 +49,13 @@ public abstract class Repository {
    *
    * @param storableEntityHandler the {@link StorableEntityHandler} that will handle the storage process.
    * @param entity the {@link E} to store.
+   * @param <V> the type of the errors instances, produced during the validation of the entity.
    * @param <E> the precise subtype of the {@link Entity}.
    * @param <R> the precise subtype of the {@link Record}.
    */
-  protected final <E extends Entity<? extends Repository>, R extends UpdatableRecord<R>> void store(
-      final StorableEntityHandler<E, R> storableEntityHandler, final E entity) {
+  protected final <V, E extends Entity<? extends Repository> & IStorableEntity<V>,
+                      R extends UpdatableRecord<R>> void store(
+      final StorableEntityHandler<V, E, R> storableEntityHandler, final E entity) {
     briventoryDB.store(storableEntityHandler, entity);
   }
 

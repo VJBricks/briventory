@@ -1,24 +1,24 @@
-package repositories;
+package orm.repositories;
 
-import models.Entity;
+import orm.models.Entity;
 import org.jooq.DSLContext;
 import org.jooq.UpdatableRecord;
 
 /**
- * This subclass of {@link EntityAction} will store the {@link Entity} into the database.
+ * This subclass of {@link EntityAction} will delete the {@link Entity} from the database.
  *
  * @param <E> the precise subtype of the {@link Entity}.
  * @param <R> the precise subtype of the {@link org.jooq.Record}.
  */
-public final class StoreAction<E extends Entity<? extends Repository>, R extends UpdatableRecord<R>>
+public final class DeleteAction<E extends Entity<? extends Repository>, R extends UpdatableRecord<R>>
     implements EntityAction {
 
   // *******************************************************************************************************************
   // Attributes
   // *******************************************************************************************************************
-  /** The {@link StorableEntityHandler} instance, that will perform the storage process. */
-  private final StorableEntityHandler<E, R> storableEntityHandler;
-  /** The {@link E} to store. */
+  /** The {@link DeletableEntityHandler} instance, that will perform the deletion process. */
+  private final DeletableEntityHandler<E, R> deletableEntityHandler;
+  /** The {@link E} to delete. */
   private final E entity;
 
   // *******************************************************************************************************************
@@ -28,11 +28,11 @@ public final class StoreAction<E extends Entity<? extends Repository>, R extends
   /**
    * Creates a new {@link StoreAction}.
    *
-   * @param storableEntityHandler the {@link StorableEntityHandler} instance, that will perform the storage process.
-   * @param entity the {@link E} to store.
+   * @param deletableEntityHandler the {@link DeletableEntityHandler} instance, that will perform the deletion process.
+   * @param entity the {@link E} to delete.
    */
-  public StoreAction(final StorableEntityHandler<E, R> storableEntityHandler, final E entity) {
-    this.storableEntityHandler = storableEntityHandler;
+  public DeleteAction(final DeletableEntityHandler<E, R> deletableEntityHandler, final E entity) {
+    this.deletableEntityHandler = deletableEntityHandler;
     this.entity = entity;
   }
 
@@ -42,6 +42,8 @@ public final class StoreAction<E extends Entity<? extends Repository>, R extends
 
   /** {@inheritDoc} */
   @Override
-  public void execute(final DSLContext dslContext) { storableEntityHandler.store(dslContext, entity); }
+  public void execute(final DSLContext dslContext) {
+    deletableEntityHandler.delete(dslContext, entity);
+  }
 
 }

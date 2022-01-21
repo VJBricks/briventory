@@ -2,6 +2,7 @@ package repositories;
 
 import database.BriventoryDB;
 import org.semver.Version;
+import orm.repositories.Repository;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

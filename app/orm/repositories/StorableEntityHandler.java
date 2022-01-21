@@ -1,11 +1,12 @@
-package repositories;
+package orm.repositories;
 
 import database.BriventoryDBException;
-import models.Entity;
+import orm.models.Entity;
 import org.jooq.DSLContext;
 import org.jooq.RecordUnmapper;
 import org.jooq.Table;
 import org.jooq.UpdatableRecord;
+import orm.models.IStorableEntity;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -24,10 +25,12 @@ import java.util.List;
  *   related entities.</li>
  * </ol>
  *
+ * @param <V> the type of the errors instances, produced during the validation of the entity.
  * @param <E> the precise subtype of the {@link Entity}.
  * @param <R> the precise subtype of the {@link org.jooq.Record}.
  */
-public abstract class StorableEntityHandler<E extends Entity<? extends Repository>, R extends UpdatableRecord<R>> {
+public abstract class StorableEntityHandler<V, E extends Entity<? extends Repository> & IStorableEntity<V>,
+                                               R extends UpdatableRecord<R>> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -71,10 +74,10 @@ public abstract class StorableEntityHandler<E extends Entity<? extends Repositor
    * @param dslContext the {@link DSLContext}.
    * @param entity the {@link E} being stored.
    *
-   * @return {@code true} if the storage can be done, otherwise {@code false}. By default, this method returns {@code
-   * true}.
+   * @return a {@link List} of {@link V} instances, or an empty list if there is no error. By default, this method
+   * returns the result of {@link IStorableEntity#isValid()}.
    */
-  protected boolean shallStore(final DSLContext dslContext, final E entity) { return true; }
+  protected List<V> shallStore(final DSLContext dslContext, final E entity) { return entity.isValid(); }
 
   /**
    * Provides all the {@link EntityAction}s on related entities, that will be executed before the storage of the current
@@ -110,8 +113,16 @@ public abstract class StorableEntityHandler<E extends Entity<? extends Repositor
     dslContext.configuration().set(unmapper);
     final R modelAsRecord = dslContext.newRecord(table, entity);
 
-    if (!shallStore(dslContext, entity))
-      throw new BriventoryDBException(String.format("Persistence of entity %s is not allowed", modelAsRecord));
+    List<V> shallStoreResult = shallStore(dslContext, entity);
+    if (!shallStoreResult.isEmpty()) {
+      StringBuilder stringBuilder = new StringBuilder();
+      for (V entry : shallStoreResult)
+        stringBuilder.append(entry)
+                     .append(System.lineSeparator());
+      throw new BriventoryDBException(
+          String.format("Persistence of entity %s is not allowed for the following reasons:%s%s",
+                        entity, System.lineSeparator(), stringBuilder));
+    }
 
     for (EntityAction entityAction : getPreStoreActions(entity))
       entityAction.execute(dslContext);

@@ -1,4 +1,4 @@
-package repositories;
+package orm.repositories;
 
 import org.jooq.DSLContext;
 

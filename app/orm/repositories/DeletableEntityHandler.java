@@ -1,7 +1,7 @@
-package repositories;
+package orm.repositories;
 
 import database.BriventoryDBException;
-import models.Entity;
+import orm.models.Entity;
 import org.jooq.DSLContext;
 import org.jooq.RecordUnmapper;
 import org.jooq.Table;

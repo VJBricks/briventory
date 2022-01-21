@@ -1,8 +1,13 @@
 package models;
 
+import orm.models.Entity;
+import orm.models.IStorableEntity;
+import play.data.validation.ValidationError;
 import repositories.AccountsRepository;
 
 import java.time.LocalDate;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * The {@code BrickLinkTokens} class is the representation of the table {@code bricklink_tokens} in the
@@ -12,7 +17,7 @@ import java.time.LocalDate;
  * obtained from <a href="https://www.bricklink.com/v2/api/register_consumer.page">BrickLink</a>.
  * </p>
  */
-public final class BricklinkTokens extends Entity<AccountsRepository> {
+public final class BricklinkTokens extends Entity<AccountsRepository> implements IStorableEntity<ValidationError> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -42,6 +47,25 @@ public final class BricklinkTokens extends Entity<AccountsRepository> {
    */
   public BricklinkTokens(final AccountsRepository accountsRepository) {
     super(accountsRepository);
+  }
+
+  // *******************************************************************************************************************
+  // Entity Overrides
+  // *******************************************************************************************************************
+
+  /** {@inheritDoc} */
+  @Override
+  public List<ValidationError> isValid() {
+    List<ValidationError> errors = new LinkedList<>();
+    if (consumerKey == null || consumerKey.isBlank())
+      errors.add(new ValidationError("consumerKey", "bricklinkTokens.error.consumerKey.empty"));
+    if (consumerSecret == null || consumerSecret.isBlank())
+      errors.add(new ValidationError("consumerSecret", "bricklinkTokens.error.consumerSecret.empty"));
+    if (tokenValue == null || tokenValue.isBlank())
+      errors.add(new ValidationError("tokenValue", "bricklinkTokens.error.tokenValue.empty"));
+    if (tokenSecret == null || tokenSecret.isBlank())
+      errors.add(new ValidationError("tokenSecret", "bricklinkTokens.error.tokenSecret.empty"));
+    return errors;
   }
 
   // *******************************************************************************************************************

@@ -1,6 +1,6 @@
-package models;
+package orm.models;
 
-import repositories.Repository;
+import orm.repositories.Repository;
 
 /**
  * {@code Entity} is the base class for every entity handled by the ORM.

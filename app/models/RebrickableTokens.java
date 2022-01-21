@@ -1,10 +1,15 @@
 package models;
 
+import orm.models.Entity;
+import orm.models.IStorableEntity;
+import play.data.validation.ValidationError;
 import repositories.AccountsRepository;
 
 import java.time.LocalDate;
+import java.util.LinkedList;
+import java.util.List;
 
-public final class RebrickableTokens extends Entity<AccountsRepository> {
+public final class RebrickableTokens extends Entity<AccountsRepository> implements IStorableEntity<ValidationError> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -27,6 +32,19 @@ public final class RebrickableTokens extends Entity<AccountsRepository> {
    */
   public RebrickableTokens(final AccountsRepository accountsRepository) {
     super(accountsRepository);
+  }
+
+  // *******************************************************************************************************************
+  // Entity Overrides
+  // *******************************************************************************************************************
+
+  /** {@inheritDoc} */
+  @Override
+  public List<ValidationError> isValid() {
+    List<ValidationError> errors = new LinkedList<>();
+    if (key == null || key.isBlank())
+      errors.add(new ValidationError("key", "rebrickableTokens.error.key.empty"));
+    return errors;
   }
 
   // *******************************************************************************************************************

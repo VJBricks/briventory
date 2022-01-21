@@ -4,6 +4,7 @@ import database.BriventoryDB;
 import jooq.tables.records.ColorSourceRecord;
 import models.ColorsSource;
 import org.jooq.RecordMapper;
+import orm.repositories.Repository;
 
 import javax.inject.Inject;
 
