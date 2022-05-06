@@ -7,6 +7,8 @@ import java.util.function.Function;
  * key is the filter element and the value is the result of the data loading.
  * <p>A key can be an object representation of a primitive type or an instance of a class. The key will be passed as
  * parameter to the {@code fetcher}, a {@link Function} that will perform the data loading.</p>
+ * <p><strong>Note</strong>: if the key is {@code null}, no fetch will be performed and {@link LazyLoader#getValue()}
+ * will always return {@code null}.</p>
  * <p>The fetch of a {@code null} value is handled by an internal state.</p>
  *
  * @param <K> the key.
