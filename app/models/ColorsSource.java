@@ -1,18 +1,23 @@
 package models;
 
-import orm.models.Entity;
-import orm.models.IStorableEntity;
+import jooq.tables.records.ColorSourceRecord;
+import org.jooq.DSLContext;
+import orm.Model;
+import orm.models.PersistableModel1;
+import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
-import repositories.ColorSourcesRepository;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import static jooq.Tables.COLOR_SOURCE;
 
 /**
  * The {@code ColorsSource} class is the representation of the table {@code colors_source} in the <em>Briventory</em>
  * database.
  */
-public final class ColorsSource extends Entity<ColorSourcesRepository> implements IStorableEntity<ValidationError> {
+public final class ColorsSource extends Model implements PersistableModel1<ColorSourceRecord>,
+                                                             ValidatableModel<ValidationError> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -27,23 +32,33 @@ public final class ColorsSource extends Entity<ColorSourcesRepository> implement
   // *******************************************************************************************************************
   // Construction & Initialization
   // *******************************************************************************************************************
-
-  /**
-   * Creates a new instance of {@link ColorsSource}.
-   *
-   * @param repository the {@link ColorSourcesRepository} instance.
-   */
-  public ColorsSource(final ColorSourcesRepository repository) {
-    super(repository);
+  public ColorsSource(final long id, final String name, final String url) {
+    this.id = id;
+    this.name = name;
+    this.url = url;
   }
 
   // *******************************************************************************************************************
-  // Entity Overrides
+  // PersistableModel1 Overrides
+  // *******************************************************************************************************************
+
+  @Override
+  public ColorSourceRecord getUpdatableRecord(final DSLContext dslContext) {
+    final ColorSourceRecord colorSourceRecord = dslContext.newRecord(COLOR_SOURCE);
+    return colorSourceRecord.setId(id)
+                            .setName(name)
+                            .setUrl(url);
+  }
+
+  public void lastRefresh(final ColorSourceRecord colorSourceRecord) { id = colorSourceRecord.getId(); }
+
+  // *******************************************************************************************************************
+  // IValidatableEntity Overrides
   // *******************************************************************************************************************
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> isValid() {
+  public List<ValidationError> errors(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
     if (name == null || name.isBlank())
       errors.add(new ValidationError("name", "colorsSource.error.name.empty"));
@@ -66,7 +81,7 @@ public final class ColorsSource extends Entity<ColorSourcesRepository> implement
    *
    * @return this instance.
    */
-  public ColorsSource setId(final long id) {
+  ColorsSource setId(final long id) {
     this.id = id;
     return this;
   }

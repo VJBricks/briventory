@@ -1,15 +1,20 @@
 package models;
 
-import orm.models.Entity;
-import orm.models.IStorableEntity;
+import jooq.tables.records.RebrickableTokensRecord;
+import org.jooq.DSLContext;
+import orm.Model;
+import orm.models.PersistableModel1;
+import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
-import repositories.AccountsRepository;
 
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
-public final class RebrickableTokens extends Entity<AccountsRepository> implements IStorableEntity<ValidationError> {
+import static jooq.Tables.REBRICKABLE_TOKENS;
+
+public final class RebrickableTokens extends Model implements PersistableModel1<RebrickableTokensRecord>,
+                                                                  ValidatableModel<ValidationError> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -22,25 +27,27 @@ public final class RebrickableTokens extends Entity<AccountsRepository> implemen
   private LocalDate validUntil;
 
   // *******************************************************************************************************************
-  // Construction & Initialization
+  // PersistableModel1 Overrides
   // *******************************************************************************************************************
 
-  /**
-   * Creates a new instance of {@link models.RebrickableTokens}.
-   *
-   * @param accountsRepository the {@link AccountsRepository}.
-   */
-  public RebrickableTokens(final AccountsRepository accountsRepository) {
-    super(accountsRepository);
+  @Override
+  public RebrickableTokensRecord getUpdatableRecord(final DSLContext dslContext) {
+    final RebrickableTokensRecord rebrickableTokensRecord = dslContext.newRecord(REBRICKABLE_TOKENS);
+    return rebrickableTokensRecord.setIdAccount(idAccount)
+                                  .setKey(key)
+                                  .setValidUntil(validUntil);
   }
 
+  @Override
+  public void lastRefresh(final RebrickableTokensRecord rebrickableTokensRecord) { /* Nothing to do */ }
+
   // *******************************************************************************************************************
-  // Entity Overrides
+  // ValidatableModel Overrides
   // *******************************************************************************************************************
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> isValid() {
+  public List<ValidationError> errors(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
     if (key == null || key.isBlank())
       errors.add(new ValidationError("key", "rebrickableTokens.error.key.empty"));

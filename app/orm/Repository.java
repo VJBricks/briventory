@@ -6,9 +6,12 @@ import org.jooq.ResultQuery;
 import org.jooq.Select;
 import org.jooq.UpdatableRecord;
 import org.jooq.lambda.tuple.Tuple2;
-import orm.models.IValidatableModel;
-import orm.repositories.DeletableEntityHandler;
-import orm.repositories.StorableEntityHandler;
+import orm.models.PersistableModel1;
+import orm.models.PersistableModel2;
+import orm.models.PersistableModel3;
+import orm.models.PersistableModel4;
+import orm.models.PersistableModel5;
+import orm.models.ValidatableModel;
 
 import java.util.List;
 import java.util.Optional;
@@ -197,18 +200,43 @@ public abstract class Repository<M extends Model> {
   // Persistence
   // *******************************************************************************************************************
 
-  /**
-   * Stores the {@link E} into the database.
-   *
-   * @param storableEntityHandler the {@link StorableEntityHandler} that will handle the storage process.
-   * @param entity the {@link E} to store.
-   * @param <V> the type of the errors instances, produced during the validation of the entity.
-   * @param <E> the precise subtype of the {@link Model}.
-   * @param <R> the precise subtype of the {@link Record}.
-   */
-  protected final <V, E extends Model & IValidatableModel<V>, R extends UpdatableRecord<R>> void persist(
-      final StorableEntityHandler<V, E, R> storableEntityHandler, final E entity) {
-    persistenceContext.store(storableEntityHandler, entity);
+  protected final <V, R extends UpdatableRecord<R>,
+                      P extends PersistableModel1<R> & ValidatableModel<V>> void persist(final P persistableModel) {
+    persistenceContext.persist(persistableModel);
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      P extends PersistableModel2<R1, R2> & ValidatableModel<V>> void persist(
+      final P persistableModel) {
+    persistenceContext.persist(persistableModel);
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      R3 extends UpdatableRecord<R3>,
+                      P extends PersistableModel3<R1, R2, R3> & ValidatableModel<V>> void persist(
+      final P persistableModel) {
+    persistenceContext.persist(persistableModel);
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      R3 extends UpdatableRecord<R3>,
+                      R4 extends UpdatableRecord<R4>,
+                      P extends PersistableModel4<R1, R2, R3, R4> & ValidatableModel<V>> void persist(
+      final P persistableModel) {
+    persistenceContext.persist(persistableModel);
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      R3 extends UpdatableRecord<R3>,
+                      R4 extends UpdatableRecord<R4>,
+                      R5 extends UpdatableRecord<R5>,
+                      P extends PersistableModel5<R1, R2, R3, R4, R5> & ValidatableModel<V>> void persist(
+      final P persistableModel) {
+    persistenceContext.persist(persistableModel);
   }
 
   // *******************************************************************************************************************
@@ -223,11 +251,11 @@ public abstract class Repository<M extends Model> {
    * @param <E> the precise subtype of the {@link Model}.
    * @param <R> the precise subtype of the {@link Record}.
    */
-  public <E extends Model, R extends UpdatableRecord<R>> void delete(
+  /*public <E extends Model, R extends UpdatableRecord<R>> void delete(
       final DeletableEntityHandler<E, R> deletableEntityHandler,
       final E entity) {
     persistenceContext.delete(deletableEntityHandler, entity);
-  }
+  }*/
 
   /**
    * Deletes a {@link List} of {@link E} instances from the database.
@@ -237,10 +265,10 @@ public abstract class Repository<M extends Model> {
    * @param <E> the precise subtype of the {@link Model}.
    * @param <R> the precise subtype of the {@link Record}.
    */
-  public <E extends Model, R extends UpdatableRecord<R>> void delete(
+  /*public <E extends Model, R extends UpdatableRecord<R>> void delete(
       final DeletableEntityHandler<E, R> deletableEntityHandler,
       final List<E> entities) {
     persistenceContext.delete(deletableEntityHandler, entities);
-  }
+  }*/
 
 }

@@ -1,18 +1,23 @@
 package models;
 
-import orm.models.Entity;
-import orm.models.IStorableEntity;
+import jooq.tables.records.BricksetTokensRecord;
+import org.jooq.DSLContext;
+import orm.Model;
+import orm.models.PersistableModel1;
+import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
-import repositories.AccountsRepository;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import static jooq.Tables.BRICKSET_TOKENS;
 
 /**
  * The {@code BricksetTokens} class is the representation of the table {@code brickset_tokens} in the
  * <em>Briventory</em> database.
  */
-public final class BricksetTokens extends Entity<AccountsRepository> implements IStorableEntity<ValidationError> {
+public final class BricksetTokens extends Model implements PersistableModel1<BricksetTokensRecord>,
+                                                               ValidatableModel<ValidationError> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -28,25 +33,28 @@ public final class BricksetTokens extends Entity<AccountsRepository> implements 
   private String password;
 
   // *******************************************************************************************************************
-  // Construction & Initialization
+  // PersistableModel1 Overrides
   // *******************************************************************************************************************
 
-  /**
-   * Creates a new instance of {@link BricksetTokens}.
-   *
-   * @param accountsRepository the {@link AccountsRepository}.
-   */
-  public BricksetTokens(final AccountsRepository accountsRepository) {
-    super(accountsRepository);
+  @Override
+  public BricksetTokensRecord getUpdatableRecord(final DSLContext dslContext) {
+    final BricksetTokensRecord bricksetTokensRecord = dslContext.newRecord(BRICKSET_TOKENS);
+    return bricksetTokensRecord.setIdAccount(idAccount)
+                               .setApiKey(apiKey)
+                               .setUsername(username)
+                               .setPassword(password);
   }
 
+  @Override
+  public void lastRefresh(final BricksetTokensRecord bricksetTokensRecord) { /* Nothing to do */ }
+
   // *******************************************************************************************************************
-  // Entity Overrides
+  // ValidatableModel Overrides
   // *******************************************************************************************************************
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> isValid() {
+  public List<ValidationError> errors(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
     if (apiKey == null || apiKey.isBlank())
       errors.add(new ValidationError("apiKey", "bricksetTokens.error.apiKey.empty"));

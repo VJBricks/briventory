@@ -1,13 +1,17 @@
 package models;
 
-import orm.models.Entity;
-import orm.models.IStorableEntity;
+import jooq.tables.records.BricklinkTokensRecord;
+import org.jooq.DSLContext;
+import orm.Model;
+import orm.models.PersistableModel1;
+import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
-import repositories.AccountsRepository;
 
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
+
+import static jooq.Tables.BRICKLINK_TOKENS;
 
 /**
  * The {@code BrickLinkTokens} class is the representation of the table {@code bricklink_tokens} in the
@@ -17,7 +21,8 @@ import java.util.List;
  * obtained from <a href="https://www.bricklink.com/v2/api/register_consumer.page">BrickLink</a>.
  * </p>
  */
-public final class BricklinkTokens extends Entity<AccountsRepository> implements IStorableEntity<ValidationError> {
+public final class BricklinkTokens extends Model implements PersistableModel1<BricklinkTokensRecord>,
+                                                                ValidatableModel<ValidationError> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -37,25 +42,30 @@ public final class BricklinkTokens extends Entity<AccountsRepository> implements
   private LocalDate validUntil;
 
   // *******************************************************************************************************************
-  // Construction & Initialization
+  // PersistableModel1 Overrides
   // *******************************************************************************************************************
 
-  /**
-   * Creates a new instance of {@link BricksetTokens}.
-   *
-   * @param accountsRepository the {@link AccountsRepository}.
-   */
-  public BricklinkTokens(final AccountsRepository accountsRepository) {
-    super(accountsRepository);
+  @Override
+  public BricklinkTokensRecord getUpdatableRecord(final DSLContext dslContext) {
+    final BricklinkTokensRecord bricklinkTokensRecord = dslContext.newRecord(BRICKLINK_TOKENS);
+    return bricklinkTokensRecord.setIdAccount(idAccount)
+                                .setConsumerKey(consumerKey)
+                                .setConsumerSecret(consumerSecret)
+                                .setTokenValue(tokenValue)
+                                .setTokenSecret(tokenSecret)
+                                .setValidUntil(validUntil);
   }
 
+  @Override
+  public void lastRefresh(final BricklinkTokensRecord bricklinkTokensRecord) { /* Nothing to do */ }
+
   // *******************************************************************************************************************
-  // Entity Overrides
+  // ValidatableModel Overrides
   // *******************************************************************************************************************
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> isValid() {
+  public List<ValidationError> errors(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
     if (consumerKey == null || consumerKey.isBlank())
       errors.add(new ValidationError("consumerKey", "bricklinkTokens.error.consumerKey.empty"));

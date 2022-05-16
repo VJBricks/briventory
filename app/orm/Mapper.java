@@ -18,12 +18,4 @@ public interface Mapper<R extends Record, M extends Model> {
    */
   M map(R r);
 
-  /**
-   * Refreshes an instance of {@link M} with the {@link R} provided.
-   *
-   * @param r the {@link R} to get the data.
-   * @param m the {@link M} to refresh.
-   */
-  void refresh(R r, M m);
-
 }

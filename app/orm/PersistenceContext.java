@@ -7,12 +7,17 @@ import org.jooq.SQLDialect;
 import org.jooq.Select;
 import org.jooq.UpdatableRecord;
 import org.jooq.lambda.tuple.Tuple2;
-import orm.models.IValidatableModel;
-import orm.repositories.DeletableEntityHandler;
-import orm.repositories.StorableEntityHandler;
+import orm.models.PersistableModel;
+import orm.models.PersistableModel1;
+import orm.models.PersistableModel2;
+import orm.models.PersistableModel3;
+import orm.models.PersistableModel4;
+import orm.models.PersistableModel5;
+import orm.models.ValidatableModel;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class PersistenceContext {
@@ -69,6 +74,7 @@ public abstract class PersistenceContext {
 
   /**
    * Fetches all the queries provided and returns a {@link List}, containing all instances.
+   * <p><strong>Note</strong>: the implementation of this method can implies to suppress uncheck cast warnings.</p>
    *
    * @param queries the queries that will be executed into the database.
    * @param <M> the specific implementation, extending {@link Model}.
@@ -167,39 +173,133 @@ public abstract class PersistenceContext {
   protected abstract boolean exists(Function<DSLContext, Select<?>> query);
 
   // *******************************************************************************************************************
-  // Abstract Methods, relative to storage (insert or update)
+  // Methods relative to persistence (insert or update)
   // *******************************************************************************************************************
 
   /**
-   * Stores the {@link E} into the database.
+   * Stores the {@link P} into the database.
    *
-   * @param storableEntityHandler the {@link StorableEntityHandler} that will handle the storage process.
-   * @param entity the {@link E} to store.
+   * @param dslContext the {@link DSLContext}.
+   * @param persistableModel the {@link orm.models.PersistableModel} going to be persisted.
    * @param <V> the type of the errors instances, produced during the validation of the entity.
-   * @param <E> the precise subtype of the {@link Model}.
-   * @param <R> the precise subtype of the {@link org.jooq.Record}.
+   * @param <P> the precise subtype of {@link orm.models.PersistableModel}.
+   * @param <R> the precise subtype of the {@link UpdatableRecord}.
    */
-  protected abstract <V, E extends Model & IValidatableModel<V>, R extends UpdatableRecord<R>> void store(
-      StorableEntityHandler<V, E, R> storableEntityHandler, E entity);
+  protected final <V, R extends UpdatableRecord<R>,
+                      P extends PersistableModel1<R> & ValidatableModel<V>> void persist(
+      final DSLContext dslContext, final P persistableModel) {
+    persist(dslContext, ModelPersistorFactory.of(persistableModel));
+  }
+
+  /**
+   * Stores the {@link P} into the database.
+   *
+   * @param persistableModel the {@link orm.models.PersistableModel} going to be persisted.
+   * @param <V> the type of the errors instances, produced during the validation of the entity.
+   * @param <P> the precise subtype of {@link orm.models.PersistableModel}.
+   * @param <R> the precise subtype of the {@link UpdatableRecord}.
+   */
+  protected final <V, R extends UpdatableRecord<R>,
+                      P extends PersistableModel1<R> & ValidatableModel<V>> void persist(final P persistableModel) {
+    persist(ModelPersistorFactory.of(persistableModel));
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      P extends PersistableModel2<R1, R2> & ValidatableModel<V>> void persist(
+      final DSLContext dslContext, final P persistableModel) {
+    persist(dslContext, ModelPersistorFactory.of(persistableModel));
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      P extends PersistableModel2<R1, R2> & ValidatableModel<V>> void persist(
+      final P persistableModel) {
+    persist(ModelPersistorFactory.of(persistableModel));
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      R3 extends UpdatableRecord<R3>,
+                      P extends PersistableModel3<R1, R2, R3> & ValidatableModel<V>> void persist(
+      final DSLContext dslContext, final P persistableModel) {
+    persist(dslContext, ModelPersistorFactory.of(persistableModel));
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      R3 extends UpdatableRecord<R3>,
+                      P extends PersistableModel3<R1, R2, R3> & ValidatableModel<V>> void persist(
+      final P persistableModel) {
+    persist(ModelPersistorFactory.of(persistableModel));
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      R3 extends UpdatableRecord<R3>,
+                      R4 extends UpdatableRecord<R4>,
+                      P extends PersistableModel4<R1, R2, R3, R4> & ValidatableModel<V>> void persist(
+      final DSLContext dslContext, final P persistableModel) {
+    persist(dslContext, ModelPersistorFactory.of(persistableModel));
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      R3 extends UpdatableRecord<R3>,
+                      R4 extends UpdatableRecord<R4>,
+                      P extends PersistableModel4<R1, R2, R3, R4> & ValidatableModel<V>> void persist(
+      final P persistableModel) {
+    persist(ModelPersistorFactory.of(persistableModel));
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      R3 extends UpdatableRecord<R3>,
+                      R4 extends UpdatableRecord<R4>,
+                      R5 extends UpdatableRecord<R5>,
+                      P extends PersistableModel5<R1, R2, R3, R4, R5> & ValidatableModel<V>> void persist(
+      final DSLContext dslContext, final P persistableModel) {
+    persist(dslContext, ModelPersistorFactory.of(persistableModel));
+  }
+
+  protected final <V, R1 extends UpdatableRecord<R1>,
+                      R2 extends UpdatableRecord<R2>,
+                      R3 extends UpdatableRecord<R3>,
+                      R4 extends UpdatableRecord<R4>,
+                      R5 extends UpdatableRecord<R5>,
+                      P extends PersistableModel5<R1, R2, R3, R4, R5> & ValidatableModel<V>> void persist(
+      final P persistableModel) {
+    persist(ModelPersistorFactory.of(persistableModel));
+  }
+
+  protected abstract void executeInTransaction(Consumer<DSLContext> usingTransaction);
+
+  private <V, P extends PersistableModel & ValidatableModel<V>,
+              Q extends ModelPersistor<V, P>> void persist(final Q modelPersistor) {
+    executeInTransaction(dslContext -> persist(dslContext, modelPersistor));
+  }
+
+  private <V, M extends Model,
+              P extends PersistableModel & ValidatableModel<V>,
+              Q extends ModelPersistor<V, P>> void persist(
+      final DSLContext dslContext, final Q modelPersistor) {
+
+    final List<V> errors = modelPersistor.getPersistableModel().errors(dslContext);
+    if (!errors.isEmpty()) {
+      throw new PersistenceException(modelPersistor.getPersistableModel().getClass());
+    }
+
+    for (ModelAction modelAction : modelPersistor.getPersistableModel().getPrePersistenceActions(dslContext))
+      modelAction.perform(this, dslContext);
+
+    modelPersistor.persist(this, dslContext);
+
+    for (ModelAction modelAction : modelPersistor.getPersistableModel().getPostPersistenceActions(dslContext))
+      modelAction.perform(this, dslContext);
+
+  }
 
   // *******************************************************************************************************************
   // Abstract Methods, relative to deletion
   // *******************************************************************************************************************
-
-  /**
-   * Deletes the {@link E} from the database.
-   *
-   * @param deletableEntityHandler the {@link DeletableEntityHandler} that will handle the deletion process.
-   * @param entity the {@link E} to delete.
-   * @param <E> the precise subtype of the {@link Model}.
-   * @param <R> the precise subtype of the {@link org.jooq.Record}.
-   */
-  protected abstract <E extends Model, R extends UpdatableRecord<R>> void delete(
-      DeletableEntityHandler<E, R> deletableEntityHandler,
-      E entity);
-
-  protected abstract <E extends Model, R extends UpdatableRecord<R>> void delete(
-      DeletableEntityHandler<E, R> deletableEntityHandler,
-      List<E> entities);
-
 }

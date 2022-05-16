@@ -1,19 +1,41 @@
 package models;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import jooq.tables.records.AccountRecord;
 import org.apache.commons.validator.routines.EmailValidator;
-import orm.models.Entity;
-import orm.models.IStorableEntity;
+import org.jooq.DSLContext;
+import orm.LazyLoader;
+import orm.Mapper;
+import orm.Model;
+import orm.RepositoriesHandler;
+import orm.models.PersistableModel1;
+import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
 import repositories.AccountsRepository;
+import repositories.ColorSourcesRepository;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static jooq.Tables.ACCOUNT;
+
 /** The {@code Account} class is the representation of the table {@code account} in the <em>Briventory</em> database. */
-public final class Account extends Entity<AccountsRepository> implements IStorableEntity<ValidationError> {
+public final class Account extends Model implements PersistableModel1<AccountRecord>,
+                                                        ValidatableModel<ValidationError> {
+
+  // *******************************************************************************************************************
+  // Instance factory
+  // *******************************************************************************************************************
+  /** the {@link Mapper} that will create an instance of {@link Account} from an instance of {@link AccountRecord}. */
+  public static final Mapper<AccountRecord, Account> ACCOUNT_MAPPER =
+      accountRecord -> new Account(accountRecord.getId(),
+                                   accountRecord.getIdColorSource(),
+                                   accountRecord.getFirstname(),
+                                   accountRecord.getLastname(),
+                                   accountRecord.getEmail(),
+                                   accountRecord.getPassword());
 
   // *******************************************************************************************************************
   // Constants
@@ -27,31 +49,74 @@ public final class Account extends Entity<AccountsRepository> implements IStorab
   /** The database identifier. */
   private Long id;
   /** The foreign key identifier of the {@link ColorsSource}. */
-  private Long idColorSource;
+  private final LazyLoader<Long, ColorsSource> colorsSourceLazyLoader =
+      new LazyLoader<>(idColorSource -> RepositoriesHandler.of(ColorSourcesRepository.class)
+                                                           .findById(idColorSource));
   /** The first name. */
   private String firstname;
   /** The last name. */
   private String lastname;
   /** The e-mail address. */
   private String email;
-  /** The password. */
+  /**
+   * The password.
+   *
+   * @deprecated It is maybe a bad idea to keep the hashed password in the memory !
+   */
+  @Deprecated(forRemoval = false)
   private String password;
 
   /** Does this account has administrator rights ? */
-  private Boolean isAdministrator;
+  private final LazyLoader<Account, Boolean> administratorLazyLoader =
+      new LazyLoader<>(account -> RepositoriesHandler.of(AccountsRepository.class)
+                                                     .isAdministrator(account));
   /** Does this account is locked. */
-  private Boolean isLocked;
+  private final LazyLoader<Account, Boolean> isLockedLazyLoader =
+      new LazyLoader<>(account -> RepositoriesHandler.of(AccountsRepository.class)
+                                                     .isLocked(account));
 
   // *******************************************************************************************************************
   // Construction & Initialization
   // *******************************************************************************************************************
 
+  /** Creates an empty {@link Account} instance. */
+  public Account() { /* No-op. */ }
+
   /**
-   * Builds an empty {@link Account} instance.
+   * Creates a new {@link Account} instance.
    *
-   * @param accountRepository the instance of {@link AccountsRepository}.
+   * @param idColorSource the identifier of the {@link ColorsSource}. It can be {@code null} if this account has no
+   * default color source attached to it.
+   * @param firstname the first name.
+   * @param lastname the last name.
+   * @param email the email address.
+   * @param password the hashed password.
    */
-  public Account(final AccountsRepository accountRepository) { super(accountRepository); }
+  public Account(final Long idColorSource, final String firstname, final String lastname, final String email,
+                 final String password) {
+    colorsSourceLazyLoader.setKey(idColorSource);
+    this.firstname = firstname;
+    this.lastname = lastname;
+    this.email = email;
+    this.password = password;
+  }
+
+  /**
+   * Creates a new {@link Account} instance.
+   *
+   * @param id the identifier.
+   * @param idColorSource the identifier of the {@link ColorsSource}. It can be {@code null} if this account has no
+   * default color source attached to it.
+   * @param firstname the first name.
+   * @param lastname the last name.
+   * @param email the email address.
+   * @param password the hashed password.
+   */
+  private Account(final Long id, final Long idColorSource, final String firstname, final String lastname,
+                  final String email, final String password) {
+    this(idColorSource, firstname, lastname, email, password);
+    this.id = id;
+  }
 
   // *******************************************************************************************************************
   // Object Overrides
@@ -94,12 +159,29 @@ public final class Account extends Entity<AccountsRepository> implements IStorab
   }
 
   // *******************************************************************************************************************
-  // Entity Overrides
+  // PersistableModel1 Overrides
+  // *******************************************************************************************************************
+
+  @Override
+  public AccountRecord getUpdatableRecord(final DSLContext dslContext) {
+    final AccountRecord accountRecord = dslContext.newRecord(ACCOUNT);
+    return accountRecord.setId(id)
+                        .setFirstname(firstname)
+                        .setLastname(lastname)
+                        .setEmail(email)
+                        .setIdColorSource(colorsSourceLazyLoader.getKey());
+  }
+
+  @Override
+  public void lastRefresh(final AccountRecord accountRecord) { id = accountRecord.getId(); }
+
+  // *******************************************************************************************************************
+  // IValidatableModel Overrides
   // *******************************************************************************************************************
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> isValid() {
+  public List<ValidationError> errors(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
     if (firstname == null || firstname.isBlank())
       errors.add(new ValidationError("firstname", "account.error.firstname.empty"));
@@ -110,7 +192,7 @@ public final class Account extends Entity<AccountsRepository> implements IStorab
     if (email == null || email.isBlank())
       errors.add(new ValidationError("email", "account.error.email.empty"));
     if (!EmailValidator.getInstance().isValid(email))
-      errors.add(new ValidationError("email", "account.error.email.invald"));
+      errors.add(new ValidationError("email", "account.error.email.invalid"));
     return errors;
   }
 
@@ -141,7 +223,7 @@ public final class Account extends Entity<AccountsRepository> implements IStorab
    * @return this instance.
    */
   public Account setIdColorSource(final Long idColorSource) {
-    this.idColorSource = idColorSource;
+    colorsSourceLazyLoader.setKey(idColorSource);
     return this;
   }
 
@@ -153,16 +235,17 @@ public final class Account extends Entity<AccountsRepository> implements IStorab
    * @return this instance.
    */
   public Account setColorSource(final ColorsSource colorSource) {
-    setIdColorSource(colorSource.getId());
+    colorsSourceLazyLoader.setKey(colorSource.getId());
+    colorsSourceLazyLoader.setValue(colorSource);
     return this;
   }
 
   /** @return the identifier of the {@link ColorsSource}. */
-  public Long getIdColorSource() { return idColorSource; }
+  public Long getIdColorSource() { return colorsSourceLazyLoader.getKey(); }
 
   /** @return the {@link ColorsSource} instance. */
   public Optional<ColorsSource> getColorsSource() {
-    return Optional.ofNullable(getRepository().getColorSourcesRepository().findById(idColorSource));
+    return Optional.ofNullable(colorsSourceLazyLoader.getValue());
   }
 
   /**
@@ -223,8 +306,8 @@ public final class Account extends Entity<AccountsRepository> implements IStorab
   }
 
   /**
-   * Sets the password using the clear text. The hash will be performed before setting the password to this {@link
-   * Account}.
+   * Sets the password using the clear text. The hash will be performed before setting the password to this
+   * {@link Account}.
    *
    * @param clearPassword the password as clear text.
    *
@@ -245,16 +328,16 @@ public final class Account extends Entity<AccountsRepository> implements IStorab
 
   /** @return {@code true} if this user is locked, otherwise {@code false}. */
   public boolean isLocked() {
-    if (isLocked == null)
-      isLocked = getRepository().isLocked(this);
-    return isLocked;
+    final var isLocked = isLockedLazyLoader.getValue();
+    if (isLocked != null) return isLocked;
+    return false;
   }
 
   /**
    * @return an {@link Optional} instance to determine if the value has been fetch ({@code true} or {@code false}) or is
    * not present if it has not been fetch.
    */
-  public Optional<Boolean> isLockedOptional() { return Optional.ofNullable(isLocked); }
+  public Optional<Boolean> isLockedOptional() { return Optional.ofNullable(isLockedLazyLoader.getValue()); }
 
   /**
    * Sets the locked status for this account.
@@ -264,7 +347,7 @@ public final class Account extends Entity<AccountsRepository> implements IStorab
    * @return this instance.
    */
   public Account setLocked(final boolean isLocked) {
-    this.isLocked = isLocked;
+    isLockedLazyLoader.setValue(isLocked);
     return this;
   }
 
@@ -274,9 +357,9 @@ public final class Account extends Entity<AccountsRepository> implements IStorab
 
   /** @return {@code true} if this user is an administrator, otherwise {@code false}. */
   public boolean isAdministrator() {
-    if (isAdministrator == null)
-      isAdministrator = getRepository().isAdministrator(this);
-    return isAdministrator;
+    final var isAdministrator = administratorLazyLoader.getValue();
+    if (isAdministrator != null) return isAdministrator;
+    return false;
   }
 
   /**
@@ -284,7 +367,7 @@ public final class Account extends Entity<AccountsRepository> implements IStorab
    * not present if it has not been fetch.
    */
   public Optional<Boolean> isAdministratorOptional() {
-    return Optional.ofNullable(isAdministrator);
+    return Optional.ofNullable(administratorLazyLoader.getValue());
   }
 
   /**
@@ -295,7 +378,7 @@ public final class Account extends Entity<AccountsRepository> implements IStorab
    * @return this instance.
    */
   public Account setAdministrator(final boolean isAdministrator) {
-    this.isAdministrator = isAdministrator;
+    administratorLazyLoader.setValue(isAdministrator);
     return this;
   }
 
