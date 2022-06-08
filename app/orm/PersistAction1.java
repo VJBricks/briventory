@@ -8,13 +8,13 @@ import orm.models.ValidatableModel;
 import java.util.Collections;
 import java.util.List;
 
-public final class PersistAction1<V, M extends Model, R extends UpdatableRecord<R>,
+public final class PersistAction1<V, R extends UpdatableRecord<R>,
                                      P extends PersistableModel1<R> & ValidatableModel<V>>
     extends ModelAction {
 
   private final List<P> persistableModels;
 
-  public PersistAction1(final List<P> persistableModels) {
+  PersistAction1(final List<P> persistableModels) {
     this.persistableModels = persistableModels;
   }
 

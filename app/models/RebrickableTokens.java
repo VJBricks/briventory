@@ -31,7 +31,7 @@ public final class RebrickableTokens extends Model implements PersistableModel1<
   // *******************************************************************************************************************
 
   @Override
-  public RebrickableTokensRecord getUpdatableRecord(final DSLContext dslContext) {
+  public RebrickableTokensRecord createRecord1(final DSLContext dslContext) {
     final RebrickableTokensRecord rebrickableTokensRecord = dslContext.newRecord(REBRICKABLE_TOKENS);
     return rebrickableTokensRecord.setIdAccount(idAccount)
                                   .setKey(key)
@@ -39,7 +39,7 @@ public final class RebrickableTokens extends Model implements PersistableModel1<
   }
 
   @Override
-  public void lastRefresh(final RebrickableTokensRecord rebrickableTokensRecord) { /* Nothing to do */ }
+  public void refresh1(final RebrickableTokensRecord rebrickableTokensRecord) { /* Nothing to do */ }
 
   // *******************************************************************************************************************
   // ValidatableModel Overrides
@@ -47,7 +47,7 @@ public final class RebrickableTokens extends Model implements PersistableModel1<
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> errors(final DSLContext dslContext) {
+  public List<ValidationError> validate(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
     if (key == null || key.isBlank())
       errors.add(new ValidationError("key", "rebrickableTokens.error.key.empty"));

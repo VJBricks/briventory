@@ -25,9 +25,7 @@
             <generatedAnnotationDate>true</generatedAnnotationDate>
 
             <nullableAnnotation>true</nullableAnnotation>
-            <!--<nullableAnnotationType>javax.annotation.Nullable</nullableAnnotationType>-->
             <nonnullAnnotation>true</nonnullAnnotation>
-            <!--<nonnullAnnotationType>javax.annotation.Nonnull</nonnullAnnotationType>-->
 
             <generatedSerialVersionUID>HASH</generatedSerialVersionUID>
 

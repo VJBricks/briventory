@@ -1,10 +1,11 @@
 package models;
 
-import database.BriventoryDBException;
 import junit5.J5WithApplication;
+import org.jooq.exception.DataAccessException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import orm.PersistenceException;
 import repositories.AccountsRepository;
 
 import java.util.LinkedList;
@@ -54,19 +55,19 @@ class AdminTest extends J5WithApplication {
   @BeforeEach
   public void setUp() {
     assertDoesNotThrow(() -> {
-      accountsRepository = getApp().injector().instanceOf(AccountsRepository.class);
+      if (accountsRepository == null)
+        accountsRepository = instanceOf(AccountsRepository.class);
       assertNotNull(accountsRepository);
       ids.clear();
 
       if (!accountsRepository.hasActiveAdministrator()) {
-        Account account = accountsRepository.buildInstance()
-                                            .setFirstname(BRUCE_FIRSTNAME)
-                                            .setLastname(BRUCE_LASTNAME)
-                                            .setEmail(BRUCE_EMAIL)
-                                            .setClearPassword(BRUCE_PASS)
-                                            .setAdministrator(true)
-                                            .setLocked(false);
-        accountsRepository.store(account);
+        Account account = new Account().setFirstname(BRUCE_FIRSTNAME)
+                                       .setLastname(BRUCE_LASTNAME)
+                                       .setEmail(BRUCE_EMAIL)
+                                       .setClearPassword(BRUCE_PASS)
+                                       .setAdministrator(true)
+                                       .setLocked(false);
+        accountsRepository.persist(account);
       }
     });
   }
@@ -89,13 +90,12 @@ class AdminTest extends J5WithApplication {
   void adminInsertRemove() {
     assertNotNull(accountsRepository);
     assertDoesNotThrow(() -> {
-      Account account = accountsRepository.buildInstance()
-                                          .setFirstname(KATHY_FIRSTNAME)
-                                          .setLastname(KATHY_LASTNAME)
-                                          .setEmail(KATHY_EMAIL)
-                                          .setClearPassword(KATHY_PASS)
-                                          .setAdministrator(true);
-      accountsRepository.store(account);
+      Account account = new Account().setFirstname(KATHY_FIRSTNAME)
+                                     .setLastname(KATHY_LASTNAME)
+                                     .setEmail(KATHY_EMAIL)
+                                     .setClearPassword(KATHY_PASS)
+                                     .setAdministrator(true);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
     });
 
@@ -109,13 +109,12 @@ class AdminTest extends J5WithApplication {
   @Test
   void adminInsertMissingFirstname() {
     assertNotNull(accountsRepository);
-    assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      Account account = accountsRepository.buildInstance()
-                                          .setLastname(BARBARA_LASTNAME)
-                                          .setEmail(BARBARA_EMAIL)
-                                          .setClearPassword(BARBARA_PASS)
-                                          .setAdministrator(true);
-      accountsRepository.store(account);
+    assertThrows(PersistenceException.class, () -> { // NOSONAR
+      Account account = new Account().setLastname(BARBARA_LASTNAME)
+                                     .setEmail(BARBARA_EMAIL)
+                                     .setClearPassword(BARBARA_PASS)
+                                     .setAdministrator(true);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
@@ -123,13 +122,12 @@ class AdminTest extends J5WithApplication {
   @Test
   void adminInsertMissingLastname() {
     assertNotNull(accountsRepository);
-    assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      Account account = accountsRepository.buildInstance()
-                                          .setFirstname(BARBARA_FIRSTNAME)
-                                          .setEmail(BARBARA_EMAIL)
-                                          .setClearPassword(BARBARA_PASS)
-                                          .setAdministrator(true);
-      accountsRepository.store(account);
+    assertThrows(PersistenceException.class, () -> { // NOSONAR
+      Account account = new Account().setFirstname(BARBARA_FIRSTNAME)
+                                     .setEmail(BARBARA_EMAIL)
+                                     .setClearPassword(BARBARA_PASS)
+                                     .setAdministrator(true);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
@@ -137,12 +135,11 @@ class AdminTest extends J5WithApplication {
   @Test
   void adminInsertEmptyName() {
     assertNotNull(accountsRepository);
-    assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      Account account = accountsRepository.buildInstance()
-                                          .setEmail(BARBARA_EMAIL)
-                                          .setClearPassword(BARBARA_PASS)
-                                          .setAdministrator(true);
-      accountsRepository.store(account);
+    assertThrows(PersistenceException.class, () -> { // NOSONAR
+      Account account = new Account().setEmail(BARBARA_EMAIL)
+                                     .setClearPassword(BARBARA_PASS)
+                                     .setAdministrator(true);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
@@ -150,13 +147,12 @@ class AdminTest extends J5WithApplication {
   @Test
   void adminInsertMissingEmail() {
     assertNotNull(accountsRepository);
-    assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      Account account = accountsRepository.buildInstance()
-                                          .setFirstname(BARBARA_FIRSTNAME)
-                                          .setLastname(BARBARA_LASTNAME)
-                                          .setClearPassword(BARBARA_PASS)
-                                          .setAdministrator(true);
-      accountsRepository.store(account);
+    assertThrows(PersistenceException.class, () -> { // NOSONAR
+      Account account = new Account().setFirstname(BARBARA_FIRSTNAME)
+                                     .setLastname(BARBARA_LASTNAME)
+                                     .setClearPassword(BARBARA_PASS)
+                                     .setAdministrator(true);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
@@ -164,14 +160,13 @@ class AdminTest extends J5WithApplication {
   @Test
   void adminInsertEmptyEmail() {
     assertNotNull(accountsRepository);
-    assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      Account account = accountsRepository.buildInstance()
-                                          .setFirstname(BARBARA_FIRSTNAME)
-                                          .setLastname(BARBARA_LASTNAME)
-                                          .setEmail("")
-                                          .setClearPassword(BARBARA_PASS)
-                                          .setAdministrator(true);
-      accountsRepository.store(account);
+    assertThrows(PersistenceException.class, () -> { // NOSONAR
+      Account account = new Account().setFirstname(BARBARA_FIRSTNAME)
+                                     .setLastname(BARBARA_LASTNAME)
+                                     .setEmail("")
+                                     .setClearPassword(BARBARA_PASS)
+                                     .setAdministrator(true);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
@@ -179,14 +174,13 @@ class AdminTest extends J5WithApplication {
   @Test
   void adminInsertBadEmail() {
     assertNotNull(accountsRepository);
-    assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      Account account = accountsRepository.buildInstance()
-                                          .setFirstname(BARBARA_FIRSTNAME)
-                                          .setLastname(BARBARA_LASTNAME)
-                                          .setEmail("barbara.gordon-city.gc")
-                                          .setClearPassword(BARBARA_PASS)
-                                          .setAdministrator(true);
-      accountsRepository.store(account);
+    assertThrows(PersistenceException.class, () -> { // NOSONAR
+      Account account = new Account().setFirstname(BARBARA_FIRSTNAME)
+                                     .setLastname(BARBARA_LASTNAME)
+                                     .setEmail("barbara.gordon-city.gc")
+                                     .setClearPassword(BARBARA_PASS)
+                                     .setAdministrator(true);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
@@ -194,13 +188,12 @@ class AdminTest extends J5WithApplication {
   @Test
   void adminInsertMissingPassword() {
     assertNotNull(accountsRepository);
-    assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      Account account = accountsRepository.buildInstance()
-                                          .setFirstname(BARBARA_FIRSTNAME)
-                                          .setLastname(BARBARA_LASTNAME)
-                                          .setEmail(BARBARA_EMAIL)
-                                          .setAdministrator(true);
-      accountsRepository.store(account);
+    assertThrows(PersistenceException.class, () -> { // NOSONAR
+      Account account = new Account().setFirstname(BARBARA_FIRSTNAME)
+                                     .setLastname(BARBARA_LASTNAME)
+                                     .setEmail(BARBARA_EMAIL)
+                                     .setAdministrator(true);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
@@ -208,13 +201,12 @@ class AdminTest extends J5WithApplication {
   @Test
   void adminInsertEmptyPassword() {
     assertNotNull(accountsRepository);
-    assertThrows(BriventoryDBException.class, () -> { // NOSONAR
-      Account account = accountsRepository.buildInstance()
-                                          .setFirstname(BARBARA_FIRSTNAME)
-                                          .setLastname(BARBARA_LASTNAME)
-                                          .setEmail(BARBARA_EMAIL)
-                                          .setAdministrator(true);
-      accountsRepository.store(account);
+    assertThrows(PersistenceException.class, () -> { // NOSONAR
+      Account account = new Account().setFirstname(BARBARA_FIRSTNAME)
+                                     .setLastname(BARBARA_LASTNAME)
+                                     .setEmail(BARBARA_EMAIL)
+                                     .setAdministrator(true);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
     });
   }
@@ -222,7 +214,7 @@ class AdminTest extends J5WithApplication {
   @Test
   void adminRemoveAll() {
     assertNotNull(accountsRepository);
-    assertThrows(BriventoryDBException.class, () -> { // NOSONAR
+    assertThrows(DataAccessException.class, () -> { // NOSONAR
       accountsRepository.delete(accountsRepository.getAdministrators());
     });
   }
@@ -232,25 +224,24 @@ class AdminTest extends J5WithApplication {
     assertNotNull(accountsRepository);
 
     assertDoesNotThrow(() -> {
-      Account account = accountsRepository.buildInstance()
-                                          .setFirstname(JOKER_FIRSTNAME)
-                                          .setLastname(JOKER_LASTNAME)
-                                          .setEmail(JOKER_EMAIL)
-                                          .setClearPassword(JOKER_PASS)
-                                          .setAdministrator(true);
+      Account account = new Account().setFirstname(JOKER_FIRSTNAME)
+                                     .setLastname(JOKER_LASTNAME)
+                                     .setEmail(JOKER_EMAIL)
+                                     .setClearPassword(JOKER_PASS)
+                                     .setAdministrator(true);
 
-      accountsRepository.store(account);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
 
       assertFalse(accountsRepository.isLocked(account));
 
       account.setLocked(true);
-      accountsRepository.store(account);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
       assertTrue(accountsRepository.isLocked(account));
 
       account.setLocked(false);
-      accountsRepository.store(account);
+      accountsRepository.persist(account);
       if (!ids.contains(account.getId())) ids.add(account.getId());
       assertFalse(accountsRepository.isLocked(account));
     });

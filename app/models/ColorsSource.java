@@ -43,14 +43,14 @@ public final class ColorsSource extends Model implements PersistableModel1<Color
   // *******************************************************************************************************************
 
   @Override
-  public ColorSourceRecord getUpdatableRecord(final DSLContext dslContext) {
+  public ColorSourceRecord createRecord1(final DSLContext dslContext) {
     final ColorSourceRecord colorSourceRecord = dslContext.newRecord(COLOR_SOURCE);
     return colorSourceRecord.setId(id)
                             .setName(name)
                             .setUrl(url);
   }
 
-  public void lastRefresh(final ColorSourceRecord colorSourceRecord) { id = colorSourceRecord.getId(); }
+  public void refresh1(final ColorSourceRecord colorSourceRecord) { id = colorSourceRecord.getId(); }
 
   // *******************************************************************************************************************
   // IValidatableEntity Overrides
@@ -58,7 +58,7 @@ public final class ColorsSource extends Model implements PersistableModel1<Color
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> errors(final DSLContext dslContext) {
+  public List<ValidationError> validate(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
     if (name == null || name.isBlank())
       errors.add(new ValidationError("name", "colorsSource.error.name.empty"));

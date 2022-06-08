@@ -3,6 +3,7 @@ package models;
 import jooq.tables.records.ContainerTypeRecord;
 import org.jooq.DSLContext;
 import orm.Model;
+import orm.models.DeletableModel;
 import orm.models.PersistableModel1;
 import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
@@ -14,7 +15,8 @@ import java.util.List;
 import static jooq.Tables.CONTAINER_TYPE;
 
 public final class ContainerType extends Model implements PersistableModel1<ContainerTypeRecord>,
-                                                              ValidatableModel<ValidationError> {
+                                                              ValidatableModel<ValidationError>,
+                                                              DeletableModel<ValidationError, ContainerTypeRecord> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -47,20 +49,26 @@ public final class ContainerType extends Model implements PersistableModel1<Cont
   }
 
   // *******************************************************************************************************************
-  // PersistableModel1 Overrides
+  // PersistableModel1 & DeletableModel Overrides
   // *******************************************************************************************************************
+  @Override
+  public void refresh1(final ContainerTypeRecord containerTypeRecord) { id = containerTypeRecord.getId(); }
 
   @Override
-  public ContainerTypeRecord getUpdatableRecord(final DSLContext dslContext) {
+  public ContainerTypeRecord createRecord1(final DSLContext dslContext) {
     final ContainerTypeRecord containerTypeRecord = dslContext.newRecord(CONTAINER_TYPE);
-    return containerTypeRecord.setId(id)
-                              .setName(name)
-                              .setMinLockers(minLockers)
-                              .setMaxLockers(maxLockers)
-                              .setNumberFormatting(numberFormatting);
+    containerTypeRecord.setName(name)
+                       .setMinLockers(minLockers)
+                       .setMaxLockers(maxLockers)
+                       .setNumberFormatting(numberFormatting);
+    if (id != null) containerTypeRecord.setId(id);
+    return containerTypeRecord;
   }
 
-  public void lastRefresh(final ContainerTypeRecord containerTypeRecord) { id = containerTypeRecord.getId(); }
+  @Override
+  public ContainerTypeRecord createDeletionRecord(final DSLContext dslContext) {
+    return createRecord1(dslContext);
+  }
 
   // *******************************************************************************************************************
   // ValidatableModel Overrides
@@ -71,7 +79,7 @@ public final class ContainerType extends Model implements PersistableModel1<Cont
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> errors(final DSLContext dslContext) {
+  public List<ValidationError> validate(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
 
     if (name == null || name.isBlank())

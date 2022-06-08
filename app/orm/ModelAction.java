@@ -11,6 +11,12 @@ import org.jooq.DSLContext;
 @SuppressWarnings("java:S1610")
 public abstract class ModelAction {
 
+  /**
+   * Performs the corresponding action.
+   *
+   * @param persistenceContext the {@link PersistenceContext}, needed to call the corresponding {@code persist} method.
+   * @param dslContext the {@link DSLContext}.
+   */
   abstract void perform(PersistenceContext persistenceContext, DSLContext dslContext);
 
 }

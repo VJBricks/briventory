@@ -11,23 +11,23 @@
   FieldConstructor(singleLineFormConstructor.f)
 }
 
-@signedin(title = messages("user.settings.title"), account) {
+@signedin(title = messages("account.settings.title"), account) {
   <div class="container-fluid">
 
-    <h2>@messages("user.settings.title")</h2>
-    <p>@Html(messages("user.settings.explained"))</p>
+    <h2>@messages("account.settings.title")</h2>
+    <p>@Html(messages("account.settings.explained"))</p>
 
     <div class="accordion" id="settingsAccordion">
 
       <div class="accordion-item">
         <h2 class="accordion-header collapsed" id="credentials">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#credentialsCollapse" aria-expanded="false" aria-controls="credentialsCollapse">
-          @messages("user.settings.credentials.title")
+          @messages("account.settings.credentials.title")
           </button>
         </h2>
         <div id="credentialsCollapse" class="accordion-collapse collapse" aria-labelledby="credentials" data-bs-parent="#settingsAccordion">
           <div class="accordion-body">
-            <p>@Html(messages("user.settings.credentials.explained"))</p>
+            <p>@Html(messages("account.settings.credentials.explained"))</p>
             <hr>
 
               @helper.form(action = controllers.accounts.routes.AccountsController.updateEmail(), Symbol("id") -> "email") {
@@ -35,16 +35,21 @@
                 @helper.inputText(emailForm("email"),
                   Symbol("class") -> "form-control",
                   Symbol("type") -> "email",
-                  Symbol("_label") -> messages("user.settings.credentials.email.label"),
+                  Symbol("_label") -> messages("account.settings.credentials.email.label"),
                   Symbol("_button") -> messages("button.update.caption"),
                   Symbol("_showConstraints") -> false)
               }
 
               @helper.form(action = controllers.accounts.routes.AccountsController.updateName(), Symbol("id") -> "name") {
                 @helper.CSRF.formField
-                @helper.inputText(nameForm("name"),
+                @helper.inputText(nameForm("firstname"),
                   Symbol("class") -> "form-control",
-                  Symbol("_label") -> messages("user.settings.credentials.name.label"),
+                  Symbol("_label") -> messages("account.settings.credentials.firstname.label"),
+                  Symbol("_button") -> messages("button.update.caption"),
+                  Symbol("_showConstraints") -> false)
+                @helper.inputText(nameForm("lastname"),
+                  Symbol("class") -> "form-control",
+                  Symbol("_label") -> messages("account.settings.credentials.lastname.label"),
                   Symbol("_button") -> messages("button.update.caption"),
                   Symbol("_showConstraints") -> false)
               }
@@ -56,12 +61,12 @@
       <div class="accordion-item">
         <h2 class="accordion-header" id="bricklink">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bricklinkCollapse" aria-expanded="false" aria-controls="bricklinkCollapse">
-          @messages("user.settings.bricklink.sync.title")
+          @messages("account.settings.bricklink.sync.title")
           </button>
         </h2>
         <div id="bricklinkCollapse" class="accordion-collapse collapse" aria-labelledby="bricklink" data-bs-parent="#settingsAccordion">
           <div class="accordion-body">
-            <p>@Html(messages("user.settings.bricklink.sync.explained"))</p>
+            <p>@Html(messages("account.settings.bricklink.sync.explained"))</p>
             <hr>
             <strong>This is the first item's accordion body.</strong>
             It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>

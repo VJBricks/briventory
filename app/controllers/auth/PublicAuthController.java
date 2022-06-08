@@ -93,8 +93,8 @@ public final class PublicAuthController extends Controller {
   }
 
   /**
-   * Performs the sign in, using the form values retrieved into the request. The view encapsulated into the {@link
-   * Result} instance depends on the data validation:
+   * Performs the sign in, using the form values retrieved into the request. The view encapsulated into the
+   * {@link Result} instance depends on the data validation:
    * <ul>
    *   <li>a <em>bad request</em> {@link Result} if the form contains errors or on wrong credentials;</li>
    *   <li>the redirection to the index page if the authentication succeeded.</li>
@@ -179,13 +179,12 @@ public final class PublicAuthController extends Controller {
                                            request,
                                            messagesApi.preferred(request)));
 
-    final var account = accountsRepository.buildInstance()
-                                          .setFirstname(form.get().getFirstname())
-                                          .setLastname(form.get().getLastname())
-                                          .setEmail(form.get().getEmail())
-                                          .setClearPassword(form.get().getPassword())
-                                          .setAdministrator(true);
-    accountsRepository.store(account);
+    final var account = new Account(form.get().getFirstname(),
+                                    form.get().getLastname(),
+                                    form.get().getEmail(),
+                                    form.get().getPassword(),
+                                    true);
+    accountsRepository.persist(account);
     return redirect(routes.PublicAuthController.signIn(null));
   }
 

@@ -1,11 +1,13 @@
 package orm;
 
 import org.jooq.DSLContext;
+import org.jooq.Function3;
 import org.jooq.Record;
 import org.jooq.ResultQuery;
 import org.jooq.Select;
 import org.jooq.UpdatableRecord;
 import org.jooq.lambda.tuple.Tuple2;
+import orm.models.DeletableModel;
 import orm.models.PersistableModel1;
 import orm.models.PersistableModel2;
 import orm.models.PersistableModel3;
@@ -15,6 +17,7 @@ import orm.models.ValidatableModel;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -76,6 +79,25 @@ public abstract class Repository<M extends Model> {
    * Fetches data from the database and returns the result as a {@link List} of instances corresponding to the type
    * {@link M}.
    *
+   * @param factory the {@link Mapper} that will create instances of type {@link M}.
+   * @param dslContext the {@link DSLContext}.
+   * @param query the query that will be executed into the database.
+   * @param <R> the specific implementation, extending {@link Record}.
+   * @param <F> the specific implementation, extending {@link Mapper}.
+   *
+   * @return a {@link List} of {@link M} instances.
+   */
+  protected final <R extends Record, F extends Mapper<R, M>> List<M> fetch(
+      final F factory,
+      final DSLContext dslContext,
+      final Function<DSLContext, ResultQuery<R>> query) {
+    return persistenceContext.fetch(factory, query);
+  }
+
+  /**
+   * Fetches data from the database and returns the result as a {@link List} of instances corresponding to the type
+   * {@link M}.
+   *
    * @param query the query that will be executed into the database.
    * @param <R> the specific implementation, extending {@link Record}.
    * @param <F> the specific implementation, extending {@link Mapper}.
@@ -98,8 +120,8 @@ public abstract class Repository<M extends Model> {
   @SuppressWarnings("varargs")
   protected final List<M> unionAll(
       final Function<DSLContext,
-                        Tuple2<? extends Mapper<? extends Record, ? extends M>,
-                                  ? extends ResultQuery<? extends Record>>>... queries) {
+          Tuple2<? extends Mapper<? extends Record, ? extends M>,
+              ? extends ResultQuery<? extends Record>>>... queries) {
     return persistenceContext.unionAll(queries);
   }
 
@@ -117,9 +139,32 @@ public abstract class Repository<M extends Model> {
    * @throws org.jooq.exception.TooManyRowsException if the query returned more than one record.
    * @see ResultQuery#fetchOne()
    */
-  protected <R extends Record, F extends Mapper<R, M>> M fetchOne(
-      final F factory, final Function<DSLContext, ResultQuery<R>> query) {
+  protected final <R extends Record, F extends Mapper<R, M>> M fetchOne(
+      final F factory,
+      final Function<DSLContext, ResultQuery<R>> query) {
     return persistenceContext.fetchOne(factory, query);
+  }
+
+  /**
+   * Fetches the only one record of the query.
+   *
+   * @param factory the {@link Mapper} that will create instances of type {@link M}.
+   * @param dslContext the {@link DSLContext}.
+   * @param query the query that will be executed into the database.
+   * @param <R> the specific implementation, extending {@link Record}.
+   * @param <F> the specific implementation, extending {@link Mapper}.
+   *
+   * @return the instance of type {@link M}, or {@code null} if the query has no row.
+   *
+   * @throws org.jooq.exception.DataAccessException if something went wrong executing the query.
+   * @throws org.jooq.exception.TooManyRowsException if the query returned more than one record.
+   * @see ResultQuery#fetchOne()
+   */
+  protected final <R extends Record, F extends Mapper<R, M>> M fetchOne(
+      final F factory,
+      final DSLContext dslContext,
+      final Function<DSLContext, ResultQuery<R>> query) {
+    return persistenceContext.fetchOne(factory, dslContext, query);
   }
 
   /**
@@ -196,45 +241,114 @@ public abstract class Repository<M extends Model> {
     return persistenceContext.exists(query);
   }
 
+  /**
+   * Executes a {@code select exists} query, using the query provided as the sub-query.
+   *
+   * @param dslContext the {@link DSLContext}.
+   * @param query the query that will be used as the sub-query.
+   *
+   * @return {@code true} if the sub-query exports a least one record, otherwise {@code false}.
+   *
+   * @see DSLContext#fetchExists(Select)
+   */
+  protected boolean exists(final DSLContext dslContext, final Select<?> query) {
+    return persistenceContext.exists(dslContext, query);
+  }
+
   // *******************************************************************************************************************
   // Persistence
   // *******************************************************************************************************************
 
+  /**
+   * Persists the {@link PersistableModel1} provided.
+   *
+   * @param persistableModel the {@link PersistableModel1} to persist.
+   * @param <V> the type of the validation errors.
+   * @param <R> the precise subtype of {@link UpdatableRecord}.
+   * @param <P> the precise subtype that is a {@link orm.models.PersistableModel} and, also, a
+   * {@link ValidatableModel}.
+   */
   protected final <V, R extends UpdatableRecord<R>,
-                      P extends PersistableModel1<R> & ValidatableModel<V>> void persist(final P persistableModel) {
+      P extends PersistableModel1<R> & ValidatableModel<V>> void persist(final P persistableModel) {
     persistenceContext.persist(persistableModel);
   }
 
+  /**
+   * Persists the {@link PersistableModel1} provided.
+   *
+   * @param persistableModel the {@link PersistableModel1} to persist.
+   * @param <V> the type of the validation errors.
+   * @param <R1> the precise subtype of the first {@link UpdatableRecord}.
+   * @param <R2> the precise subtype of the second {@link UpdatableRecord}.
+   * @param <P> the precise subtype that is a {@link orm.models.PersistableModel} and, also, a
+   * {@link ValidatableModel}.
+   */
   protected final <V, R1 extends UpdatableRecord<R1>,
-                      R2 extends UpdatableRecord<R2>,
-                      P extends PersistableModel2<R1, R2> & ValidatableModel<V>> void persist(
+      R2 extends UpdatableRecord<R2>,
+      P extends PersistableModel2<R1, R2> & ValidatableModel<V>> void persist(
       final P persistableModel) {
     persistenceContext.persist(persistableModel);
   }
 
+  /**
+   * Persists the {@link PersistableModel1} provided.
+   *
+   * @param persistableModel the {@link PersistableModel1} to persist.
+   * @param <V> the type of the validation errors.
+   * @param <R1> the precise subtype of the first {@link UpdatableRecord}.
+   * @param <R2> the precise subtype of the second {@link UpdatableRecord}.
+   * @param <R3> the precise subtype of the third {@link UpdatableRecord}.
+   * @param <P> the precise subtype that is a {@link orm.models.PersistableModel} and, also, a
+   * {@link ValidatableModel}.
+   */
   protected final <V, R1 extends UpdatableRecord<R1>,
-                      R2 extends UpdatableRecord<R2>,
-                      R3 extends UpdatableRecord<R3>,
-                      P extends PersistableModel3<R1, R2, R3> & ValidatableModel<V>> void persist(
+      R2 extends UpdatableRecord<R2>,
+      R3 extends UpdatableRecord<R3>,
+      P extends PersistableModel3<R1, R2, R3> & ValidatableModel<V>> void persist(
       final P persistableModel) {
     persistenceContext.persist(persistableModel);
   }
 
+  /**
+   * Persists the {@link PersistableModel1} provided.
+   *
+   * @param persistableModel the {@link PersistableModel1} to persist.
+   * @param <V> the type of the validation errors.
+   * @param <R1> the precise subtype of the first {@link UpdatableRecord}.
+   * @param <R2> the precise subtype of the second {@link UpdatableRecord}.
+   * @param <R3> the precise subtype of the third {@link UpdatableRecord}.
+   * @param <R4> the precise subtype of the fourth {@link UpdatableRecord}.
+   * @param <P> the precise subtype that is a {@link orm.models.PersistableModel} and, also, a
+   * {@link ValidatableModel}.
+   */
   protected final <V, R1 extends UpdatableRecord<R1>,
-                      R2 extends UpdatableRecord<R2>,
-                      R3 extends UpdatableRecord<R3>,
-                      R4 extends UpdatableRecord<R4>,
-                      P extends PersistableModel4<R1, R2, R3, R4> & ValidatableModel<V>> void persist(
+      R2 extends UpdatableRecord<R2>,
+      R3 extends UpdatableRecord<R3>,
+      R4 extends UpdatableRecord<R4>,
+      P extends PersistableModel4<R1, R2, R3, R4> & ValidatableModel<V>> void persist(
       final P persistableModel) {
     persistenceContext.persist(persistableModel);
   }
 
+  /**
+   * Persists the {@link PersistableModel1} provided.
+   *
+   * @param persistableModel the {@link PersistableModel1} to persist.
+   * @param <V> the type of the validation errors.
+   * @param <R1> the precise subtype of the first {@link UpdatableRecord}.
+   * @param <R2> the precise subtype of the second {@link UpdatableRecord}.
+   * @param <R3> the precise subtype of the third {@link UpdatableRecord}.
+   * @param <R4> the precise subtype of the fourth {@link UpdatableRecord}.
+   * @param <R5> the precise subtype of the fifth {@link UpdatableRecord}.
+   * @param <P> the precise subtype that is a {@link orm.models.PersistableModel} and, also, a
+   * {@link ValidatableModel}.
+   */
   protected final <V, R1 extends UpdatableRecord<R1>,
-                      R2 extends UpdatableRecord<R2>,
-                      R3 extends UpdatableRecord<R3>,
-                      R4 extends UpdatableRecord<R4>,
-                      R5 extends UpdatableRecord<R5>,
-                      P extends PersistableModel5<R1, R2, R3, R4, R5> & ValidatableModel<V>> void persist(
+      R2 extends UpdatableRecord<R2>,
+      R3 extends UpdatableRecord<R3>,
+      R4 extends UpdatableRecord<R4>,
+      R5 extends UpdatableRecord<R5>,
+      P extends PersistableModel5<R1, R2, R3, R4, R5> & ValidatableModel<V>> void persist(
       final P persistableModel) {
     persistenceContext.persist(persistableModel);
   }
@@ -243,32 +357,66 @@ public abstract class Repository<M extends Model> {
   // Deletion
   // *******************************************************************************************************************
 
-  /**
-   * Deletes the {@link E} from the database.
-   *
-   * @param deletableEntityHandler the {@link DeletableEntityHandler} that will handle the deletion process.
-   * @param entity the {@link E} to delete.
-   * @param <E> the precise subtype of the {@link Model}.
-   * @param <R> the precise subtype of the {@link Record}.
-   */
-  /*public <E extends Model, R extends UpdatableRecord<R>> void delete(
-      final DeletableEntityHandler<E, R> deletableEntityHandler,
-      final E entity) {
-    persistenceContext.delete(deletableEntityHandler, entity);
-  }*/
+  protected final <V, R extends UpdatableRecord<R>, D extends DeletableModel<V, R>> void deleteInTransaction(
+      final D deletableModel) {
+    persistenceContext.deleteInTransaction(deletableModel);
+  }
+
+  protected final <V, R extends UpdatableRecord<R>, D extends DeletableModel<V, R>> void deleteAllInTransaction(
+      final List<D> deletableModels) {
+    persistenceContext.deleteAllInTransaction(deletableModels);
+  }
+
+  // *******************************************************************************************************************
+  // Validation
+  // *******************************************************************************************************************
 
   /**
-   * Deletes a {@link List} of {@link E} instances from the database.
+   * Validates the {@link V} provided.
    *
-   * @param deletableEntityHandler the {@link DeletableEntityHandler} that will handle the deletion process.
-   * @param entities the {@link List} of {@link E} instances to delete.
-   * @param <E> the precise subtype of the {@link Model}.
-   * @param <R> the precise subtype of the {@link Record}.
+   * @param validatableModel the {@link V} to validate.
+   * @param <R> The type of the validation results.
+   * @param <V> the precise subtype of {@link ValidatableModel}.
+   *
+   * @return a {@link List} containing all {@link R} instances.
    */
-  /*public <E extends Model, R extends UpdatableRecord<R>> void delete(
-      final DeletableEntityHandler<E, R> deletableEntityHandler,
-      final List<E> entities) {
-    persistenceContext.delete(deletableEntityHandler, entities);
-  }*/
+  protected final <R, V extends ValidatableModel<R>> List<R> validate(final V validatableModel) {
+    return persistenceContext.validate(validatableModel);
+  }
+
+  // *******************************************************************************************************************
+  // Lazy Loader Helpers
+  // *******************************************************************************************************************
+  protected final <K> ManyModelsLoader<K, M> createManyModelsLoader(
+      final K key,
+      final BiFunction<DSLContext, K, List<M>> fetcher) {
+    return new ManyModelsLoader<>(persistenceContext, key, fetcher);
+  }
+
+  protected final <K> ModelLoader<K, M> createModelLoader(final BiFunction<DSLContext, K, M> fetcher) {
+    return new ModelLoader<>(persistenceContext, fetcher);
+  }
+
+  protected final <K> ModelLoader<K, M> createModelLoader(final K key, final BiFunction<DSLContext, K, M> fetcher) {
+    return new ModelLoader<>(persistenceContext, key, fetcher);
+  }
+
+  protected final <K> OptionalModelLoader<K, M> createOptionalModelLoader(
+      final BiFunction<DSLContext, K, Optional<M>> fetcher) {
+    return new OptionalModelLoader<>(persistenceContext, fetcher);
+  }
+
+  protected final <K> OptionalModelLoader<K, M> createOptionalModelLoader(
+      final K key,
+      final BiFunction<DSLContext, K, Optional<M>> fetcher) {
+    return new OptionalModelLoader<>(persistenceContext, key, fetcher);
+  }
+
+  protected final <K, V, R extends Record> RecordLoader<K, V, R> createRecordLoader(
+      final K key,
+      final BiFunction<DSLContext, K, V> fetcher,
+      final Function3<DSLContext, K, V, R> recordCreator) {
+    return new RecordLoader<>(persistenceContext, key, fetcher, recordCreator);
+  }
 
 }

@@ -15,7 +15,7 @@ class GlobalControllerTest extends J5WithApplication {
         .method(Helpers.GET)
         .uri("/");
 
-    Result result = Helpers.route(getApp(), request);
+    Result result = resultFrom(request);
     Assertions.assertEquals(Http.Status.SEE_OTHER, result.status());
   }
 

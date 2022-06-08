@@ -1,4 +1,4 @@
-import scala.util.{Failure, Try}
+import scala.util.Failure
 
 name := """Briventory"""
 maintainer := "briventory@varani.ch"
@@ -20,7 +20,7 @@ javaOptions ++= Seq("--illegal-access=permit")
 
 // Include public assets during tests
 Test / unmanagedResourceDirectories += baseDirectory(_ / "target/web/public/test").value
-Test / fork := false
+Test / fork := true
 
 // Make verbose tests
 testOptions += Tests.Argument(jupiterTestFramework, "-v")
@@ -40,53 +40,61 @@ libraryDependencies ++= Seq(
   javaJdbc,
 
   guice,
-  "com.google.inject" % "guice" % "5.0.1",
+  "com.google.inject" % "guice" % "5.1.0",
 
   "javax.validation" % "validation-api" % "2.0.1.Final",
-  "jakarta.persistence" % "jakarta.persistence-api" % "3.0.0",
-  "jakarta.validation" % "jakarta.validation-api" % "3.0.1",
-  "org.jooq" % "jooq" % "3.16.2",
-  "org.jooq" % "jooq-codegen" % "3.16.2",
-  "org.jooq" % "jooq-meta" % "3.16.2",
+  "jakarta.persistence" % "jakarta.persistence-api" % "3.1.0",
+  "jakarta.validation" % "jakarta.validation-api" % "3.0.2",
+  "org.jooq" % "jooq" % "3.16.6",
+  "org.jooq" % "jooq-codegen" % "3.16.6",
+  "org.jooq" % "jooq-meta" % "3.16.6",
+  "org.jooq" % "jool" % "0.9.14",
 
   /* Both dependencies below are necessary to have validator working. */
   "org.glassfish" % "javax.el" % "3.0.1-b12",
 
   /*"javax.cache" % "cache-api" % "1.1.1",*/
-  "org.ehcache" % "ehcache" % "3.9.9",
-  "io.dropwizard.metrics" % "metrics-core" % "4.2.7"
+  "org.ehcache" % "ehcache" % "3.10.0",
+  "io.dropwizard.metrics" % "metrics-core" % "4.2.9"
 )
 
 // Libraries
 libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-text" % "1.9",
   "commons-validator" % "commons-validator" % "1.7",
-  "org.postgresql" % "postgresql" % "42.3.1",
+  "org.postgresql" % "postgresql" % "42.3.6",
   "org.hsqldb" % "hsqldb" % "2.6.1",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.12.5",
-  "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.13.1",
+  "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.13.3",
   "org.semver" % "api" % "0.9.33",
   "me.gosimple" % "nbvcxz" % "1.5.0",
   "at.favre.lib" % "bcrypt" % "0.9.0"
 )
 
+// To remove when Play2.9 is released
+libraryDependencies ++= Seq(
+  "io.jsonwebtoken" % "jjwt-api" % "0.11.5",
+  "io.jsonwebtoken" % "jjwt-impl" % "0.11.5",
+  "io.jsonwebtoken" % "jjwt-jackson" % "0.11.5"
+)
+
 // WebJars
 libraryDependencies ++= Seq(
-  "org.webjars" %% "webjars-play" % "2.8.8",
+  "org.webjars" %% "webjars-play" % "2.8.13",
   "org.webjars" % "jquery" % "3.6.0",
-  "org.webjars" % "jquery-ui" % "1.13.0",
+  "org.webjars" % "jquery-ui" % "1.13.1",
   "org.webjars" % "popper.js" % "2.9.3",
   "org.webjars" % "bootstrap" % "5.1.3",
-  "org.webjars" % "font-awesome" % "5.15.4",
+  "org.webjars" % "font-awesome" % "6.1.0",
   "org.webjars.bowergithub.dropbox" % "zxcvbn" % "4.4.2"
 )
 
 // Tests libraries
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++= Seq(
-  "org.assertj" % "assertj-core" % "3.22.0" % Test,
-  "org.awaitility" % "awaitility" % "4.1.1" % Test,
-  "net.aichler" % "jupiter-interface" % JupiterKeys.jupiterVersion.value % Test,
+  "org.assertj" % "assertj-core" % "3.23.1" % Test,
+  "org.awaitility" % "awaitility" % "4.2.0" % Test,
+  "net.aichler" % "jupiter-interface" % "0.10.0" % Test,
   "org.junit.jupiter" % "junit-jupiter-api" % "5.8.2" % Test,
   "org.junit.jupiter" % "junit-jupiter-engine" % "5.8.2" % Test,
   "org.junit.jupiter" % "junit-jupiter-params" % "5.8.2" % Test,

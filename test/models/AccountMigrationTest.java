@@ -19,13 +19,13 @@ class AccountMigrationTest extends J5WithApplication {
 
   private static final String JOKER_EMAIL = "jocker@vilain.gotham.com";
   private static final String JOKER_FIRSTNAME = "The";
-  private static final String JOKER_LASTNAME = "Jocker";
-  private static final String JOKER_PASS = "jocker493";
+  private static final String JOKER_LASTNAME = "Joker";
+  private static final String JOKER_PASS = "joker493";
 
   private static final String HARLEY_EMAIL = "harley.quinn@vilain.gotham.com";
   private static final String HARLEY_FIRSTNAME = "Harley";
   private static final String HARLEY_LASTNAME = "Quinn";
-  private static final String HARLEY_PASS = "hquinn685";
+  private static final String HARLEY_PASS = "h_quinn685";
 
   private AccountsRepository accountsRepository;
 
@@ -34,19 +34,19 @@ class AccountMigrationTest extends J5WithApplication {
   @BeforeEach
   public void setUp() {
     assertDoesNotThrow(() -> {
-      accountsRepository = getApp().injector().instanceOf(AccountsRepository.class);
+      if (accountsRepository == null)
+        accountsRepository = instanceOf(AccountsRepository.class);
       assertNotNull(accountsRepository);
       ids.clear();
 
       if (!accountsRepository.hasActiveAdministrator()) {
-        Account account = accountsRepository.buildInstance()
-                                            .setFirstname(BRUCE_FIRSTNAME)
-                                            .setLastname(BRUCE_LASTNAME)
-                                            .setEmail(BRUCE_EMAIL)
-                                            .setClearPassword(BRUCE_PASS)
-                                            .setAdministrator(true)
-                                            .setLocked(false);
-        accountsRepository.store(account);
+        Account account = new Account().setFirstname(BRUCE_FIRSTNAME)
+                                       .setLastname(BRUCE_LASTNAME)
+                                       .setEmail(BRUCE_EMAIL)
+                                       .setClearPassword(BRUCE_PASS)
+                                       .setAdministrator(true)
+                                       .setLocked(false);
+        accountsRepository.persist(account);
       }
     });
   }
@@ -65,18 +65,17 @@ class AccountMigrationTest extends J5WithApplication {
   void migrateAccountToAdmin() {
     assertNotNull(accountsRepository);
 
-    Account account = accountsRepository.buildInstance()
-                                        .setFirstname(HARLEY_FIRSTNAME)
-                                        .setLastname(HARLEY_LASTNAME)
-                                        .setEmail(HARLEY_EMAIL)
-                                        .setClearPassword(HARLEY_PASS);
+    Account account = new Account().setFirstname(HARLEY_FIRSTNAME)
+                                   .setLastname(HARLEY_LASTNAME)
+                                   .setEmail(HARLEY_EMAIL)
+                                   .setClearPassword(HARLEY_PASS);
 
     assertDoesNotThrow(() -> {
-      accountsRepository.store(account);
+      accountsRepository.persist(account);
       if (account.getId() != null && !ids.contains(account.getId())) ids.add(account.getId());
 
       account.setAdministrator(true);
-      accountsRepository.store(account);
+      accountsRepository.persist(account);
       assertTrue(accountsRepository.getAdministrators().contains(account));
     });
 
@@ -86,22 +85,21 @@ class AccountMigrationTest extends J5WithApplication {
   void migrateAdminToAccount() {
     assertNotNull(accountsRepository);
 
-    Account account = accountsRepository.buildInstance()
-                                        .setFirstname(JOKER_FIRSTNAME)
-                                        .setLastname(JOKER_LASTNAME)
-                                        .setEmail(JOKER_EMAIL)
-                                        .setClearPassword(JOKER_PASS)
-                                        .setAdministrator(true);
+    Account account = new Account().setFirstname(JOKER_FIRSTNAME)
+                                   .setLastname(JOKER_LASTNAME)
+                                   .setEmail(JOKER_EMAIL)
+                                   .setClearPassword(JOKER_PASS)
+                                   .setAdministrator(true);
 
     assertDoesNotThrow(() -> {
-      accountsRepository.store(account);
+      accountsRepository.persist(account);
       if (account.getId() != null && !ids.contains(account.getId())) ids.add(account.getId());
 
       assertTrue(accountsRepository.getAll().contains(account));
       assertTrue(accountsRepository.getAdministrators().contains(account));
 
       account.setAdministrator(false);
-      accountsRepository.store(account);
+      accountsRepository.persist(account);
       assertTrue(accountsRepository.getAll().contains(account));
       assertFalse(accountsRepository.getAdministrators().contains(account));
 

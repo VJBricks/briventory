@@ -8,10 +8,10 @@ import java.util.List;
 /**
  * A {@link ValidatableModel} instance is validated before being stored into the database.
  *
- * @param <T> the type of the instances, used to populate the {@link List} of
- * {@link ValidatableModel#errors(DSLContext)}.
+ * @param <E> the type of the instances, representing errors, used to populate the {@link List} of
+ * {@link ValidatableModel#validate(DSLContext)}.
  */
-public interface ValidatableModel<T> {
+public interface ValidatableModel<E> {
 
   /**
    * Gets the error messages that concern this model. If there is no error, en empty list should be returned.
@@ -20,8 +20,7 @@ public interface ValidatableModel<T> {
    *
    * @return a {@link List} containing the error messages or an empty list if this model is valid.
    */
-
-  default List<T> errors(final DSLContext dslContext) {
+  default List<E> validate(final DSLContext dslContext) {
     return Collections.emptyList();
   }
 

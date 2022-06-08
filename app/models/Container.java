@@ -2,9 +2,11 @@ package models;
 
 import jooq.tables.records.ContainerRecord;
 import org.jooq.DSLContext;
-import orm.LazyLoader;
+import orm.ManyModelsLoader;
 import orm.Model;
+import orm.ModelLoader;
 import orm.RepositoriesHandler;
+import orm.models.DeletableModel;
 import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
 import repositories.ContainerTypesRepository;
@@ -17,21 +19,22 @@ import java.util.List;
 
 import static jooq.Tables.CONTAINER;
 
-public abstract class Container extends Model implements ValidatableModel<ValidationError> {
+public abstract class Container extends Model implements ValidatableModel<ValidationError>,
+    DeletableModel<ValidationError, ContainerRecord> {
 
   // *******************************************************************************************************************
   // Attributes
   // *******************************************************************************************************************
   /** The identifier. */
   private Long id;
-  /** The {@link LazyLoader} instance to retrieve the corresponding {@link ContainerType}. */
-  private final LazyLoader<Long, ContainerType> containerTypeLazyLoader =
-      new LazyLoader<>(idCT -> RepositoriesHandler.of(ContainerTypesRepository.class)
-                                                  .findContainerTypeById(idCT));
-  /** The {@link LazyLoader} instance to retrieve the associated {@link Locker} instances. */
-  private final LazyLoader<Container, List<Locker>> lockersLazyLoader =
-      new LazyLoader<>(container -> RepositoriesHandler.of(LockersRepository.class)
-                                                       .getLockers(container));
+  /** The {@link ModelLoader} instance to retrieve the corresponding {@link ContainerType}. */
+  private final ModelLoader<Long, ContainerType> containerTypeLoader =
+      RepositoriesHandler.of(ContainerTypesRepository.class)
+                         .createModelLoader();
+  /** The {@link ManyModelsLoader} instance to retrieve the associated {@link Locker} instances. */
+  private final ManyModelsLoader<Container, Locker> lockersLoader =
+      RepositoriesHandler.of(LockersRepository.class)
+                         .createLockersLoader(this);
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -47,10 +50,10 @@ public abstract class Container extends Model implements ValidatableModel<Valida
    */
   protected Container(final long id, final long idContainerType, final List<Locker> lockers) {
     this.id = id;
-    containerTypeLazyLoader.setKey(idContainerType);
-    lockersLazyLoader.setKey(this);
+    containerTypeLoader.setKey(idContainerType);
+    lockersLoader.setKey(this);
     if (lockers != null) {
-      lockersLazyLoader.setValue(lockers);
+      lockersLoader.setValue(lockers);
     }
   }
 
@@ -60,18 +63,27 @@ public abstract class Container extends Model implements ValidatableModel<Valida
    * @param containerType the {@link ContainerType}.
    */
   protected Container(final ContainerType containerType) {
-    containerTypeLazyLoader.setKey(containerType.getId());
-    containerTypeLazyLoader.setValue(containerType);
+    containerTypeLoader.setKey(containerType.getId());
+    containerTypeLoader.setValue(containerType);
   }
 
   // *******************************************************************************************************************
   // PersistableModel1 Overrides
   // *******************************************************************************************************************
 
-  public final ContainerRecord getUpdatableRecord1(final DSLContext dslContext) {
+  public final ContainerRecord createRecord1(final DSLContext dslContext) {
     final ContainerRecord containerRecord = dslContext.newRecord(CONTAINER);
-    return containerRecord.setId(id)
-                          .setIdContainerType(containerTypeLazyLoader.getKey());
+    containerRecord.setIdContainerType(containerTypeLoader.getKey());
+    if (id != null) containerRecord.setId(id);
+    return containerRecord;
+  }
+
+  public final void refresh1(final ContainerRecord containerRecord) {
+    id = containerRecord.getId();
+  }
+
+  public final ContainerRecord createDeletionRecord(final DSLContext dslContext) {
+    return createRecord1(dslContext);
   }
 
   // *******************************************************************************************************************
@@ -80,9 +92,9 @@ public abstract class Container extends Model implements ValidatableModel<Valida
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> errors(final DSLContext dslContext) {
+  public List<ValidationError> validate(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
-    if (containerTypeLazyLoader.getKey() == null)
+    if (containerTypeLoader.getKey() == null)
       errors.add(new ValidationError("idContainerType", "container.error.containerType.missing"));
     return errors;
   }
@@ -94,25 +106,11 @@ public abstract class Container extends Model implements ValidatableModel<Valida
   /** @return the identifier. */
   public Long getId() { return id; }
 
-  /**
-   * Sets the identifier.
-   *
-   * @param <C> the real subtype of {@link Container}.
-   * @param id the identifier.
-   *
-   * @return this instance.
-   */
-  @SuppressWarnings("unchecked")
-  public <C extends Container> C setId(final Long id) {
-    this.id = id;
-    return (C) this;
-  }
-
   /** @return the identifier of the {@link ContainerType}. */
-  public Long getIdContainerType() { return containerTypeLazyLoader.getKey(); }
+  public Long getIdContainerType() { return containerTypeLoader.getKey(); }
 
   /** @return the {@link ContainerType} instance, or {@code null}. */
-  public ContainerType getContainerType() { return containerTypeLazyLoader.getValue(); }
+  public ContainerType getContainerType() { return containerTypeLoader.getValue(); }
 
   /**
    * Sets the identifier of the {@link ContainerType}.
@@ -124,7 +122,7 @@ public abstract class Container extends Model implements ValidatableModel<Valida
    */
   @SuppressWarnings("unchecked")
   public final <C extends Container> C setIdContainerType(final Long idContainerType) {
-    containerTypeLazyLoader.setKey(idContainerType);
+    containerTypeLoader.setKey(idContainerType);
     return (C) this;
   }
 
@@ -138,19 +136,19 @@ public abstract class Container extends Model implements ValidatableModel<Valida
    */
   @SuppressWarnings("unchecked")
   public final <C extends Container> C setContainerType(final ContainerType containerType) {
-    containerTypeLazyLoader.setKey(containerType.getId());
-    containerTypeLazyLoader.setValue(containerType);
+    containerTypeLoader.setKey(containerType.getId());
+    containerTypeLoader.setValue(containerType);
     return (C) this;
   }
 
   @SuppressWarnings("unchecked")
   public final <C extends Container> C setLockers(final List<Locker> lockers) {
-    lockersLazyLoader.setValue(lockers == null ? new LinkedList<>() : lockers);
+    lockersLoader.setValue(lockers == null ? new LinkedList<>() : lockers);
     return (C) this;
   }
 
   public final List<Locker> getLockers() {
-    final var lockers = lockersLazyLoader.getValue();
+    final var lockers = lockersLoader.getValue();
     if (lockers == null) return Collections.emptyList();
     return Collections.unmodifiableList(lockers);
   }

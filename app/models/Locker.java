@@ -2,8 +2,8 @@ package models;
 
 import jooq.tables.records.LockerRecord;
 import org.jooq.DSLContext;
-import orm.LazyLoader;
 import orm.Model;
+import orm.ModelLoader;
 import orm.RepositoriesHandler;
 import orm.models.PersistableModel1;
 import repositories.LockerSizesRepository;
@@ -12,19 +12,37 @@ import static jooq.Tables.LOCKER;
 
 public final class Locker extends Model implements PersistableModel1<LockerRecord> {
 
+  // *******************************************************************************************************************
+  // Attributes
+  // *******************************************************************************************************************
+  /** The identifier of this {@link Locker}. */
   private Long id;
 
-  private final LazyLoader<Long, LockerSize> lockerSizeLazyLoader =
-      new LazyLoader<>(key -> RepositoriesHandler.of(LockerSizesRepository.class)
-                                                 .getById(key));
+  /** The {@link ModelLoader} that will handle the instance of {@link LockerSize}. */
+  private final ModelLoader<Long, LockerSize> lockerSizeLoader =
+      RepositoriesHandler.of(LockerSizesRepository.class)
+                         .createModelLoader();
 
+  /** The position of the locker in its container. */
   private Short position;
 
+  // *******************************************************************************************************************
+  // Construction & Initialization
+  // *******************************************************************************************************************
+
+  /** Creates an empty instance of {@link Locker}. */
   public Locker() { /* No-Op */ }
 
+  /**
+   * Creates an instance of {@link Locker}.
+   *
+   * @param id the identifier.
+   * @param idLockerSize the identifier of the {@link LockerSize}.
+   * @param position the position of the locker in its container.
+   */
   public Locker(final long id, final long idLockerSize, final short position) {
     this.id = id;
-    lockerSizeLazyLoader.setKey(idLockerSize);
+    lockerSizeLoader.setKey(idLockerSize);
     this.position = position;
   }
 
@@ -33,17 +51,19 @@ public final class Locker extends Model implements PersistableModel1<LockerRecor
   // *******************************************************************************************************************
 
   @Override
-  public LockerRecord getUpdatableRecord(final DSLContext dslContext) {
+  public LockerRecord createRecord1(final DSLContext dslContext) {
     final LockerRecord lockerRecord = dslContext.newRecord(LOCKER);
     return lockerRecord.setId(id)
-                       .setIdLockerSize(lockerSizeLazyLoader.getKey());
+                       .setIdLockerSize(lockerSizeLoader.getKey());
   }
 
-  public void lastRefresh(final LockerRecord lockerRecord) { id = lockerRecord.getId(); }
+  public void refresh1(final LockerRecord lockerRecord) { id = lockerRecord.getId(); }
 
-  void setId(final Long id) { this.id = id; }
+  // *******************************************************************************************************************
+  // Getters & Setters
+  // *******************************************************************************************************************
 
-  public void setIdLockerSize(final Long idLockerSize) { lockerSizeLazyLoader.setKey(idLockerSize); }
+  public void setIdLockerSize(final Long idLockerSize) { lockerSizeLoader.setKey(idLockerSize); }
 
   public void setPosition(final Short position) { this.position = position; }
 

@@ -1,8 +1,11 @@
 package repositories;
 
 import database.BriventoryDB;
+import jooq.tables.records.ConfigurationRecord;
+import models.Configuration;
 import org.semver.Version;
-import orm.repositories.Repository;
+import orm.Mapper;
+import orm.Repository;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,13 +17,28 @@ import static jooq.Tables.CONFIGURATION;
  * This table is a read-only one.
  */
 @Singleton
-public class ConfigurationRepository extends Repository {
+public class ConfigurationRepository extends Repository<Configuration> {
+
+  // *******************************************************************************************************************
+  // Instance factory
+  // *******************************************************************************************************************
+  /**
+   * the {@link Mapper} that will create an instance of {@link Configuration} from an instance of
+   * {@link ConfigurationRecord}.
+   */
+  private static final Mapper<ConfigurationRecord, Configuration> CONFIGURATION_MAPPER =
+      configurationRecord -> new Configuration(configurationRecord.getDatabaseRevision());
 
   // *******************************************************************************************************************
   // Constants
   // *******************************************************************************************************************
   /** The app version, taken from the {@code build.sbt} file. */
   private static final Version APP_VERSION = Version.parse(utils.BriventoryBuildInfo.version());
+
+  // *******************************************************************************************************************
+  // Attributes
+  // *******************************************************************************************************************
+  private final Configuration configuration;
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -34,6 +52,8 @@ public class ConfigurationRepository extends Repository {
   @Inject
   public ConfigurationRepository(final BriventoryDB briventoryDB) {
     super(briventoryDB);
+    configuration = fetchSingle(CONFIGURATION_MAPPER,
+                                dslContext -> dslContext.selectFrom(CONFIGURATION));
   }
 
   // *******************************************************************************************************************
@@ -45,15 +65,8 @@ public class ConfigurationRepository extends Repository {
    * {@code false}.
    */
   public boolean isDatabaseInitialized() {
-    try {
-      final var optionalRevision = query(
-          dslContext -> dslContext.select(CONFIGURATION.DATABASE_REVISION)
-                                  .from(CONFIGURATION)
-                                  .fetchOptionalInto(String.class));
-      return optionalRevision.filter(revision -> Version.parse(revision).isCompatible(APP_VERSION)).isPresent();
-    } catch (Exception e) {
-      return false;
-    }
+    if (configuration.getDatabaseRevision() == null) return false;
+    return Version.parse(configuration.getDatabaseRevision()).isCompatible(APP_VERSION);
   }
 
 }

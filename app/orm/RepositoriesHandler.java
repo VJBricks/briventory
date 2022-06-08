@@ -1,9 +1,8 @@
 package orm;
 
-import com.google.inject.Guice;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +47,7 @@ public final class RepositoriesHandler {
    */
   public static <R extends Repository<?>> R of(final Class<R> repositoryType) {
     if (uniqueInstance == null) {
-      uniqueInstance = Guice.createInjector().getInstance(RepositoriesHandler.class);
+      uniqueInstance = new RepositoriesHandler();
     }
     return uniqueInstance.injectAndReturn(repositoryType);
   }
@@ -57,7 +56,8 @@ public final class RepositoriesHandler {
   // Attributes
   // *******************************************************************************************************************
   /** The {@link Injector} to create instances of {@link Repository}. */
-  private final Injector injector;
+  @Inject
+  private static Injector injector;
   /** The dictionary of repositories. */
   private final Map<Class<? extends Repository<?>>, Repository<?>> repositories;
 
@@ -68,13 +68,9 @@ public final class RepositoriesHandler {
   /**
    * Creates a new instance of {@link RepositoriesHandler}. This constructor is private, avoiding the instance creation
    * outside the single instance.
-   *
-   * @param injector the {@link Injector} to create instances of {@link Repository}.
    */
-  @Inject
-  private RepositoriesHandler(final Injector injector) {
+  private RepositoriesHandler() {
     repositories = new HashMap<>();
-    this.injector = injector;
   }
 
   // *******************************************************************************************************************
@@ -102,6 +98,7 @@ public final class RepositoriesHandler {
    */
   @SuppressWarnings("unchecked")
   private <R extends Repository<?>> R injectAndReturn(final Class<R> repositoryType) {
+    if (injector == null) throw new RepositoryException(String.format(INSTANTIATION_ERROR, Injector.class.getName()));
     synchronized (repositories) {
       try {
         repositories.computeIfAbsent(repositoryType, injector::getInstance);

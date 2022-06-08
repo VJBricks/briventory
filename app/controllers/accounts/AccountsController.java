@@ -112,11 +112,13 @@ public final class AccountsController extends Controller {
   }
 
   public Result updateEmail(final Http.Request request) {
-    return ok();
+    return paymentRequired();
   }
 
   public Result updateName(final Http.Request request) {
-    return ok();
+    return paymentRequired();
   }
+
+  public Result updateCredentials(final Http.Request request) { return paymentRequired(); }
 
 }

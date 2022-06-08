@@ -46,7 +46,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
   // *******************************************************************************************************************
 
   @Override
-  public BricklinkTokensRecord getUpdatableRecord(final DSLContext dslContext) {
+  public BricklinkTokensRecord createRecord1(final DSLContext dslContext) {
     final BricklinkTokensRecord bricklinkTokensRecord = dslContext.newRecord(BRICKLINK_TOKENS);
     return bricklinkTokensRecord.setIdAccount(idAccount)
                                 .setConsumerKey(consumerKey)
@@ -57,7 +57,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
   }
 
   @Override
-  public void lastRefresh(final BricklinkTokensRecord bricklinkTokensRecord) { /* Nothing to do */ }
+  public void refresh1(final BricklinkTokensRecord bricklinkTokensRecord) { /* Nothing to do */ }
 
   // *******************************************************************************************************************
   // ValidatableModel Overrides
@@ -65,7 +65,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> errors(final DSLContext dslContext) {
+  public List<ValidationError> validate(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
     if (consumerKey == null || consumerKey.isBlank())
       errors.add(new ValidationError("consumerKey", "bricklinkTokens.error.consumerKey.empty"));

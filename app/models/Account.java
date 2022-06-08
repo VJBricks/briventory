@@ -2,28 +2,36 @@ package models;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import jooq.tables.records.AccountRecord;
+import jooq.tables.records.AdministratorRecord;
+import jooq.tables.records.LockedAccountRecord;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.jooq.DSLContext;
-import orm.LazyLoader;
+import orm.DeleteRecordAction;
 import orm.Mapper;
 import orm.Model;
+import orm.ModelAction;
+import orm.OptionalModelLoader;
+import orm.PersistRecordAction;
+import orm.RecordLoader;
 import orm.RepositoriesHandler;
+import orm.models.DeletableModel;
 import orm.models.PersistableModel1;
 import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
 import repositories.AccountsRepository;
-import repositories.ColorSourcesRepository;
+import repositories.ColorsSourcesRepository;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static jooq.Tables.ACCOUNT;
+import static jooq.Tables.*;
 
 /** The {@code Account} class is the representation of the table {@code account} in the <em>Briventory</em> database. */
 public final class Account extends Model implements PersistableModel1<AccountRecord>,
-                                                        ValidatableModel<ValidationError> {
+    ValidatableModel<ValidationError>,
+    DeletableModel<ValidationError, AccountRecord> {
 
   // *******************************************************************************************************************
   // Instance factory
@@ -49,9 +57,9 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   /** The database identifier. */
   private Long id;
   /** The foreign key identifier of the {@link ColorsSource}. */
-  private final LazyLoader<Long, ColorsSource> colorsSourceLazyLoader =
-      new LazyLoader<>(idColorSource -> RepositoriesHandler.of(ColorSourcesRepository.class)
-                                                           .findById(idColorSource));
+  private final OptionalModelLoader<Long, ColorsSource> colorsSourceLazyLoader =
+      RepositoriesHandler.of(ColorsSourcesRepository.class)
+                         .createOptionalModelLoader();
   /** The first name. */
   private String firstname;
   /** The last name. */
@@ -63,17 +71,18 @@ public final class Account extends Model implements PersistableModel1<AccountRec
    *
    * @deprecated It is maybe a bad idea to keep the hashed password in the memory !
    */
-  @Deprecated(forRemoval = false)
+  @Deprecated()
   private String password;
 
   /** Does this account has administrator rights ? */
-  private final LazyLoader<Account, Boolean> administratorLazyLoader =
-      new LazyLoader<>(account -> RepositoriesHandler.of(AccountsRepository.class)
-                                                     .isAdministrator(account));
+  private final RecordLoader<Account, Boolean, AdministratorRecord> administratorLazyLoader =
+      RepositoriesHandler.of(AccountsRepository.class)
+                         .createAdministratorLoader(this);
+
   /** Does this account is locked. */
-  private final LazyLoader<Account, Boolean> isLockedLazyLoader =
-      new LazyLoader<>(account -> RepositoriesHandler.of(AccountsRepository.class)
-                                                     .isLocked(account));
+  private final RecordLoader<Account, Boolean, LockedAccountRecord> isLockedLazyLoader =
+      RepositoriesHandler.of(AccountsRepository.class)
+                         .createLockedAccountLoader(this);
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -81,6 +90,21 @@ public final class Account extends Model implements PersistableModel1<AccountRec
 
   /** Creates an empty {@link Account} instance. */
   public Account() { /* No-op. */ }
+
+  /**
+   * Creates a new {@link Account} instance.
+   *
+   * @param firstname the first name.
+   * @param lastname the last name.
+   * @param email the email address.
+   * @param password the hashed password.
+   */
+  public Account(final String firstname, final String lastname, final String email, final String password) {
+    this.firstname = firstname;
+    this.lastname = lastname;
+    this.email = email;
+    this.password = password;
+  }
 
   /**
    * Creates a new {@link Account} instance.
@@ -94,11 +118,23 @@ public final class Account extends Model implements PersistableModel1<AccountRec
    */
   public Account(final Long idColorSource, final String firstname, final String lastname, final String email,
                  final String password) {
+    this(firstname, lastname, email, password);
     colorsSourceLazyLoader.setKey(idColorSource);
-    this.firstname = firstname;
-    this.lastname = lastname;
-    this.email = email;
-    this.password = password;
+  }
+
+  /**
+   * Creates a new {@link Account} instance.
+   *
+   * @param firstname the first name.
+   * @param lastname the last name.
+   * @param email the email address.
+   * @param password the hashed password.
+   * @param isAdministrator sets this account as an administrator.
+   */
+  public Account(final String firstname, final String lastname, final String email, final String password,
+                 final boolean isAdministrator) {
+    this(firstname, lastname, email, password);
+    administratorLazyLoader.setValue(isAdministrator);
   }
 
   /**
@@ -159,21 +195,60 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   }
 
   // *******************************************************************************************************************
-  // PersistableModel1 Overrides
+  // PersistableModel1 & DeletableModel Overrides
   // *******************************************************************************************************************
 
+  /**
+   * Creates all {@link ModelAction} that will be performed after the persistence of the model.
+   *
+   * @param dslContext the {@link DSLContext}.
+   *
+   * @return a {@link List} of {@link ModelAction} instances. By default, this method returns an empty list.
+   */
   @Override
-  public AccountRecord getUpdatableRecord(final DSLContext dslContext) {
-    final AccountRecord accountRecord = dslContext.newRecord(ACCOUNT);
-    return accountRecord.setId(id)
-                        .setFirstname(firstname)
-                        .setLastname(lastname)
-                        .setEmail(email)
-                        .setIdColorSource(colorsSourceLazyLoader.getKey());
+  public List<ModelAction> getPostPersistenceActions(final DSLContext dslContext) {
+    final List<ModelAction> actions = new LinkedList<>();
+
+    /*actions.addAll(ModelActions.fromLazyLoader(dslContext, administratorLazyLoader));
+    actions.addAll(ModelActions.fromLazyLoader(dslContext, isLockedLazyLoader));*/
+
+    if (administratorLazyLoader.hasChanged(dslContext)) {
+      final var administratorRecord = dslContext.newRecord(ADMINISTRATOR).setIdAccount(id);
+      if (Boolean.TRUE.equals(administratorLazyLoader.getValue(dslContext)))
+        actions.add(new PersistRecordAction<>(administratorRecord));
+      else actions.add(new DeleteRecordAction<>(administratorRecord));
+    }
+
+    if (isLockedLazyLoader.hasChanged(dslContext)) {
+      final var lockedAccountRecord = dslContext.newRecord(LOCKED_ACCOUNT).setIdAccount(id);
+      if (Boolean.TRUE.equals(isLockedLazyLoader.getValue(dslContext)))
+        actions.add(new PersistRecordAction<>(lockedAccountRecord));
+      else actions.add(new DeleteRecordAction<>(lockedAccountRecord));
+    }
+
+    return actions;
   }
 
+  /** {@inheritDoc} */
   @Override
-  public void lastRefresh(final AccountRecord accountRecord) { id = accountRecord.getId(); }
+  public void refresh1(final AccountRecord accountRecord) { id = accountRecord.getId(); }
+
+  /** {@inheritDoc} */
+  @Override
+  public AccountRecord createRecord1(final DSLContext dslContext) {
+    final AccountRecord accountRecord = dslContext.newRecord(ACCOUNT);
+    accountRecord.setFirstname(firstname)
+                 .setLastname(lastname)
+                 .setEmail(email)
+                 .setIdColorSource(colorsSourceLazyLoader.getKey())
+                 .setPassword(password);
+    if (id != null) accountRecord.setId(id);
+    return accountRecord;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public AccountRecord createDeletionRecord(final DSLContext dslContext) { return createRecord1(dslContext); }
 
   // *******************************************************************************************************************
   // IValidatableModel Overrides
@@ -181,7 +256,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> errors(final DSLContext dslContext) {
+  public List<ValidationError> validate(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
     if (firstname == null || firstname.isBlank())
       errors.add(new ValidationError("firstname", "account.error.firstname.empty"));
@@ -236,7 +311,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
    */
   public Account setColorSource(final ColorsSource colorSource) {
     colorsSourceLazyLoader.setKey(colorSource.getId());
-    colorsSourceLazyLoader.setValue(colorSource);
+    colorsSourceLazyLoader.setValue(Optional.ofNullable(colorSource));
     return this;
   }
 
@@ -245,7 +320,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
 
   /** @return the {@link ColorsSource} instance. */
   public Optional<ColorsSource> getColorsSource() {
-    return Optional.ofNullable(colorsSourceLazyLoader.getValue());
+    return colorsSourceLazyLoader.getValue();
   }
 
   /**

@@ -17,11 +17,11 @@ public final class PersistAction4<V, R1 extends UpdatableRecord<R1>,
 
   private final List<P> persistableModels;
 
-  public PersistAction4(final List<P> persistableModels) {
+  PersistAction4(final List<P> persistableModels) {
     this.persistableModels = persistableModels;
   }
 
-  public PersistAction4(final P persistableModel) {
+  PersistAction4(final P persistableModel) {
     this.persistableModels = Collections.singletonList(persistableModel);
   }
 

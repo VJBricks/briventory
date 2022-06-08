@@ -37,7 +37,7 @@ public final class BricksetTokens extends Model implements PersistableModel1<Bri
   // *******************************************************************************************************************
 
   @Override
-  public BricksetTokensRecord getUpdatableRecord(final DSLContext dslContext) {
+  public BricksetTokensRecord createRecord1(final DSLContext dslContext) {
     final BricksetTokensRecord bricksetTokensRecord = dslContext.newRecord(BRICKSET_TOKENS);
     return bricksetTokensRecord.setIdAccount(idAccount)
                                .setApiKey(apiKey)
@@ -46,7 +46,7 @@ public final class BricksetTokens extends Model implements PersistableModel1<Bri
   }
 
   @Override
-  public void lastRefresh(final BricksetTokensRecord bricksetTokensRecord) { /* Nothing to do */ }
+  public void refresh1(final BricksetTokensRecord bricksetTokensRecord) { /* Nothing to do */ }
 
   // *******************************************************************************************************************
   // ValidatableModel Overrides
@@ -54,7 +54,7 @@ public final class BricksetTokens extends Model implements PersistableModel1<Bri
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> errors(final DSLContext dslContext) {
+  public List<ValidationError> validate(final DSLContext dslContext) {
     List<ValidationError> errors = new LinkedList<>();
     if (apiKey == null || apiKey.isBlank())
       errors.add(new ValidationError("apiKey", "bricksetTokens.error.apiKey.empty"));

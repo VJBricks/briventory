@@ -27,7 +27,7 @@ public final class LockerSize extends Model implements PersistableModel1<LockerS
   // *******************************************************************************************************************
 
   @Override
-  public LockerSizeRecord getUpdatableRecord(final DSLContext dslContext) {
+  public LockerSizeRecord createRecord1(final DSLContext dslContext) {
     final LockerSizeRecord lockerSizeRecord = dslContext.newRecord(LOCKER_SIZE);
     return lockerSizeRecord.setId(id)
                            .setName(name)
@@ -36,7 +36,7 @@ public final class LockerSize extends Model implements PersistableModel1<LockerS
                            .setHeight(height);
   }
 
-  public void lastRefresh(final LockerSizeRecord lockerSizeRecord) { id = lockerSizeRecord.getId(); }
+  public void refresh1(final LockerSizeRecord lockerSizeRecord) { id = lockerSizeRecord.getId(); }
 
   public Long getId() { return id; }
 

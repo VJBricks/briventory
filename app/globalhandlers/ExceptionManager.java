@@ -1,9 +1,12 @@
 package globalhandlers;
 
 import database.BriventoryDBException;
+import play.Environment;
 import play.Logger;
 import play.Logger.ALogger;
+import play.Mode;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -20,17 +23,24 @@ public final class ExceptionManager {
 
   /* TODO allow to register handlers, instead of defining them in the class.*/
   /* TODO Categorize the exceptions. */
+  /* TODO an handler can choose in witch application mode it can handle exceptions. */
 
   // *******************************************************************************************************************
   // Attributes
   // *******************************************************************************************************************
   /** The {@link LinkedList}, acting as a queue, that contains all {@link Throwable} to handle. */
   private final LinkedList<Throwable> throwables;
+  /** The running {@link Mode} of the application. */
+  private final Mode mode;
 
   // *******************************************************************************************************************
   // Construction & Initialization
   // *******************************************************************************************************************
-  public ExceptionManager() { throwables = new LinkedList<>(); }
+  @Inject
+  public ExceptionManager(final Environment environment) {
+    throwables = new LinkedList<>();
+    this.mode = environment.mode();
+  }
 
   // *******************************************************************************************************************
   // Subscription and handling
@@ -59,7 +69,7 @@ public final class ExceptionManager {
   private void log(final Throwable throwable) {
     final ALogger alogger = Logger.of(ExceptionManager.class);
     if (alogger.isErrorEnabled())
-      Logger.of(ExceptionManager.class).error(throwable.getMessage());
+      Logger.of(ExceptionManager.class).error(throwable.getMessage(), throwable);
   }
 
   private void mail(final Throwable throwable) {
@@ -74,7 +84,9 @@ public final class ExceptionManager {
       CompletableFuture.supplyAsync(() -> {
         throwables.removeIf(throwable -> {
           log(throwable);
-          mail(throwable);
+          if (mode == Mode.PROD) {
+            mail(throwable);
+          }
           return true;
         });
         return null;

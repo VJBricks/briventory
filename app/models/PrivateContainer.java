@@ -34,15 +34,14 @@ public final class PrivateContainer
   // *******************************************************************************************************************
 
   @Override
-  public PrivateContainerRecord getUpdatableRecord2(final DSLContext dslContext,
-                                                    final ContainerRecord containerRecord) {
+  public PrivateContainerRecord createRecord2(final DSLContext dslContext) {
     final PrivateContainerRecord privateContainerRecord = dslContext.newRecord(PRIVATE_CONTAINER);
-    setId(containerRecord.getId());
-    return privateContainerRecord.setIdContainer(containerRecord.getId())
+    return privateContainerRecord.setIdContainer(getId())
                                  .setIdAccount(idAccount);
   }
 
-  public void lastRefresh(final PrivateContainerRecord privateContainerRecord) { /* Nothing to do */ }
+  @Override
+  public void refresh2(final PrivateContainerRecord privateContainerRecord) { /* Nothing to do */ }
 
   // *******************************************************************************************************************
   // ValidatableModel Overrides
@@ -50,7 +49,7 @@ public final class PrivateContainer
 
   /** {@inheritDoc} */
   @Override
-  public List<ValidationError> errors(final DSLContext dslContext) {
+  public List<ValidationError> validate(final DSLContext dslContext) {
     return null; // TODO
   }
 

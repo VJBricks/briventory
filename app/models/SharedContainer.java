@@ -6,7 +6,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record3;
 import orm.Mapper;
 import orm.models.PersistableModel2;
-import play.data.validation.ValidationError;
 
 import java.util.List;
 
@@ -47,23 +46,12 @@ public final class SharedContainer
   // *******************************************************************************************************************
 
   @Override
-  public SharedContainerRecord getUpdatableRecord2(final DSLContext dslContext,
-                                                   final ContainerRecord containerRecord) {
+  public SharedContainerRecord createRecord2(final DSLContext dslContext) {
     final SharedContainerRecord sharedContainerRecord = dslContext.newRecord(SHARED_CONTAINER);
-    setId(containerRecord.getId());
-    return sharedContainerRecord.setIdContainer(containerRecord.getId());
+    return sharedContainerRecord.setIdContainer(getId());
   }
 
-  public void lastRefresh(final SharedContainerRecord sharedContainerRecord) { /* Nothing to do */ }
-
-  // *******************************************************************************************************************
-  // ValidatableModel Overrides
-  // *******************************************************************************************************************
-
-  /** {@inheritDoc} */
   @Override
-  public List<ValidationError> errors(final DSLContext dslContext) {
-    return null; // TODO
-  }
+  public void refresh2(final SharedContainerRecord sharedContainerRecord) { /* Nothing to do */ }
 
 }
