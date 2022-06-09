@@ -38,9 +38,9 @@ public final class ModelActions {
       actions.add(new DeleteAction<>(oldModel));
   }*/
 
-  public static <K, V> List<ModelAction> fromLazyLoader(final DSLContext context,
+  public static <K, V> List<ModelAction> fromLazyLoader(final DSLContext dslContext,
                                                         final LazyLoader<K, V> lazyLoader) {
-    return lazyLoader.createModelActions();
+    return lazyLoader.createModelActions(dslContext);
   }
 
 }

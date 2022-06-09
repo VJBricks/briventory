@@ -1,12 +1,13 @@
 package models;
 
-import database.BriventoryDB;
 import junit5.J5WithApplication;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import repositories.AccountsRepository;
 import repositories.ContainerTypesRepository;
 import repositories.ContainersRepository;
+import repositories.PrivateContainersRepository;
 import repositories.SharedContainersRepository;
 
 import java.util.List;
@@ -22,10 +23,12 @@ class ContainerTest extends J5WithApplication {
   private ContainersRepository containersRepository;
   /** The injected {@link SharedContainersRepository} instance. */
   private SharedContainersRepository sharedContainersRepository;
+  /** The injected {@link PrivateContainersRepository} instance. */
+  private PrivateContainersRepository privateContainersRepository;
   /** The injected {@link ContainerTypesRepository} instance. */
   private ContainerTypesRepository containerTypesRepository;
-  /** The injected {@link BriventoryDB} instance. */
-  private BriventoryDB briventoryDB;
+  /** The injected {@link AccountsRepository} instance. */
+  private AccountsRepository accountsRepository;
 
   // *******************************************************************************************************************
   // Global test methods.
@@ -44,13 +47,17 @@ class ContainerTest extends J5WithApplication {
         sharedContainersRepository = instanceOf(SharedContainersRepository.class);
       assertNotNull(sharedContainersRepository);
 
+      if (privateContainersRepository == null)
+        privateContainersRepository = instanceOf(PrivateContainersRepository.class);
+      assertNotNull(privateContainersRepository);
+
       if (containerTypesRepository == null)
         containerTypesRepository = instanceOf(ContainerTypesRepository.class);
       assertNotNull(containerTypesRepository);
 
-      if (briventoryDB == null)
-        briventoryDB = instanceOf(BriventoryDB.class);
-      assertNotNull(briventoryDB);
+      if (accountsRepository == null)
+        accountsRepository = instanceOf(AccountsRepository.class);
+      assertNotNull(accountsRepository);
 
       if (containerType == null) {
         containerType = new ContainerType("For Container tests",
@@ -66,6 +73,12 @@ class ContainerTest extends J5WithApplication {
 
   @AfterEach
   public void tearDown() {
+    containersRepository.getContainers().forEach(container -> {
+      if (container instanceof SharedContainer sharedContainer)
+        sharedContainersRepository.delete(sharedContainer);
+      if (container instanceof PrivateContainer privateContainer)
+        privateContainersRepository.delete(privateContainer);
+    });
     containerTypesRepository.delete(containerType);
   }
 
@@ -86,6 +99,32 @@ class ContainerTest extends J5WithApplication {
     for (Container container : containers)
       System.out.println(container);
     assertTrue(containers.isEmpty());
+  }
+
+  @Test
+  void sharedToPrivateMigration() {
+    final Account account = accountsRepository.getAdministrators().get(0);
+    final SharedContainer sharedContainer = new SharedContainer(containerType);
+    sharedContainersRepository.persist(sharedContainer);
+    final long idSharedContainer = sharedContainer.getId();
+    final PrivateContainer privateContainer = containersRepository.migrate(sharedContainer, account);
+    assertNotNull(privateContainer);
+    assertEquals(idSharedContainer, privateContainer.getId());
+    assertEquals(0, sharedContainersRepository.getSharedContainers().size());
+    assertEquals(1, privateContainersRepository.getPrivateContainers().size());
+  }
+
+  @Test
+  void privateToSharedMigration() {
+    final Account account = accountsRepository.getAdministrators().get(0);
+    final PrivateContainer privateContainer = new PrivateContainer(containerType, account);
+    privateContainersRepository.persist(privateContainer);
+    final long idPrivateContainer = privateContainer.getId();
+    final SharedContainer sharedContainer = containersRepository.migrate(privateContainer);
+    assertNotNull(sharedContainer);
+    assertEquals(idPrivateContainer, sharedContainer.getId());
+    assertEquals(1, sharedContainersRepository.getSharedContainers().size());
+    assertEquals(0, privateContainersRepository.getPrivateContainers().size());
   }
 
 }

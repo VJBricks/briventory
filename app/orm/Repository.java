@@ -91,7 +91,7 @@ public abstract class Repository<M extends Model> {
       final F factory,
       final DSLContext dslContext,
       final Function<DSLContext, ResultQuery<R>> query) {
-    return persistenceContext.fetch(factory, query);
+    return persistenceContext.fetch(factory, dslContext, query);
   }
 
   /**
@@ -368,6 +368,19 @@ public abstract class Repository<M extends Model> {
   }
 
   // *******************************************************************************************************************
+  // Migration
+  // *******************************************************************************************************************
+
+  protected final <V,
+      RF2 extends UpdatableRecord<RF2>,
+      RT1 extends UpdatableRecord<RT1>,
+      RT2 extends UpdatableRecord<RT2>,
+      F extends DeletableModel<V, RF2>, T extends PersistableModel2<RT1, RT2> & ValidatableModel<V>> T migrate(
+      final Function<DSLContext, RF2> recordToDelete, final T resultingModel) {
+    return persistenceContext.migrate(recordToDelete, resultingModel);
+  }
+
+  // *******************************************************************************************************************
   // Validation
   // *******************************************************************************************************************
 
@@ -387,36 +400,97 @@ public abstract class Repository<M extends Model> {
   // *******************************************************************************************************************
   // Lazy Loader Helpers
   // *******************************************************************************************************************
+
+  /**
+   * Constructs an instance of {@link ManyModelsLoader}.
+   *
+   * @param key the key.
+   * @param fetcher the {@link BiFunction} that will be used to fetch.
+   * @param <K> the type of the key.
+   *
+   * @return an instance of {@link ManyModelsLoader}.
+   */
   protected final <K> ManyModelsLoader<K, M> createManyModelsLoader(
       final K key,
       final BiFunction<DSLContext, K, List<M>> fetcher) {
     return new ManyModelsLoader<>(persistenceContext, key, fetcher);
   }
 
-  protected final <K> ModelLoader<K, M> createModelLoader(final BiFunction<DSLContext, K, M> fetcher) {
-    return new ModelLoader<>(persistenceContext, fetcher);
+  /**
+   * Constructs an instance of {@link ModelLoader}.
+   *
+   * @param fetcher the {@link BiFunction} that will be used to fetch.
+   * @param <K> the type of the key.
+   *
+   * @return an instance of {@link ModelLoader}.
+   */
+  protected final <K> ModelLoader<K, M> createModelLoader(
+      final BiFunction<DSLContext, K, M> fetcher/*,
+      final Function4<DSLContext, K, M, M, List<ModelAction>> modelActionsCreator*/) {
+    return new ModelLoader<>(persistenceContext, fetcher/*, modelActionsCreator*/);
   }
 
-  protected final <K> ModelLoader<K, M> createModelLoader(final K key, final BiFunction<DSLContext, K, M> fetcher) {
-    return new ModelLoader<>(persistenceContext, key, fetcher);
+  /**
+   * Constructs an instance of {@link ModelLoader}.
+   *
+   * @param key the key.
+   * @param fetcher the {@link BiFunction} that will be used to fetch.
+   * @param <K> the type of the key.
+   *
+   * @return an instance of {@link ModelLoader}.
+   */
+  protected final <K> ModelLoader<K, M> createModelLoader(
+      final K key,
+      final BiFunction<DSLContext, K, M> fetcher/*,
+      final Function4<DSLContext, K, M, M, List<ModelAction>> modelActionsCreator*/) {
+    return new ModelLoader<>(persistenceContext, key, fetcher/*, modelActionsCreator*/);
   }
 
+  /**
+   * Constructs an instance of {@link OptionalModelLoader}.
+   *
+   * @param fetcher the {@link BiFunction} that will be used to fetch.
+   * @param <K> the type of the key.
+   *
+   * @return an instance of {@link OptionalModelLoader}.
+   */
   protected final <K> OptionalModelLoader<K, M> createOptionalModelLoader(
       final BiFunction<DSLContext, K, Optional<M>> fetcher) {
     return new OptionalModelLoader<>(persistenceContext, fetcher);
   }
 
+  /**
+   * Constructs an instance of {@link OptionalModelLoader}.
+   *
+   * @param key the key.
+   * @param fetcher the {@link BiFunction} that will be used to fetch.
+   * @param <K> the type of the key.
+   *
+   * @return an instance of {@link OptionalModelLoader}.
+   */
   protected final <K> OptionalModelLoader<K, M> createOptionalModelLoader(
       final K key,
       final BiFunction<DSLContext, K, Optional<M>> fetcher) {
     return new OptionalModelLoader<>(persistenceContext, key, fetcher);
   }
 
-  protected final <K, V, R extends Record> RecordLoader<K, V, R> createRecordLoader(
+  /**
+   * Constructs an instance of {@link RecordLoader}.
+   *
+   * @param key the key.
+   * @param fetcher the {@link BiFunction} that will be used to fetch.
+   * @param modelActionCreator the {@link Function3} that will be used to create the corresponding instances of
+   * {@link ModelActions}.
+   * @param <K> the type of the key.
+   * @param <V> the type of the value.
+   *
+   * @return an instance of {@link RecordLoader}.
+   */
+  protected final <K, V> RecordLoader<K, V> createRecordLoader(
       final K key,
       final BiFunction<DSLContext, K, V> fetcher,
-      final Function3<DSLContext, K, V, R> recordCreator) {
-    return new RecordLoader<>(persistenceContext, key, fetcher, recordCreator);
+      final Function3<DSLContext, K, V, ModelAction> modelActionCreator) {
+    return new RecordLoader<>(persistenceContext, key, fetcher, modelActionCreator);
   }
 
 }

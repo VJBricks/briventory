@@ -22,7 +22,7 @@ public class OptionalModelLoader<K, M extends Model> extends LazyLoader<K, Optio
    * @return
    */
   @Override
-  public List<ModelAction> createModelActions() {
+  public List<ModelAction> createModelActions(final DSLContext dslContext) {
     return null;
   }
 

@@ -17,7 +17,7 @@ public final class ManyModelsLoader<K, M extends Model> extends LazyLoader<K, Li
 
   /** {@inheritDoc} */
   @Override
-  public List<ModelAction> createModelActions() {
+  public List<ModelAction> createModelActions(final DSLContext dslContext) {
     if (!isFetched()) return Collections.emptyList();
 
     final List<ModelAction> actions = new LinkedList<>();

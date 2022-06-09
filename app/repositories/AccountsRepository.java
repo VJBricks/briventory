@@ -6,6 +6,8 @@ import jooq.tables.records.LockedAccountRecord;
 import models.Account;
 import org.jooq.DSLContext;
 import org.jooq.Select;
+import orm.DeleteRecordAction;
+import orm.PersistRecordAction;
 import orm.RecordLoader;
 import orm.Repository;
 
@@ -41,45 +43,6 @@ public final class AccountsRepository extends Repository<Account> {
   // Storage & Deletion
   // *******************************************************************************************************************
 
-  /*private final StorableEntityHandler<ValidationError, Account, AccountRecord> storeAccountHandler =
-      new StorableEntityHandler<>(accountsUnmapper, accountsReloader, ACCOUNT) {
-
-        @Override
-        protected List<EntityAction> getPostStoreActions(final Account account) {
-          final List<EntityAction> actions = super.getPostStoreActions(account);
-
-          final Optional<Boolean> isAdministratorOptional = account.isAdministratorOptional();
-          if (isAdministratorOptional.isPresent()) {
-            if (Boolean.TRUE.equals(isAdministratorOptional.get())) {
-              actions.add(new StoreAction<>(storeAdministratorHandler, account));
-            } else {
-              actions.add(new DeleteAction<>(deleteAdministratorHandler, account));
-            }
-          }
-
-          final Optional<Boolean> isLockedAccountOptional = account.isLockedOptional();
-          isLockedAccountOptional.ifPresent(locked -> {
-            if (Boolean.TRUE.equals(isLockedAccountOptional.get())) {
-              actions.add(new StoreAction<>(storeLockedAccountHandler, account));
-            } else {
-              actions.add(new DeleteAction<>(deleteLockedAccountHandler, account));
-            }
-          });
-
-          return actions;
-        }
-      };*/
-
-  /*private final DeletableEntityHandler<Account, AccountRecord> deleteAccountHandler =
-      new DeletableEntityHandler<>(accountsUnmapper, ACCOUNT) {
-        @Override
-        protected boolean shallDelete(final DSLContext dslContext, final Account account) {
-          return super.shallDelete(dslContext, account) &&
-                 !isLastActiveAdministrator(dslContext, account);
-
-        }
-      };*/
-
   /**
    * Persists the provided {@link Account} into the database.
    *
@@ -107,11 +70,17 @@ public final class AccountsRepository extends Repository<Account> {
    *
    * @return a {@link RecordLoader}.
    */
-  public RecordLoader<Account, Boolean, LockedAccountRecord> createLockedAccountLoader(final Account account) {
+  public RecordLoader<Account, Boolean> createLockedAccountLoader(final Account account) {
     return createRecordLoader(account,
                               (dslContext, a) -> exists(dslContext, isLocked(dslContext, account)),
-                              (dslContext, a, isLocked) -> dslContext.newRecord(LOCKED_ACCOUNT)
-                                                                     .setIdAccount(a.getId()));
+                              (dslContext, a, isLocked) -> {
+                                final LockedAccountRecord lockedAccountRecord = dslContext.newRecord(LOCKED_ACCOUNT)
+                                                                                          .setIdAccount(a.getId());
+                                if (Boolean.TRUE.equals(isLocked))
+                                  return new PersistRecordAction<>(lockedAccountRecord);
+                                else
+                                  return new DeleteRecordAction<>(lockedAccountRecord);
+                              });
   }
 
   /**
@@ -122,7 +91,7 @@ public final class AccountsRepository extends Repository<Account> {
    *
    * @return {@code true} if the {@link Account} is locked, otherwise {@code false}.
    */
-  public Select<?> isLocked(final DSLContext dslContext, final Account account) {
+  private Select<?> isLocked(final DSLContext dslContext, final Account account) {
     return dslContext.selectFrom(LOCKED_ACCOUNT)
                      .where(LOCKED_ACCOUNT.ID_ACCOUNT.eq(account.getId()));
   }
@@ -159,11 +128,17 @@ public final class AccountsRepository extends Repository<Account> {
    *
    * @return a {@link RecordLoader}.
    */
-  public RecordLoader<Account, Boolean, AdministratorRecord> createAdministratorLoader(final Account account) {
+  public RecordLoader<Account, Boolean> createAdministratorLoader(final Account account) {
     return createRecordLoader(account,
                               (dslContext, a) -> exists(dslContext, isAdministrator(dslContext, a)),
-                              (dslContext, a, isAdministrator) -> dslContext.newRecord(ADMINISTRATOR)
-                                                                            .setIdAccount(a.getId()));
+                              (dslContext, a, isAdministrator) -> {
+                                final AdministratorRecord administratorRecord = dslContext.newRecord(ADMINISTRATOR)
+                                                                                          .setIdAccount(a.getId());
+                                if (Boolean.TRUE.equals(isAdministrator))
+                                  return new PersistRecordAction<>(administratorRecord);
+                                else
+                                  return new DeleteRecordAction<>(administratorRecord);
+                              });
   }
 
   /**
@@ -174,7 +149,7 @@ public final class AccountsRepository extends Repository<Account> {
    *
    * @return {@code true} if the {@link Account} is locked, otherwise {@code false}.
    */
-  public Select<?> isAdministrator(final DSLContext dslContext, final Account account) {
+  private Select<?> isAdministrator(final DSLContext dslContext, final Account account) {
     return dslContext.selectFrom(ADMINISTRATOR)
                      .where(ADMINISTRATOR.ID_ACCOUNT.eq(account.getId()));
   }

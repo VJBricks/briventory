@@ -33,6 +33,9 @@
     <logger name="org.jooq" level="ERROR"/>
     <logger name="com.zaxxer.hikari" level="ERROR"/>
     <logger name="junit5" level="ERROR"/>
+    <logger name="org.jdbcdslog.ConnectionLogger" level="OFF"  /> <!-- Won' log connections -->
+    <logger name="org.jdbcdslog.StatementLogger"  level="INFO" /> <!-- Will log all statements -->
+    <logger name="org.jdbcdslog.ResultSetLogger"  level="OFF"  /> <!-- Won' log result sets -->
 
     <root level="WARN">
         <appender-ref ref="ASYNCFILE"/>

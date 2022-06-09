@@ -67,6 +67,17 @@ public abstract class Container extends Model implements ValidatableModel<Valida
     containerTypeLoader.setValue(containerType);
   }
 
+  /**
+   * Creates a new instance of {@link Container}.
+   *
+   * @param id id the identifier.
+   * @param containerType the {@link ContainerType}.
+   */
+  protected Container(final long id, final ContainerType containerType) {
+    this(containerType);
+    this.id = id;
+  }
+
   // *******************************************************************************************************************
   // PersistableModel1 Overrides
   // *******************************************************************************************************************

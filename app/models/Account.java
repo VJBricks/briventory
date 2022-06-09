@@ -2,16 +2,13 @@ package models;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import jooq.tables.records.AccountRecord;
-import jooq.tables.records.AdministratorRecord;
-import jooq.tables.records.LockedAccountRecord;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.jooq.DSLContext;
-import orm.DeleteRecordAction;
 import orm.Mapper;
 import orm.Model;
 import orm.ModelAction;
+import orm.ModelActions;
 import orm.OptionalModelLoader;
-import orm.PersistRecordAction;
 import orm.RecordLoader;
 import orm.RepositoriesHandler;
 import orm.models.DeletableModel;
@@ -26,7 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static jooq.Tables.*;
+import static jooq.Tables.ACCOUNT;
 
 /** The {@code Account} class is the representation of the table {@code account} in the <em>Briventory</em> database. */
 public final class Account extends Model implements PersistableModel1<AccountRecord>,
@@ -75,12 +72,12 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   private String password;
 
   /** Does this account has administrator rights ? */
-  private final RecordLoader<Account, Boolean, AdministratorRecord> administratorLazyLoader =
+  private final RecordLoader<Account, Boolean> administratorLoader =
       RepositoriesHandler.of(AccountsRepository.class)
                          .createAdministratorLoader(this);
 
   /** Does this account is locked. */
-  private final RecordLoader<Account, Boolean, LockedAccountRecord> isLockedLazyLoader =
+  private final RecordLoader<Account, Boolean> isLockedLoader =
       RepositoriesHandler.of(AccountsRepository.class)
                          .createLockedAccountLoader(this);
 
@@ -134,7 +131,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   public Account(final String firstname, final String lastname, final String email, final String password,
                  final boolean isAdministrator) {
     this(firstname, lastname, email, password);
-    administratorLazyLoader.setValue(isAdministrator);
+    administratorLoader.setValue(isAdministrator);
   }
 
   /**
@@ -209,22 +206,8 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   public List<ModelAction> getPostPersistenceActions(final DSLContext dslContext) {
     final List<ModelAction> actions = new LinkedList<>();
 
-    /*actions.addAll(ModelActions.fromLazyLoader(dslContext, administratorLazyLoader));
-    actions.addAll(ModelActions.fromLazyLoader(dslContext, isLockedLazyLoader));*/
-
-    if (administratorLazyLoader.hasChanged(dslContext)) {
-      final var administratorRecord = dslContext.newRecord(ADMINISTRATOR).setIdAccount(id);
-      if (Boolean.TRUE.equals(administratorLazyLoader.getValue(dslContext)))
-        actions.add(new PersistRecordAction<>(administratorRecord));
-      else actions.add(new DeleteRecordAction<>(administratorRecord));
-    }
-
-    if (isLockedLazyLoader.hasChanged(dslContext)) {
-      final var lockedAccountRecord = dslContext.newRecord(LOCKED_ACCOUNT).setIdAccount(id);
-      if (Boolean.TRUE.equals(isLockedLazyLoader.getValue(dslContext)))
-        actions.add(new PersistRecordAction<>(lockedAccountRecord));
-      else actions.add(new DeleteRecordAction<>(lockedAccountRecord));
-    }
+    actions.addAll(ModelActions.fromLazyLoader(dslContext, administratorLoader));
+    actions.addAll(ModelActions.fromLazyLoader(dslContext, isLockedLoader));
 
     return actions;
   }
@@ -403,7 +386,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
 
   /** @return {@code true} if this user is locked, otherwise {@code false}. */
   public boolean isLocked() {
-    final var isLocked = isLockedLazyLoader.getValue();
+    final var isLocked = isLockedLoader.getValue();
     if (isLocked != null) return isLocked;
     return false;
   }
@@ -412,7 +395,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
    * @return an {@link Optional} instance to determine if the value has been fetch ({@code true} or {@code false}) or is
    * not present if it has not been fetch.
    */
-  public Optional<Boolean> isLockedOptional() { return Optional.ofNullable(isLockedLazyLoader.getValue()); }
+  public Optional<Boolean> isLockedOptional() { return Optional.ofNullable(isLockedLoader.getValue()); }
 
   /**
    * Sets the locked status for this account.
@@ -422,7 +405,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
    * @return this instance.
    */
   public Account setLocked(final boolean isLocked) {
-    isLockedLazyLoader.setValue(isLocked);
+    isLockedLoader.setValue(isLocked);
     return this;
   }
 
@@ -432,7 +415,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
 
   /** @return {@code true} if this user is an administrator, otherwise {@code false}. */
   public boolean isAdministrator() {
-    final var isAdministrator = administratorLazyLoader.getValue();
+    final var isAdministrator = administratorLoader.getValue();
     if (isAdministrator != null) return isAdministrator;
     return false;
   }
@@ -442,7 +425,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
    * not present if it has not been fetch.
    */
   public Optional<Boolean> isAdministratorOptional() {
-    return Optional.ofNullable(administratorLazyLoader.getValue());
+    return Optional.ofNullable(administratorLoader.getValue());
   }
 
   /**
@@ -453,7 +436,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
    * @return this instance.
    */
   public Account setAdministrator(final boolean isAdministrator) {
-    administratorLazyLoader.setValue(isAdministrator);
+    administratorLoader.setValue(isAdministrator);
     return this;
   }
 

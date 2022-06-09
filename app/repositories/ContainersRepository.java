@@ -1,7 +1,10 @@
 package repositories;
 
 import database.BriventoryDB;
+import models.Account;
 import models.Container;
+import models.PrivateContainer;
+import models.SharedContainer;
 import orm.Repository;
 
 import javax.inject.Inject;
@@ -43,6 +46,19 @@ public final class ContainersRepository extends Repository<Container> {
     super(briventoryDB);
     this.privateContainersRepository = privateContainersRepository;
     this.sharedContainersRepository = sharedContainersRepository;
+  }
+
+  // *******************************************************************************************************************
+  // Migration
+  // *******************************************************************************************************************
+  public PrivateContainer migrate(final SharedContainer sharedContainer, final Account account) {
+    return migrate(dslContext -> sharedContainer.createRecord2(dslContext),
+                   new PrivateContainer(sharedContainer, account));
+  }
+
+  public SharedContainer migrate(final PrivateContainer privateContainer) {
+    return migrate(dslContext -> privateContainer.createRecord2(dslContext),
+                   new SharedContainer(privateContainer));
   }
 
   // *******************************************************************************************************************

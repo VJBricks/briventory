@@ -66,15 +66,17 @@ public abstract class LazyLoader<K, V> {
   }
 
   // *******************************************************************************************************************
-  // Abstract Methods
+  // Abstract & Protected Methods
   // *******************************************************************************************************************
 
   /**
    * Creates the corresponding {@link ModelAction} to be executed during the persistence or the deletion process.
    *
+   * @param dslContext the {@link DSLContext}.
+   *
    * @return a {@link List} of {@link ModelAction} instances.
    */
-  public abstract List<ModelAction> createModelActions();
+  abstract List<ModelAction> createModelActions(DSLContext dslContext);
 
   // *******************************************************************************************************************
   // Getters & Setters
@@ -124,7 +126,7 @@ public abstract class LazyLoader<K, V> {
    * @return the value.
    */
   public final V getValue() {
-    return persistenceContext.produceInConnection(dslContext -> getValue(dslContext));
+    return persistenceContext.produceInConnection(this::getValue);
   }
 
   /**

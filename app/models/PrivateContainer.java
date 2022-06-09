@@ -6,6 +6,7 @@ import org.jooq.DSLContext;
 import orm.models.PersistableModel2;
 import play.data.validation.ValidationError;
 
+import java.util.Collections;
 import java.util.List;
 
 import static jooq.Tables.PRIVATE_CONTAINER;
@@ -29,6 +30,16 @@ public final class PrivateContainer
     this.idAccount = idAccount;
   }
 
+  public PrivateContainer(final ContainerType containerType, final Account account) {
+    super(containerType);
+    this.idAccount = account.getId();
+  }
+
+  public PrivateContainer(final SharedContainer sharedContainer, final Account account) {
+    super(sharedContainer.getId(), sharedContainer.getContainerType());
+    this.idAccount = account.getId();
+  }
+
   // *******************************************************************************************************************
   // PersistableModel1 Overrides
   // *******************************************************************************************************************
@@ -50,7 +61,7 @@ public final class PrivateContainer
   /** {@inheritDoc} */
   @Override
   public List<ValidationError> validate(final DSLContext dslContext) {
-    return null; // TODO
+    return Collections.emptyList();
   }
 
   // *******************************************************************************************************************

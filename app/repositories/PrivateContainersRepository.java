@@ -42,9 +42,17 @@ public final class PrivateContainersRepository extends Repository<PrivateContain
     super(briventoryDB);
   }
 
+  public void persist(final PrivateContainer privateContainer) {
+    super.persist(privateContainer);
+  }
+
+  public void delete(final PrivateContainer privateContainer) {
+    super.deleteInTransaction(privateContainer);
+  }
+
   Tuple2<Mapper<Record4<Long, Long, List<Locker>, Long>,
-                   PrivateContainer>,
-            ResultQuery<Record4<Long, Long, List<Locker>, Long>>> getPrivateContainersQuery(
+      PrivateContainer>,
+      ResultQuery<Record4<Long, Long, List<Locker>, Long>>> getPrivateContainersQuery(
       final DSLContext dslContext) {
     return Tuple.tuple(PRIVATE_CONTAINER_MAPPER,
                        dslContext.select(CONTAINER.ID,
@@ -60,8 +68,8 @@ public final class PrivateContainersRepository extends Repository<PrivateContain
   }
 
   Tuple2<Mapper<Record4<Long, Long, List<Locker>, Long>,
-                   PrivateContainer>,
-            ResultQuery<Record4<Long, Long, List<Locker>, Long>>> getPrivateContainersWithLockersQuery(
+      PrivateContainer>,
+      ResultQuery<Record4<Long, Long, List<Locker>, Long>>> getPrivateContainersWithLockersQuery(
       final DSLContext dslContext) {
     return Tuple.tuple(PRIVATE_CONTAINER_MAPPER,
                        dslContext.select(CONTAINER.ID,

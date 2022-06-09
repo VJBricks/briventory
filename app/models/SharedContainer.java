@@ -41,6 +41,10 @@ public final class SharedContainer
     super(containerType);
   }
 
+  public SharedContainer(final PrivateContainer privateContainer) {
+    super(privateContainer.getId(), privateContainer.getContainerType());
+  }
+
   // *******************************************************************************************************************
   // PersistableModel1 Overrides
   // *******************************************************************************************************************

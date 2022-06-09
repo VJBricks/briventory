@@ -583,6 +583,24 @@ public abstract class PersistenceContext {
   }
 
   // *******************************************************************************************************************
+  // Migration
+  // *******************************************************************************************************************
+
+  protected final <V,
+      RF2 extends UpdatableRecord<RF2>,
+      RT1 extends UpdatableRecord<RT1>,
+      RT2 extends UpdatableRecord<RT2>,
+      F extends DeletableModel<V, RF2>, T extends PersistableModel2<RT1, RT2> & ValidatableModel<V>> T migrate(
+      final Function<DSLContext, RF2> recordToDelete, final T resultingModel) {
+    return produceInTransaction(dslContext -> {
+      final RF2 toDelete = recordToDelete.apply(dslContext);
+      toDelete.delete();
+      persist(dslContext, resultingModel);
+      return resultingModel;
+    });
+  }
+
+  // *******************************************************************************************************************
   // Abstract Methods, relative to validation
   // *******************************************************************************************************************
 
