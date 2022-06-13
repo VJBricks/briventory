@@ -3,6 +3,10 @@ package controllers.accounts;
 import controllers.ErrorsController;
 import controllers.auth.SessionHelper;
 import controllers.auth.SignedInAuthenticator;
+import me.gosimple.nbvcxz.Nbvcxz;
+import me.gosimple.nbvcxz.resources.ConfigurationBuilder;
+import me.gosimple.nbvcxz.resources.Dictionary;
+import me.gosimple.nbvcxz.resources.DictionaryBuilder;
 import models.Account;
 import play.data.Form;
 import play.data.FormFactory;
@@ -11,10 +15,17 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Security;
+import play.routing.JavaScriptReverseRouter;
+import repositories.AccountsRepository;
 
 import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
+import static play.mvc.Http.MimeTypes.JAVASCRIPT;
+
+/** The {@code AccountsController} handle all entry points that are specific to {@link Account} instances. */
 @Security.Authenticated(SignedInAuthenticator.class)
 public final class AccountsController extends Controller {
 
@@ -30,16 +41,18 @@ public final class AccountsController extends Controller {
   private final ErrorsController errorsController;
   /** The injected {@link FormFactory} instance. */
   private final FormFactory formFactory;
+  /** The injected {@link AccountsRepository} instance. */
+  private final AccountsRepository accountsRepository;
 
   // *******************************************************************************************************************
   // Injected Templates
   // *******************************************************************************************************************
 
-  /** The {@link views.html.users.settings } template. */
-  private final views.html.users.settings settings;
+  /** The {@link views.html.accounts.settings } template. */
+  private final views.html.accounts.settings settings;
 
-  /** The {@link views.html.users.activity } template. */
-  private final views.html.users.activity activity;
+  /** The {@link views.html.accounts.activity } template. */
+  private final views.html.accounts.activity activity;
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -52,24 +65,52 @@ public final class AccountsController extends Controller {
    * @param sessionHelper the {@link SessionHelper} instance.
    * @param errorsController the {@link ErrorsController} instance.
    * @param formFactory the {@link FormFactory} instance.
-   * @param settings the {@link views.html.users.settings} template.
-   * @param activity the {@link views.html.users.activity} template.
+   * @param accountsRepository the {@link AccountsRepository} instance.
+   * @param settings the {@link views.html.accounts.settings} template.
+   * @param activity the {@link views.html.accounts.activity} template.
    */
   @Inject
-  public AccountsController(final MessagesApi messagesApi, final SessionHelper sessionHelper,
-                            final ErrorsController errorsController, final FormFactory formFactory,
-                            final views.html.users.settings settings,
-                            final views.html.users.activity activity) {
+  public AccountsController(final MessagesApi messagesApi,
+                            final SessionHelper sessionHelper,
+                            final ErrorsController errorsController,
+                            final FormFactory formFactory,
+                            final AccountsRepository accountsRepository,
+                            final views.html.accounts.settings settings,
+                            final views.html.accounts.activity activity) {
     this.messagesApi = messagesApi;
     this.sessionHelper = sessionHelper;
     this.errorsController = errorsController;
     this.formFactory = formFactory;
+    this.accountsRepository = accountsRepository;
     this.settings = settings;
     this.activity = activity;
   }
 
   // *******************************************************************************************************************
-  // Entry Points
+  // Password Matters
+  // *******************************************************************************************************************
+  public static Nbvcxz nbvcxz(final String... wordsToExclude) {
+
+    // From https://github.com/GoSimpleLLC/nbvcxz#requires-java
+    // Create a map of excluded words on a per-user basis using a hypothetical "User" object that contains this info
+    final List<Dictionary> dictionaryList = ConfigurationBuilder.getDefaultDictionaries();
+    dictionaryList.add(new DictionaryBuilder().setDictionaryName("exclude")
+                                              .addWords(Arrays.asList(wordsToExclude), 0)
+                                              .setExclusion(true)
+                                              .createDictionary());
+
+    // Create our configuration object and set our custom minimum entropy, and custom dictionary list
+    final var minimumEntry = 40d;
+    var configuration = new ConfigurationBuilder()
+        .setMinimumEntropy(minimumEntry)
+        .setDictionaries(dictionaryList)
+        .createConfiguration();
+
+    return new Nbvcxz(configuration);
+  }
+
+  // *******************************************************************************************************************
+  // Entry Points related to the activities page
   // *******************************************************************************************************************
 
   /**
@@ -77,7 +118,7 @@ public final class AccountsController extends Controller {
    *
    * @param request the {@link Http.Request}.
    *
-   * @return the {@link views.html.users.activity} page.
+   * @return the {@link views.html.accounts.activity} page.
    */
   public Result activity(final Http.Request request) {
     final Optional<Account> accountOptional = sessionHelper.retrieveAccount(request);
@@ -88,37 +129,132 @@ public final class AccountsController extends Controller {
     return errorsController.forbidden(request);
   }
 
+  // *******************************************************************************************************************
+  // Entry Points related to the settings page
+  // *******************************************************************************************************************
+
+  /**
+   * Provides the JavaScript routes in a JS object called {@code settingsJSRoutes}.
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return the {@code settingsJSRoutes} JS object.
+   */
+  public Result settingsJs(final Http.Request request) {
+    return ok(JavaScriptReverseRouter.create("settingsJSRoutes", "jQuery.ajax", request.host(),
+                                             routes.javascript.AccountsController.updateName(),
+                                             routes.javascript.AccountsController.updateEmail(),
+                                             routes.javascript.AccountsController.updateCredentials()))
+        .as(JAVASCRIPT);
+  }
+
   /**
    * Returns the <em>settings</em> page.
    *
    * @param request the {@link Http.Request}.
    *
-   * @return the {@link views.html.users.settings} page.
+   * @return the {@link views.html.accounts.settings} page.
    */
   public Result settings(final Http.Request request) {
     final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
     if (optionalAccount.isPresent()) {
       final var preferred = messagesApi.preferred(request);
 
-      Form<EmailForm> emailForm = formFactory.form(EmailForm.class);
-      emailForm = emailForm.fill(new EmailForm(optionalAccount.get().getEmail()));
+      final Form<EmailForm> emailForm = formFactory.form(EmailForm.class)
+                                                   .fill(new EmailForm(optionalAccount.get().getId(),
+                                                                       optionalAccount.get().getEmail()));
 
-      Form<NameForm> nameForm = formFactory.form(NameForm.class);
-      nameForm = nameForm.fill(new NameForm(optionalAccount.get().getFirstname(), optionalAccount.get().getLastname()));
+      final Form<NameForm> nameForm = formFactory.form(NameForm.class)
+                                                 .fill(new NameForm(optionalAccount.get().getFirstname(),
+                                                                    optionalAccount.get().getLastname()));
 
-      return ok(settings.render(optionalAccount.get(), emailForm, nameForm, request, preferred));
+      final Form<CredentialsForm> credentialsForm = formFactory.form(CredentialsForm.class)
+          .fill(new CredentialsForm(optionalAccount.get().getId()));
+
+      return ok(settings.render(optionalAccount.get(),
+                                emailForm,
+                                nameForm,
+                                credentialsForm,
+                                request,
+                                preferred));
     }
     return errorsController.forbidden(request);
   }
 
+  /**
+   * update the e-mail address and returns the related form.
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return the related form with the new values or the errors.
+   */
   public Result updateEmail(final Http.Request request) {
-    return paymentRequired();
+    final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
+    if (optionalAccount.isPresent()) {
+      final var preferred = messagesApi.preferred(request);
+      final Form<EmailForm> emailForm = formFactory.form(EmailForm.class)
+                                                   .bindFromRequest(request);
+
+      final Account account = optionalAccount.get();
+      if (!emailForm.hasErrors() && account.getId().equals(emailForm.get().getIdAccount())) {
+        account.setEmail(emailForm.get().getEmail());
+        accountsRepository.persist(account);
+        return ok(views.html.accounts.emailCard.render(emailForm, request, preferred));
+      }
+      return badRequest(views.html.accounts.emailCard.render(emailForm, request, preferred));
+    }
+    return errorsController.forbidden(request);
   }
 
+  /**
+   * update the first name and the last name and returns the related form.
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return the related form with the new values or the errors.
+   */
   public Result updateName(final Http.Request request) {
-    return paymentRequired();
+    final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
+    if (optionalAccount.isPresent()) {
+      final var preferred = messagesApi.preferred(request);
+      final Form<NameForm> nameForm = formFactory.form(NameForm.class)
+                                                 .bindFromRequest(request);
+
+      if (!nameForm.hasErrors()) {
+        final Account account = optionalAccount.get();
+        account.setFirstname(nameForm.get().getFirstname());
+        account.setLastname(nameForm.get().getLastname());
+        accountsRepository.persist(account);
+        return ok(views.html.accounts.nameCard.render(nameForm, request, preferred));
+      }
+      return badRequest(views.html.accounts.nameCard.render(nameForm, request, preferred));
+    }
+    return errorsController.forbidden(request);
   }
 
-  public Result updateCredentials(final Http.Request request) { return paymentRequired(); }
+  /**
+   * update the credentials and returns the related form.
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return the related form with the new values or the errors.
+   */
+  public Result updateCredentials(final Http.Request request) {
+    final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
+    if (optionalAccount.isPresent()) {
+      final var preferred = messagesApi.preferred(request);
+      final Form<CredentialsForm> credentialsForm = formFactory.form(CredentialsForm.class)
+                                                               .bindFromRequest(request);
+
+      final Account account = optionalAccount.get();
+      if (!credentialsForm.hasErrors() && account.getId().equals(credentialsForm.get().getIdAccount())) {
+        account.setClearPassword(credentialsForm.get().getNewPassword());
+        accountsRepository.persist(account);
+        return ok(views.html.accounts.credentialsCard.render(credentialsForm, request, preferred));
+      }
+      return badRequest(views.html.accounts.credentialsCard.render(credentialsForm, request, preferred));
+    }
+    return errorsController.forbidden(request);
+  }
 
 }

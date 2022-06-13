@@ -1,15 +1,15 @@
 @import controllers.auth.AdminSignUpForm
 @import database.Constraints
 @import org.webjars.play.WebJarsUtil
-@import views.html.helper.FieldConstructor
 @import play.data.Form
 @import play.i18n.Messages
+@import views.html.helper.FieldConstructor
 
 @this(lite: templates.lite, webJarsUtil: WebJarsUtil)
 @(form: Form[AdminSignUpForm])(implicit request: Http.Request, messages: Messages)
 
 @implicitField = @{
-  FieldConstructor(bootstrapFieldConstructor.f)
+  FieldConstructor(templates.bootstrapFieldConstructor.f)
 }
 
 @lite(title = messages("auth.admin.signup.title"),

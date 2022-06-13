@@ -11,8 +11,13 @@ import repositories.AccountsRepository;
 import java.util.LinkedList;
 import java.util.List;
 
+/** The {@link play.data.Form} is specific to update the first name and the last name of an account. */
 @ValidateWithAccountsRepository
 public final class NameForm implements ValidatableWithAccountsRepository<List<ValidationError>> {
+
+  // *******************************************************************************************************************
+  // Attributes
+  // *******************************************************************************************************************
 
   /** The first name. */
   @Required
@@ -23,6 +28,10 @@ public final class NameForm implements ValidatableWithAccountsRepository<List<Va
   @Required
   @MaxLength(Constraints.NAME_DOMAIN_LENGTH)
   private String lastname;
+
+  // *******************************************************************************************************************
+  // Construction & Initialization
+  // *******************************************************************************************************************
 
   /** Empty constructor for the binding with the request. */
   public NameForm() { /* No-op. */ }
@@ -37,6 +46,23 @@ public final class NameForm implements ValidatableWithAccountsRepository<List<Va
     this.firstname = firstname;
     this.lastname = lastname;
   }
+
+  // *******************************************************************************************************************
+  // ValidatableWithAccountsRepository Overrides
+  // *******************************************************************************************************************
+  @Override
+  public List<ValidationError> validate(final AccountsRepository accountsRepository) {
+    LinkedList<ValidationError> l = new LinkedList<>();
+    if (firstname.isBlank())
+      l.add(new ValidationError("firstname", "error.required"));
+    if (lastname.isBlank())
+      l.add(new ValidationError("lastname", "error.required"));
+    return l;
+  }
+
+  // *******************************************************************************************************************
+  // Getters & Setters
+  // *******************************************************************************************************************
 
   /** @return the first name. */
   public String getFirstname() { return firstname; }
@@ -60,16 +86,6 @@ public final class NameForm implements ValidatableWithAccountsRepository<List<Va
    */
   public void setLastname(final String lastname) {
     this.lastname = lastname;
-  }
-
-  @Override
-  public List<ValidationError> validate(final AccountsRepository accountsRepository) {
-    LinkedList<ValidationError> l = new LinkedList<>();
-    if (firstname.isBlank())
-      l.add(new ValidationError("firstname", "error.required"));
-    if (lastname.isBlank())
-      l.add(new ValidationError("lastname", "error.required"));
-    return l;
   }
 
 }

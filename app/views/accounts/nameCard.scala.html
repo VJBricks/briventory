@@ -1,0 +1,57 @@
+@import controllers.accounts.NameForm
+@import views.html.helper.FieldConstructor
+
+@(nameForm: Form[NameForm])(implicit request: Http.Request, messages: play.i18n.Messages)
+
+@implicitField = @{
+  FieldConstructor(templates.bootstrapFieldConstructor.f)
+}
+
+<div id="name-card" class="card h-100">
+  <div class="card-header">@messages("account.settings.name.label")</div>
+  <div class="card-body">
+    @if(nameForm.hasGlobalErrors()) {
+      @for(error <- nameForm.globalErrors()) {
+        <p class="form-message text-danger">@error.format(messages)</p>
+      }
+    }
+    <form id="name-card-form">
+      @helper.CSRF.formField
+      @helper.inputText(nameForm("firstname"),
+        Symbol("class") -> "form-control",
+        Symbol("_label") -> messages("account.settings.name.firstname.label"))
+      @helper.inputText(nameForm("lastname"),
+        Symbol("class") -> "form-control",
+        Symbol("_label") -> messages("account.settings.name.lastname.label"))
+    </form>
+  </div>
+  <div class="card-footer text-end">
+    <button type="submit" id="name-card-submit" class="btn btn-primary" onclick="nameCardFormSubmission()">@messages("button.update.caption")</button>
+  </div>
+
+  <script>
+          /** Performs the submission of the <code>name-card-form</code>. */
+          function nameCardFormSubmission() {
+            blockWithSpinner("#name-card");
+
+            settingsJSRoutes.controllers.accounts.AccountsController.updateName().ajax({
+              async: true,
+              method: "POST",
+              data: $("#name-card-form").serialize(),
+              success: function (data) {
+                $("#name-card").replaceWith(data);
+                classTransition("#name-card-submit", "btn-success", 3000);
+              },
+              error: function (data) {
+                $("#name-card").replaceWith(data.responseText);
+                classTransition("#name-card-submit", "btn-danger", 3000);
+              }
+            });
+          }
+
+          $("#name-card-form").submit(function () {
+            nameCardFormSubmission();
+            return false;
+          });
+  </script>
+</div>

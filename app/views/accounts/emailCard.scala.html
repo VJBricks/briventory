@@ -1,0 +1,58 @@
+@import controllers.accounts.EmailForm
+@import views.html.helper.FieldConstructor
+
+@(emailForm: Form[EmailForm])(implicit request: Http.Request, messages: play.i18n.Messages)
+
+@implicitField = @{
+  FieldConstructor(templates.bootstrapFieldConstructor.f)
+}
+
+<div id="email-card" class="card h-100">
+  <div class="card-header">@messages("account.settings.email.label")</div>
+  <div class="card-body">
+    @if(emailForm.hasGlobalErrors()) {
+      @for(error <- emailForm.globalErrors()) {
+        <p class="form-message text-danger">@error.format(messages)</p>
+      }
+    }
+    <form id="email-card-form">
+      @helper.CSRF.formField
+      @helper.input(emailForm("idAccount"), Symbol("type") -> "hidden") { (id, name, value, args) =>
+        <input type="hidden" name="@name" id="@id" value="@value" @toHtmlArgs(args)>
+      }
+      @helper.inputText(emailForm("email"),
+        Symbol("class") -> "form-control",
+        Symbol("type") -> "email",
+        Symbol("_label") -> "")
+    </form>
+  </div>
+  <div class="card-footer text-end">
+    <button type="submit" id="email-card-submit" class="btn btn-primary" onclick="emailCardFormSubmission()">@messages("button.update.caption")</button>
+  </div>
+
+  <script>
+          /** Performs the submission of the <code>email-card-form</code>. */
+          function emailCardFormSubmission() {
+            blockWithSpinner("#email-card");
+
+            settingsJSRoutes.controllers.accounts.AccountsController.updateEmail().ajax({
+              async: true,
+              method: "POST",
+              data: $("#email-card-form").serialize(),
+              success: function (data) {
+                $("#email-card").replaceWith(data);
+                classTransition("#email-card-submit", "btn-success", 3000);
+              },
+              error: function (data) {
+                $("#email-card").replaceWith(data.responseText);
+                classTransition("#email-card-submit", "btn-danger", 3000);
+              }
+            });
+          }
+
+          $("#email-card-form").submit(function () {
+            emailCardFormSubmission();
+            return false;
+          });
+  </script>
+</div>

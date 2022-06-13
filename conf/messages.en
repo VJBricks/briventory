@@ -6,14 +6,15 @@ button.update.caption = Update
 
 search.title = Search
 
-auth.signup=Sign Up
-auth.signup.password.tips=The password should have a minimal length of {0} characters and having a strength of {1}.
-auth.signup.password.strength=The actual strength is:
-auth.signup.error.email.exist=the e-mail address is already in use
-auth.signup.error.password.weak=the password does not respect the minimal strength of {0}
-auth.signup.error.passwordRepetition.mismatch=The repetition is not matching the password
+auth.signup = Sign Up
+auth.signup.password.tips = The password should have a minimal length of {0} characters and having a strength of {1}.
+auth.signup.password.strength = The actual strength is:
+auth.signup.error.email.exist = the e-mail address is already in use
+auth.signup.error.password.weak = the password does not respect the minimal strength of {0}
+auth.signup.error.passwordRepetition.mismatch = The repetition is not matching the password
+auth.signup.error.currentPassword.mismatch = the current password do not match
 
-auth.admin.signup.title=Administrator Sign Up
+auth.admin.signup.title = Administrator Sign Up
 
 auth.signin=Sign In
 auth.signin.title=Sign In
@@ -50,16 +51,33 @@ status.admin.description=At least one active administrator
 status.admin.tips=<a class="text-danger" href="{0}">Add a new administrator by following this link</a>
 status.app.version=Version
 
+account.error.firstname.empty = The first name is empty
+account.error.lastname.empty = The last name is empty
+account.error.password.empty = The password is empty
+account.error.email.empty = The e-mail address is empty
+account.error.email.invalid = Invalid e-mail address
+
 account.activity.title = Activity
 account.activity.explained = Shows you
 
 account.settings.title = Settings
 account.settings.explained = This page allows you to change the settings relative to yourself.
 
-account.settings.credentials.title = Credentials and personal information
-account.settings.credentials.explained = Change your credentials or personal information, using the forms below.
-account.settings.credentials.email.label = E-mail address
-account.settings.credentials.name.label = Name
+account.settings.account.title = Credentials and personal information
+account.settings.account.explained = Change your credentials or personal information, using the forms below.
+
+account.settings.email.label = E-mail address
+
+account.settings.name.label = First and last name
+account.settings.name.firstname.label = First name
+account.settings.name.lastname.label = Last name
+account.settings.name.label = Name and first name
+
+account.settings.credentials.password.label = Password
+account.settings.credentials.password.current.label = Current password
+account.settings.credentials.password.new.label = New password
+account.settings.credentials.password.repeated.label = Repeated Password
+account.settings.error.user.invalid = Invalid user
 
 account.settings.bricklink.sync.title = BrickLink Synchronization
 account.settings.bricklink.sync.explained = <p>Set or update the various token to sync with BrickLink. You can obtain them from the <a href="https://www.bricklink.com/v2/api/register_consumer.page">Consumer Registration</a> page.</p><p>To get more information about the BrickLink API, go to the <a href="https://www.bricklink.com/v3/api.page">BrickLink API</a> page.</p>

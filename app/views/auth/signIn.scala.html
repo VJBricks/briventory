@@ -1,13 +1,13 @@
 @import controllers.auth.SignInForm
-@import views.html.helper.FieldConstructor
 @import play.data.Form
 @import play.i18n.Messages
+@import views.html.helper.FieldConstructor
 
 @this(lite: templates.lite)
 @(form: Form[SignInForm])(implicit messages: Messages, request: Http.Request)
 
   @implicitField = @{
-    FieldConstructor(bootstrapFieldConstructor.f)
+    FieldConstructor(templates.bootstrapFieldConstructor.f)
   }
 
   @lite(title = messages("auth.signin.title")) {

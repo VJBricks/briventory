@@ -10,6 +10,7 @@ import orm.DeleteRecordAction;
 import orm.PersistRecordAction;
 import orm.RecordLoader;
 import orm.Repository;
+import play.data.validation.ValidationError;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -257,6 +258,14 @@ public final class AccountsRepository extends Repository<Account> {
   // *******************************************************************************************************************
   // Data Validation
   // *******************************************************************************************************************
+  public List<ValidationError> validate(final Account account) { return super.validate(account); }
+
+  public boolean emailAlreadyExists(final Account account, final String email) {
+    return exists(dslContext -> dslContext.selectFrom(ACCOUNT)
+                                          .where(ACCOUNT.EMAIL.equalIgnoreCase(email.trim()))
+                                          .and(ACCOUNT.ID.ne(account.getId())));
+  }
+
   public boolean emailAlreadyExists(final String email) {
     return exists(dslContext -> dslContext.selectFrom(ACCOUNT)
                                           .where(ACCOUNT.EMAIL.equalIgnoreCase(email.trim())));

@@ -1,7 +1,9 @@
+@import org.webjars.play.WebJarsUtil
 @this(main: templates.main)
-@(title: String, account: Account)(content: Html)(implicit messages: play.i18n.Messages)
 
-@main(title = title) {
+@(title: String, account: Account, stylesheets: List[Call] = Nil, javascripts: List[Call] = Nil, jsRoutes: List[Call] = Nil, webJarsJsAssets: List[WebJarsUtil#WebJarAsset] = Nil)(content: Html)(implicit messages: play.i18n.Messages)
+
+@main(title = title, stylesheets, javascripts, jsRoutes, webJarsJsAssets) {
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">

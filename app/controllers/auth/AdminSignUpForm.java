@@ -3,10 +3,6 @@ package controllers.auth;
 import controllers.forms.ValidatableWithAccountsRepository;
 import controllers.forms.ValidateWithAccountsRepository;
 import database.Constraints;
-import me.gosimple.nbvcxz.Nbvcxz;
-import me.gosimple.nbvcxz.resources.ConfigurationBuilder;
-import me.gosimple.nbvcxz.resources.Dictionary;
-import me.gosimple.nbvcxz.resources.DictionaryBuilder;
 import play.data.validation.Constraints.Email;
 import play.data.validation.Constraints.MaxLength;
 import play.data.validation.Constraints.MinLength;
@@ -18,8 +14,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import static controllers.accounts.AccountsController.nbvcxz;
+
 @ValidateWithAccountsRepository
 public final class AdminSignUpForm implements ValidatableWithAccountsRepository<List<ValidationError>> {
+
+  /** The message key to display the error that the field is required. */
+  private static final String ERROR_REQUIRED = "error.required";
 
   /** The first name. */
   @Required
@@ -106,43 +107,27 @@ public final class AdminSignUpForm implements ValidatableWithAccountsRepository<
     this.passwordRepetition = passwordRepetition;
   }
 
-  private Nbvcxz nbvcxz() {
-    // From https://github.com/GoSimpleLLC/nbvcxz#requires-java
-    // Create a map of excluded words on a per-user basis using a hypothetical "User" object that contains this info
-    List<Dictionary> dictionaryList = ConfigurationBuilder.getDefaultDictionaries();
-    dictionaryList.add(new DictionaryBuilder()
-                           .setDictionaryName("exclude")
-                           .setExclusion(true)
-                           .addWord(firstname, 0)
-                           .addWord(lastname, 0)
-                           .addWord(email, 0)
-                           .createDictionary());
-
-    // Create our configuration object and set our custom minimum entropy, and custom dictionary list
-    final var minimumEntry = 40d;
-    var configuration = new ConfigurationBuilder()
-        .setMinimumEntropy(minimumEntry)
-        .setDictionaries(dictionaryList)
-        .createConfiguration();
-
-    return new Nbvcxz(configuration);
-  }
-
   @Override
   public List<ValidationError> validate(final AccountsRepository accountsRepository) {
     LinkedList<ValidationError> l = new LinkedList<>();
+
     if (firstname.isBlank())
-      l.add(new ValidationError("firstname", "error.required"));
+      l.add(new ValidationError("firstname", ERROR_REQUIRED));
+
     if (lastname.isBlank())
-      l.add(new ValidationError("lastname", "error.required"));
+      l.add(new ValidationError("lastname", ERROR_REQUIRED));
+
     if (email.isBlank())
-      l.add(new ValidationError("email", "error.required"));
+      l.add(new ValidationError("email", ERROR_REQUIRED));
+
     if (accountsRepository.emailAlreadyExists(email))
       l.add(new ValidationError("email", "auth.signup.error.email.exist"));
-    final var nbvcxz = nbvcxz();
+
+    final var nbvcxz = nbvcxz(firstname, lastname, email);
     if (nbvcxz.estimate(password).getBasicScore() < Constraints.PASSWORD_MIN_STRENGTH)
       l.add(new ValidationError("password", "auth.signup.error.password.weak",
                                 Collections.singletonList(Constraints.PASSWORD_MIN_STRENGTH)));
+
     if (!password.equals(passwordRepetition))
       l.add(new ValidationError("passwordRepetition", "auth.signup.error.passwordRepetition.mismatch"));
     return l;

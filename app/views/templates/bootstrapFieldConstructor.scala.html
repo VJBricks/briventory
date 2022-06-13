@@ -4,8 +4,10 @@
   @elements.input
 } else {
   <div class="mb-3 row @if(elements.hasErrors) {danger}">
-    <label class="form-label" for="@elements.id">@elements.label</label>
-    <div class="col-sm-8">
+    @if(!elements.label.toString().isBlank()) {
+      <label class="form-label" for="@elements.id">@elements.label</label>
+    }
+    <div @if(!elements.label.toString().isBlank()) {class="col-sm-8"}>
       @elements.input
       @if(elements.infos.nonEmpty) {
         <p class="form-message text-dark">@elements.infos.mkString(", ")</p>

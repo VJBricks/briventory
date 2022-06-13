@@ -14,11 +14,12 @@ GET         /auth/admin/signup                controllers.auth.PublicAuthControl
 POST        /auth/admin/signup                controllers.auth.PublicAuthController.doAdminSignUp(request: Request)
 GET         /auth/signout                     controllers.auth.SecuredAuth.signOut()
 
-GET         /user/activities                  controllers.accounts.AccountsController.activity(request: Request)
-GET         /user/settings                    controllers.accounts.AccountsController.settings(request: Request)
-POST        /user/settings/email              controllers.accounts.AccountsController.updateEmail(request: Request)
-POST        /user/settings/name               controllers.accounts.AccountsController.updateName(request: Request)
-POST        /user/settings/credentials        controllers.accounts.AccountsController.updateCredentials(request: Request)
+GET         /account/activities               controllers.accounts.AccountsController.activity(request: Request)
+GET         /account/settings                 controllers.accounts.AccountsController.settings(request: Request)
+GET         /account/settings/js              controllers.accounts.AccountsController.settingsJs(request: Request)
+POST        /account/settings/email           controllers.accounts.AccountsController.updateEmail(request: Request)
+POST        /account/settings/name            controllers.accounts.AccountsController.updateName(request: Request)
+POST        /account/settings/credentials     controllers.accounts.AccountsController.updateCredentials(request: Request)
 
 GET         /storage/containers               controllers.storage.StorageController.containers(request: Request)
 

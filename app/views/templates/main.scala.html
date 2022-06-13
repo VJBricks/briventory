@@ -1,4 +1,3 @@
-@import utils.BriventoryBuildInfo
 @import org.webjars.play.WebJarsUtil
 
 @this(webJarsUtil: WebJarsUtil)
@@ -46,7 +45,7 @@
       <script defer src="@route" type="text/javascript"></script>
     }
     @scripts = @{
-      javascripts.toList
+      routes.Assets.versioned("javascripts/main.js") :: javascripts.toList
     }
 
     @for(javascript <- scripts) {
