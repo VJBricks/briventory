@@ -16,6 +16,7 @@ import orm.models.PersistableModel1;
 import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
 import repositories.AccountsRepository;
+import repositories.BricklinkTokensRepository;
 import repositories.ColorsSourcesRepository;
 
 import java.util.LinkedList;
@@ -63,12 +64,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   private String lastname;
   /** The e-mail address. */
   private String email;
-  /**
-   * The password.
-   *
-   * @deprecated It is maybe a bad idea to keep the hashed password in the memory !
-   */
-  @Deprecated()
+  /** The password. */
   private String password;
 
   /** Does this account has administrator rights ? */
@@ -80,6 +76,11 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   private final RecordLoader<Account, Boolean> isLockedLoader =
       RepositoriesHandler.of(AccountsRepository.class)
                          .createLockedAccountLoader(this);
+
+  /** The {@link BricklinkTokens} instance loader. */
+  private final OptionalModelLoader<Account, BricklinkTokens> bricklinkTokensLoader =
+      RepositoriesHandler.of(BricklinkTokensRepository.class)
+                         .createBricklinkTokensLoader(this);
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -208,6 +209,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
 
     actions.addAll(ModelActions.fromLazyLoader(dslContext, administratorLoader));
     actions.addAll(ModelActions.fromLazyLoader(dslContext, isLockedLoader));
+    actions.addAll(ModelActions.fromLazyLoader(dslContext, bricklinkTokensLoader));
 
     return actions;
   }
@@ -438,6 +440,27 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   public Account setAdministrator(final boolean isAdministrator) {
     administratorLoader.setValue(isAdministrator);
     return this;
+  }
+
+  // *******************************************************************************************************************
+  // BrickLink Synchronisation Matters
+  // *******************************************************************************************************************
+
+  /** @return the {@link Optional} instance, containing the {@link BricklinkTokens}. */
+  public Optional<BricklinkTokens> getBricklinkTokens() { return bricklinkTokensLoader.getValue(); }
+
+  /**
+   * Sets the {@link BricklinkTokens}.
+   *
+   * @param bricklinkTokens the {@link BricklinkTokens}.
+   */
+  public void setBricklinkTokens(final BricklinkTokens bricklinkTokens) {
+    bricklinkTokensLoader.setValue(Optional.of(bricklinkTokens));
+  }
+
+  /** Clears the {@link BricklinkTokens}. */
+  public void clearBricklinkTokens() {
+    bricklinkTokensLoader.setValue(Optional.empty());
   }
 
 }

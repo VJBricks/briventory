@@ -3,7 +3,6 @@ package orm;
 import org.jooq.DSLContext;
 import org.jooq.Function3;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -19,32 +18,13 @@ import java.util.function.BiFunction;
 public final class RecordLoader<K, V> extends LazyLoader<K, V> {
 
   // *******************************************************************************************************************
-  // Attributes
-  // *******************************************************************************************************************
-  /** The function that will produce the corresponding {@link ModelAction}, depending on the key and the value. */
-  private final Function3<DSLContext, K, V, ModelAction> modelActionCreator;
-
-  // *******************************************************************************************************************
   // Construction & Initialization
   // *******************************************************************************************************************
   RecordLoader(final PersistenceContext persistenceContext,
                final K key,
                final BiFunction<DSLContext, K, V> fetcher,
-               final Function3<DSLContext, K, V, ModelAction> modelActionCreator) {
-    super(persistenceContext, key, fetcher);
-    this.modelActionCreator = modelActionCreator;
-  }
-
-  // *******************************************************************************************************************
-  // LazyLoader Overrides
-  // *******************************************************************************************************************
-
-  /** {@inheritDoc} */
-  @Override
-  public List<ModelAction> createModelActions(final DSLContext dslContext) {
-    if (isFetched() && hasChanged(dslContext))
-      return Collections.singletonList(modelActionCreator.apply(dslContext, getKey(), getValue()));
-    return Collections.emptyList();
+               final Function3<DSLContext, K, V, List<ModelAction>> modelActionsCreator) {
+    super(persistenceContext, key, fetcher, modelActionsCreator);
   }
 
 }

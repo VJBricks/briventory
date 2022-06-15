@@ -5,12 +5,18 @@ import org.jooq.DSLContext;
 import orm.Model;
 import orm.ModelLoader;
 import orm.RepositoriesHandler;
+import orm.models.DeletableModel;
 import orm.models.PersistableModel1;
+import orm.models.ValidatableModel;
+import play.data.validation.ValidationError;
 import repositories.LockerSizesRepository;
 
 import static jooq.Tables.LOCKER;
 
-public final class Locker extends Model implements PersistableModel1<LockerRecord> {
+public final class Locker extends Model implements
+    PersistableModel1<LockerRecord>,
+    ValidatableModel<ValidationError>,
+    DeletableModel<ValidationError, LockerRecord> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -58,6 +64,20 @@ public final class Locker extends Model implements PersistableModel1<LockerRecor
   }
 
   public void refresh1(final LockerRecord lockerRecord) { id = lockerRecord.getId(); }
+
+  // *******************************************************************************************************************
+  // DeletableModel Overrides
+  // *******************************************************************************************************************
+
+  /**
+   * @param dslContext the {@link DSLContext}.
+   *
+   * @return
+   */
+  @Override
+  public LockerRecord createDeletionRecord(final DSLContext dslContext) {
+    return createRecord1(dslContext);
+  }
 
   // *******************************************************************************************************************
   // Getters & Setters

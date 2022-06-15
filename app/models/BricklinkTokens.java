@@ -2,7 +2,9 @@ package models;
 
 import jooq.tables.records.BricklinkTokensRecord;
 import org.jooq.DSLContext;
+import orm.Mapper;
 import orm.Model;
+import orm.models.DeletableModel;
 import orm.models.PersistableModel1;
 import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
@@ -22,7 +24,22 @@ import static jooq.Tables.BRICKLINK_TOKENS;
  * </p>
  */
 public final class BricklinkTokens extends Model implements PersistableModel1<BricklinkTokensRecord>,
-                                                                ValidatableModel<ValidationError> {
+    ValidatableModel<ValidationError>, DeletableModel<ValidationError, BricklinkTokensRecord> {
+
+  // *******************************************************************************************************************
+  // Instance factory
+  // *******************************************************************************************************************
+  /**
+   * the {@link Mapper} that will create an instance of {@link BricklinkTokens} from an instance of
+   * {@link BricklinkTokensRecord}.
+   */
+  public static final Mapper<BricklinkTokensRecord, BricklinkTokens> BRICKLINK_TOKENS_MAPPER =
+      bricklinkTokensRecord -> new BricklinkTokens(bricklinkTokensRecord.getIdAccount(),
+                                                   bricklinkTokensRecord.getConsumerKey(),
+                                                   bricklinkTokensRecord.getConsumerSecret(),
+                                                   bricklinkTokensRecord.getTokenValue(),
+                                                   bricklinkTokensRecord.getTokenSecret(),
+                                                   bricklinkTokensRecord.getValidUntil());
 
   // *******************************************************************************************************************
   // Attributes
@@ -40,6 +57,44 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
   private String tokenSecret;
   /** The validity of the tokens. */
   private LocalDate validUntil;
+
+  // *******************************************************************************************************************
+  // Construction & Initialization
+  // *******************************************************************************************************************
+
+  /**
+   * Creates a new instance of {@link BricklinkTokens}.
+   *
+   * @param idAccount the identifier of the {@link Account}.
+   * @param consumerKey the consumer key.
+   * @param consumerSecret the consumer secret.
+   * @param tokenValue the token value.
+   * @param tokenSecret the token secret.
+   * @param validUntil the validity of the tokens.
+   */
+  private BricklinkTokens(final long idAccount, final String consumerKey, final String consumerSecret,
+                          final String tokenValue, final String tokenSecret, final LocalDate validUntil) {
+    this.idAccount = idAccount;
+    this.consumerKey = consumerKey;
+    this.consumerSecret = consumerSecret;
+    this.tokenValue = tokenValue;
+    this.tokenSecret = tokenSecret;
+    this.validUntil = validUntil;
+  }
+
+  /**
+   * Creates a new instance of {@link BricklinkTokens}.
+   *
+   * @param account the {@link Account}.
+   * @param consumerKey the consumer key.
+   * @param consumerSecret the consumer secret.
+   * @param tokenValue the token value.
+   * @param tokenSecret the token secret.
+   */
+  public BricklinkTokens(final Account account, final String consumerKey, final String consumerSecret,
+                          final String tokenValue, final String tokenSecret) {
+    this(account.getId(), consumerKey, consumerSecret, tokenValue, tokenSecret, LocalDate.now());
+  }
 
   // *******************************************************************************************************************
   // PersistableModel1 Overrides
@@ -76,6 +131,16 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
     if (tokenSecret == null || tokenSecret.isBlank())
       errors.add(new ValidationError("tokenSecret", "bricklinkTokens.error.tokenSecret.empty"));
     return errors;
+  }
+
+  // *******************************************************************************************************************
+  // DeletableModel Overrides
+  // *******************************************************************************************************************
+
+  /** {@inheritDoc} */
+  @Override
+  public BricklinkTokensRecord createDeletionRecord(final DSLContext dslContext) {
+    return createRecord1(dslContext);
   }
 
   // *******************************************************************************************************************

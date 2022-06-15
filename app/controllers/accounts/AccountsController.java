@@ -8,6 +8,7 @@ import me.gosimple.nbvcxz.resources.ConfigurationBuilder;
 import me.gosimple.nbvcxz.resources.Dictionary;
 import me.gosimple.nbvcxz.resources.DictionaryBuilder;
 import models.Account;
+import models.BricklinkTokens;
 import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
@@ -144,7 +145,9 @@ public final class AccountsController extends Controller {
     return ok(JavaScriptReverseRouter.create("settingsJSRoutes", "jQuery.ajax", request.host(),
                                              routes.javascript.AccountsController.updateName(),
                                              routes.javascript.AccountsController.updateEmail(),
-                                             routes.javascript.AccountsController.updateCredentials()))
+                                             routes.javascript.AccountsController.updateCredentials(),
+                                             routes.javascript.AccountsController.updateBricklinkTokens(),
+                                             routes.javascript.AccountsController.deleteBricklinkTokens()))
         .as(JAVASCRIPT);
   }
 
@@ -168,13 +171,19 @@ public final class AccountsController extends Controller {
                                                  .fill(new NameForm(optionalAccount.get().getFirstname(),
                                                                     optionalAccount.get().getLastname()));
 
-      final Form<CredentialsForm> credentialsForm = formFactory.form(CredentialsForm.class)
-          .fill(new CredentialsForm(optionalAccount.get().getId()));
+      final Form<CredentialsForm> credentialsForm =
+          formFactory.form(CredentialsForm.class)
+                     .fill(new CredentialsForm(optionalAccount.get().getId()));
+
+      final Form<BrickLinkTokensForm> brickLinkTokensForm = formFactory.form(BrickLinkTokensForm.class)
+                                                                       .fill(new BrickLinkTokensForm(
+                                                                           optionalAccount.get().getBricklinkTokens()));
 
       return ok(settings.render(optionalAccount.get(),
                                 emailForm,
                                 nameForm,
                                 credentialsForm,
+                                brickLinkTokensForm,
                                 request,
                                 preferred));
     }
@@ -253,6 +262,53 @@ public final class AccountsController extends Controller {
         return ok(views.html.accounts.credentialsCard.render(credentialsForm, request, preferred));
       }
       return badRequest(views.html.accounts.credentialsCard.render(credentialsForm, request, preferred));
+    }
+    return errorsController.forbidden(request);
+  }
+
+  /**
+   * update the BrickLink tokens and returns the related form.
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return the related form with the new values or the errors.
+   */
+  public Result updateBricklinkTokens(final Http.Request request) {
+    final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
+    final var preferred = messagesApi.preferred(request);
+
+    if (optionalAccount.isPresent()) {
+      final Form<BrickLinkTokensForm> brickLinkTokensForm = formFactory.form(BrickLinkTokensForm.class)
+                                                                       .bindFromRequest(request);
+
+      final Account account = optionalAccount.get();
+      if (!brickLinkTokensForm.hasErrors()) {
+        final BrickLinkTokensForm form = brickLinkTokensForm.get();
+        account.setBricklinkTokens(new BricklinkTokens(account,
+                                                       form.getConsumerKey(),
+                                                       form.getConsumerSecret(),
+                                                       form.getTokenValue(),
+                                                       form.getTokenSecret()));
+        accountsRepository.persist(account);
+        brickLinkTokensForm.get().setAsFilled();
+        return ok(views.html.accounts.bricklinkTokensCard.render(brickLinkTokensForm, request, preferred));
+      }
+      return badRequest(views.html.accounts.bricklinkTokensCard.render(brickLinkTokensForm, request, preferred));
+    }
+    return errorsController.forbidden(request);
+  }
+
+  public Result deleteBricklinkTokens(final Http.Request request) {
+    final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
+    final var preferred = messagesApi.preferred(request);
+
+    if (optionalAccount.isPresent()) {
+      final Account account = optionalAccount.get();
+      account.clearBricklinkTokens();
+      accountsRepository.persist(account);
+      return ok(views.html.accounts.bricklinkTokensCard.render(formFactory.form(BrickLinkTokensForm.class),
+                                                               request,
+                                                               preferred));
     }
     return errorsController.forbidden(request);
   }

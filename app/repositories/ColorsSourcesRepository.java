@@ -6,11 +6,11 @@ import models.ColorsSource;
 import org.jooq.DSLContext;
 import orm.Mapper;
 import orm.OptionalModelLoader;
-import orm.RepositoriesHandler;
 import orm.Repository;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Collections;
 import java.util.Optional;
 
 import static jooq.tables.ColorSource.COLOR_SOURCE;
@@ -49,9 +49,8 @@ public final class ColorsSourcesRepository extends Repository<ColorsSource> {
 
   /** @return the {@link OptionalModelLoader} that will handle the lazy loading of a {@link ColorsSource}. */
   public OptionalModelLoader<Long, ColorsSource> createOptionalModelLoader() {
-    return createOptionalModelLoader((dslContext, idColorSource) ->
-                                         RepositoriesHandler.of(ColorsSourcesRepository.class)
-                                                            .findById(dslContext, idColorSource));
+    return createOptionalModelLoader(this::findById,
+                                     (dslContext, idAccount, optionalColorsSource) -> Collections.emptyList());
   }
 
   // *******************************************************************************************************************

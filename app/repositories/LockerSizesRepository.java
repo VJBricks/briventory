@@ -2,33 +2,20 @@ package repositories;
 
 import com.google.inject.Inject;
 import database.BriventoryDB;
-import jooq.tables.records.LockerSizeRecord;
 import models.LockerSize;
 import org.jooq.DSLContext;
-import orm.Mapper;
 import orm.ModelLoader;
+import orm.PersistAction1;
 import orm.Repository;
 
 import javax.inject.Singleton;
+import java.util.Collections;
 
 import static jooq.tables.LockerSize.LOCKER_SIZE;
+import static models.LockerSize.LOCKER_SIZE_MAPPER;
 
 @Singleton
 public final class LockerSizesRepository extends Repository<LockerSize> {
-
-  // *******************************************************************************************************************
-  // Instance factory
-  // *******************************************************************************************************************
-  /**
-   * the {@link Mapper} that will create an instance of {@link LockerSize} from an instance of
-   * {@link LockerSizeRecord}.
-   */
-  private static final Mapper<LockerSizeRecord, LockerSize> LOCKER_SIZE_MAPPER =
-      lockerSizeRecord -> new LockerSize(lockerSizeRecord.getId(),
-                                         lockerSizeRecord.getName(),
-                                         lockerSizeRecord.getWidth(),
-                                         lockerSizeRecord.getLength(),
-                                         lockerSizeRecord.getHeight());
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -44,7 +31,9 @@ public final class LockerSizesRepository extends Repository<LockerSize> {
 
   /** @return the {@link ModelLoader} to lazy load a {@link LockerSize} instance. */
   public ModelLoader<Long, LockerSize> createModelLoader() {
-    return createModelLoader(this::findById);
+    return createModelLoader(this::findById,
+                             (dslContext, idLocker, lockerSize) -> Collections.singletonList(
+                                 new PersistAction1<>(lockerSize)));
   }
 
   // *******************************************************************************************************************

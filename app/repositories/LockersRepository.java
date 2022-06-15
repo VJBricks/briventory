@@ -5,12 +5,16 @@ import models.Container;
 import models.Locker;
 import org.jooq.DSLContext;
 import org.jooq.Record3;
+import orm.DeleteAction;
 import orm.ManyModelsLoader;
 import orm.Mapper;
+import orm.ModelAction;
+import orm.PersistAction1;
 import orm.Repository;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.LinkedList;
 import java.util.List;
 
 import static jooq.tables.ContainerComposition.CONTAINER_COMPOSITION;
@@ -46,7 +50,16 @@ public final class LockersRepository extends Repository<Locker> {
   // Lazy Loaders Creation
   // *******************************************************************************************************************
   public ManyModelsLoader<Container, Locker> createLockersLoader(final Container container) {
-    return createManyModelsLoader(container, (dslContext, c) -> getLockers(dslContext, c));
+    return createManyModelsLoader(container,
+                                  this::findAll,
+                                  (dslContext, c, lockers) -> {
+                                    final List<ModelAction> actions = new LinkedList<>();
+                                    List<Locker> dbLockers = findAll(dslContext, c);
+                                    dbLockers.removeAll(lockers);
+                                    actions.add(new DeleteAction<>(dbLockers));
+                                    actions.add(new PersistAction1<>(lockers));
+                                    return actions;
+                                  });
   }
 
   // *******************************************************************************************************************
@@ -63,7 +76,7 @@ public final class LockersRepository extends Repository<Locker> {
                                             .where(LOCKER.ID.eq(id)));
   }
 
-  private List<Locker> getLockers(final DSLContext dslContext, final Container container) {
+  private List<Locker> findAll(final DSLContext dslContext, final Container container) {
     return fetch(LOCKER_MAPPER,
                  dslContext,
                  ctx -> ctx.select(LOCKER.ID,

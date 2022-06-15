@@ -3,6 +3,8 @@ lego.disclamer = LEGO is a trademark of the LEGO Group, which does not sponsor, 
 button.search.caption = Search
 button.save.caption = Save
 button.update.caption = Update
+button.delete.caption = Delete
+button.cancel.caption = Cancel
 
 search.title = Search
 
@@ -79,8 +81,14 @@ account.settings.credentials.password.new.label = New password
 account.settings.credentials.password.repeated.label = Repeated Password
 account.settings.error.user.invalid = Invalid user
 
-account.settings.bricklink.sync.title = BrickLink Synchronization
-account.settings.bricklink.sync.explained = <p>Set or update the various token to sync with BrickLink. You can obtain them from the <a href="https://www.bricklink.com/v2/api/register_consumer.page">Consumer Registration</a> page.</p><p>To get more information about the BrickLink API, go to the <a href="https://www.bricklink.com/v3/api.page">BrickLink API</a> page.</p>
+account.settings.sync.title = Synchronization with third party apps
+account.settings.sync.bricklink.title = BrickLink Synchronization
+account.settings.sync.bricklink.explained = <p>Set or update the various token to sync with BrickLink. You can obtain them from the <a href="https://www.bricklink.com/v2/api/register_consumer.page">Consumer Registration</a> page.</p><p>To get more information about the BrickLink API, go to the <a href="https://www.bricklink.com/v3/api.page">BrickLink API</a> page.</p>
+account.settings.sync.bricklink.consumerKey.label = Consumer key
+account.settings.sync.bricklink.consumerSecret.label = Consumer secret
+account.settings.sync.bricklink.tokenValue.label = Token value
+account.settings.sync.bricklink.tokenSecret.label = Token secret
+account.settings.sync.bricklink.delete.explain = <p>Do you really want to delete the BrickLink tokens ?</p>
 
 account.signout.title = Sign Out
 

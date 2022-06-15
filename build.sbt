@@ -62,7 +62,7 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-text" % "1.9",
   "commons-validator" % "commons-validator" % "1.7",
-  "org.postgresql" % "postgresql" % "42.3.6",
+  "org.postgresql" % "postgresql" % "42.4.0",
   "org.hsqldb" % "hsqldb" % "2.6.1",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.12.5",
   "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.13.3",
@@ -85,7 +85,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "jquery-ui" % "1.13.1",
   "org.webjars" % "popper.js" % "2.9.3",
   "org.webjars" % "bootstrap" % "5.1.3",
-  "org.webjars" % "font-awesome" % "6.1.0",
+  "org.webjars" % "font-awesome" % "6.1.1",
   "org.webjars.bowergithub.dropbox" % "zxcvbn" % "4.4.2"
 )
 

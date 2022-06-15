@@ -1,0 +1,110 @@
+@import controllers.accounts.BrickLinkTokensForm
+@import views.html.helper.FieldConstructor
+
+@(bricklinkTokensForm: Form[BrickLinkTokensForm])(implicit request: Http.Request, messages: play.i18n.Messages)
+
+@implicitField = @{
+  FieldConstructor(templates.bootstrapFieldConstructor.f)
+}
+
+<div id="bricklink-tokens-card" class="card h-100">
+  <div class="card-header">@messages("account.settings.sync.bricklink.title")</div>
+  <div class="card-body">
+    <p>@Html(messages("account.settings.sync.bricklink.explained"))</p>
+    <hr>
+    @if(bricklinkTokensForm.hasGlobalErrors()) {
+      @for(error <- bricklinkTokensForm.globalErrors()) {
+        <p class="form-message text-danger">@error.format(messages)</p>
+      }
+    }
+    <form id="bricklink-tokens-card-form">
+      @helper.CSRF.formField
+      @helper.input(bricklinkTokensForm("idAccount"), Symbol("type") -> "hidden") { (id, name, value, args) =>
+        <input type="hidden" name="@name" id="@id" value="@value" @toHtmlArgs(args)>
+      }
+      @helper.inputText(bricklinkTokensForm("consumerKey"),
+        Symbol("class") -> "form-control",
+        Symbol("_label") -> messages.at("account.settings.sync.bricklink.consumerKey.label"))
+      @helper.inputText(bricklinkTokensForm("consumerSecret"),
+        Symbol("class") -> "form-control",
+        Symbol("_label") -> messages.at("account.settings.sync.bricklink.consumerSecret.label"))
+      @helper.inputText(bricklinkTokensForm("tokenValue"),
+        Symbol("class") -> "form-control",
+        Symbol("_label") -> messages.at("account.settings.sync.bricklink.tokenValue.label"))
+      @helper.inputText(bricklinkTokensForm("tokenSecret"),
+        Symbol("class") -> "form-control",
+        Symbol("_label") -> messages.at("account.settings.sync.bricklink.tokenSecret.label"))
+    </form>
+  </div>
+  <div class="card-footer text-end">
+    @if(bricklinkTokensForm != null && bricklinkTokensForm.value().isPresent && !bricklinkTokensForm.get().isNew()) {
+      <button type="button" id="bricklink-tokens-card-delete" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#bricklink-tokens-card-clearance-modal">@messages("button.delete.caption")</button>
+    }
+    <button type="submit" id="bricklink-tokens-card-submit" class="btn btn-primary" onclick="bricklinkTokensCardFormSubmission()">@messages("button.update.caption")</button>
+  </div>
+
+  @if(bricklinkTokensForm != null && bricklinkTokensForm.value().isPresent && !bricklinkTokensForm.get().isNew()) {
+    <div class="modal fade" id="bricklink-tokens-card-clearance-modal" tabindex="-1" aria-labelledby="bricklink-tokens-card-clearance-modal-label" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="bricklink-tokens-card-clearance-modal-label">@messages.at("account.settings.sync.bricklink.title")</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>@Html(messages.at("account.settings.sync.bricklink.delete.explain"))</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@messages.at("button.cancel.caption")</button>
+            <button type="button" class="btn btn-primary" onclick="deleteBricklinkTokens()" data-bs-dismiss="modal">@messages.at("button.delete.caption")</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <script>
+          /** Performs the submission of the <code>email-card-form</code>. */
+          function bricklinkTokensCardFormSubmission() {
+            blockWithSpinner("#bricklink-tokens-card");
+
+            settingsJSRoutes.controllers.accounts.AccountsController.updateBricklinkTokens().ajax({
+              async: true,
+              method: "POST",
+              data: $("#bricklink-tokens-card-form").serialize(),
+              success: function (data) {
+                $("#bricklink-tokens-card").replaceWith(data);
+                classTransition("#bricklink-tokens-card-submit", "btn-success", 3000);
+              },
+              error: function (data) {
+                $("#bricklink-tokens-card").replaceWith(data.responseText);
+                classTransition("#bricklink-tokens-card-submit", "btn-danger", 3000);
+              }
+            });
+          }
+
+          $("#bricklink-tokens-card-form").submit(function () {
+            bricklinkTokensCardFormSubmission();
+            return false;
+          });
+
+          @if(bricklinkTokensForm != null && bricklinkTokensForm.value().isPresent && !bricklinkTokensForm.get().isNew) {
+
+          function deleteBricklinkTokens() {
+            blockWithSpinner("#bricklink-tokens-card");
+
+            settingsJSRoutes.controllers.accounts.AccountsController.deleteBricklinkTokens().ajax({
+              async: true,
+              method: "DELETE",
+              success: function (data) {
+                $("#bricklink-tokens-card").replaceWith(data);
+              },
+              error: function (data) {
+                $("#bricklink-tokens-card").replaceWith(data.responseText);
+              }
+            });
+          }
+
+          }
+  </script>
+</div>

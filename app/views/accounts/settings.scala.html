@@ -1,4 +1,4 @@
-@import controllers.accounts.{CredentialsForm, EmailForm, NameForm}
+@import controllers.accounts.{BrickLinkTokensForm, CredentialsForm, EmailForm, NameForm}
 @import play.data.Form
 @import views.html.helper.FieldConstructor
 
@@ -6,7 +6,8 @@
 @(account: Account,
         emailForm: Form[EmailForm],
         nameForm: Form[NameForm],
-        credentialsForm: Form[CredentialsForm])(implicit request: Http.Request, messages: play.i18n.Messages)
+        credentialsForm: Form[CredentialsForm],
+        bricklinkTokensForm: Form[BrickLinkTokensForm])(implicit request: Http.Request, messages: play.i18n.Messages)
 
 @implicitField = @{
   FieldConstructor(templates.bootstrapFieldConstructor.f)
@@ -56,50 +57,22 @@
       <div class="accordion-item">
         <h2 class="accordion-header" id="bricklink">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bricklinkCollapse" aria-expanded="false" aria-controls="bricklinkCollapse">
-          @messages("account.settings.bricklink.sync.title")
+          @messages("account.settings.sync.title")
           </button>
         </h2>
         <div id="bricklinkCollapse" class="accordion-collapse collapse" aria-labelledby="bricklink" data-bs-parent="#settingsAccordion">
           <div class="accordion-body">
-            <p>@Html(messages("account.settings.bricklink.sync.explained"))</p>
-            <hr>
-            <strong>This is the first item's accordion body.</strong>
-            It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>
-            .accordion-body</code>, though the transition does limit overflow.
-          </div>
-        </div>
-      </div>
-
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="rebrickable">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#rebrickableCollapse" aria-expanded="false" aria-controls="rebrickableCollapse">
-          @messages("user.settings.rebrickable.sync.title")
-          </button>
-        </h2>
-        <div id="rebrickableCollapse" class="accordion-collapse collapse" aria-labelledby="rebrickable" data-bs-parent="#settingsAccordion">
-          <div class="accordion-body">
-            <p>@Html(messages("user.settings.rebrickable.sync.explained"))</p>
-            <hr>
-            <strong>This is the first item's accordion body.</strong>
-            It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>
-            .accordion-body</code>, though the transition does limit overflow.
-          </div>
-        </div>
-      </div>
-
-      <div class="accordion-item">
-        <h2 class="accordion-header collapsed" id="brickset">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bricksetCollapse" aria-expanded="false" aria-controls="bricksetCollapse">
-          @messages("user.settings.brickset.sync.title")
-          </button>
-        </h2>
-        <div id="bricksetCollapse" class="accordion-collapse collapse" aria-labelledby="brickset" data-bs-parent="#settingsAccordion">
-          <div class="accordion-body">
-            <p>@Html(messages("user.settings.brickset.sync.explained"))</p>
-            <hr>
-            <strong>This is the first item's accordion body.</strong>
-            It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>
-            .accordion-body</code>, though the transition does limit overflow.
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+              <div class="col">
+              @views.html.accounts.bricklinkTokensCard(bricklinkTokensForm)
+              </div>
+              <div class="col">
+              @views.html.accounts.bricklinkTokensCard(bricklinkTokensForm)
+              </div>
+              <div class="col">
+              @views.html.accounts.bricklinkTokensCard(bricklinkTokensForm)
+              </div>
+            </div>
           </div>
         </div>
       </div>

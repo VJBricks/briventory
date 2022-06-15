@@ -158,9 +158,7 @@ public abstract class PersistenceContext {
     return produceInTransaction(dslContext -> {
       final List<M> models = new LinkedList<>();
 
-      for (Function<DSLContext,
-          Tuple2<? extends Mapper<? extends Record, ? extends M>,
-              ? extends ResultQuery<? extends Record>>> query : queries) {
+      for (var query : queries) {
         final Tuple2<Mapper<Record, M>, ResultQuery<Record>> result =
             (Tuple2<Mapper<Record, M>, ResultQuery<Record>>) query.apply(dslContext);
         models.addAll(result.v2.fetch(result.v1::map));
@@ -229,8 +227,32 @@ public abstract class PersistenceContext {
    * @see ResultQuery#fetchOptional()
    */
   final <M extends Model, R extends Record, F extends Mapper<R, M>> Optional<M> fetchOptional(
-      final F factory, final Function<DSLContext, ResultQuery<R>> query) {
+      final F factory,
+      final Function<DSLContext, ResultQuery<R>> query) {
     return produceInConnection(dslContext -> query.apply(dslContext).fetchOptional(factory::map));
+  }
+
+  /**
+   * Fetches the only one record of the query and returns it as an {@link Optional}.
+   *
+   * @param factory the {@link Mapper} that will create instances of type {@link M}.
+   * @param dslContext the {@link DSLContext}.
+   * @param query the query that will be executed into the database.
+   * @param <M> the specific implementation, extending {@link Model}.
+   * @param <R> the specific implementation, extending {@link Record}.
+   * @param <F> the specific implementation, extending {@link Mapper}.
+   *
+   * @return the instance of type {@link M}, or {@code null} if the query has no row.
+   *
+   * @throws org.jooq.exception.DataAccessException if something went wrong executing the query.
+   * @throws org.jooq.exception.TooManyRowsException if the query returned more than one record.
+   * @see ResultQuery#fetchOptional()
+   */
+  final <M extends Model, R extends Record, F extends Mapper<R, M>> Optional<M> fetchOptional(
+      final F factory,
+      final DSLContext dslContext,
+      final Function<DSLContext, ResultQuery<R>> query) {
+    return query.apply(dslContext).fetchOptional(factory::map);
   }
 
   /**
@@ -586,11 +608,12 @@ public abstract class PersistenceContext {
   // Migration
   // *******************************************************************************************************************
 
+  @SuppressWarnings("java:S119")
   protected final <V,
       RF2 extends UpdatableRecord<RF2>,
       RT1 extends UpdatableRecord<RT1>,
       RT2 extends UpdatableRecord<RT2>,
-      F extends DeletableModel<V, RF2>, T extends PersistableModel2<RT1, RT2> & ValidatableModel<V>> T migrate(
+      T extends PersistableModel2<RT1, RT2> & ValidatableModel<V>> T migrate(
       final Function<DSLContext, RF2> recordToDelete, final T resultingModel) {
     return produceInTransaction(dslContext -> {
       final RF2 toDelete = recordToDelete.apply(dslContext);

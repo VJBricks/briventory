@@ -7,10 +7,12 @@ import models.ContainerType;
 import org.jooq.DSLContext;
 import orm.Mapper;
 import orm.ModelLoader;
+import orm.PersistAction1;
 import orm.Repository;
 import play.data.validation.ValidationError;
 
 import javax.inject.Singleton;
+import java.util.Collections;
 import java.util.List;
 
 import static jooq.Tables.CONTAINER_TYPE;
@@ -52,7 +54,9 @@ public final class ContainerTypesRepository extends Repository<ContainerType> {
 
   /** @return the {@link ModelLoader} to lazy load a {@link ContainerType} instance. */
   public ModelLoader<Long, ContainerType> createModelLoader() {
-    return createModelLoader(this::findContainerTypeById);
+    return createModelLoader(this::findContainerTypeById,
+                             (dslContext, idContainer, containerType) -> Collections.singletonList(
+                                 new PersistAction1<>(containerType)));
   }
 
   // *******************************************************************************************************************

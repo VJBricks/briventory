@@ -182,8 +182,31 @@ public abstract class Repository<M extends Model> {
    * @see ResultQuery#fetchOptional()
    */
   protected <R extends Record, F extends Mapper<R, M>> Optional<M> fetchOptional(
-      final F factory, final Function<DSLContext, ResultQuery<R>> query) {
+      final F factory,
+      final Function<DSLContext, ResultQuery<R>> query) {
     return persistenceContext.fetchOptional(factory, query);
+  }
+
+  /**
+   * Fetches the only one record of the query and returns it as an {@link Optional}.
+   *
+   * @param factory the {@link Mapper} that will create instances of type {@link M}.
+   * @param dslContext the {@link DSLContext}.
+   * @param query the query that will be executed into the database.
+   * @param <R> the specific implementation, extending {@link Record}.
+   * @param <F> the specific implementation, extending {@link Mapper}.
+   *
+   * @return the instance of type {@link M}, or {@code null} if the query has no row.
+   *
+   * @throws org.jooq.exception.DataAccessException if something went wrong executing the query.
+   * @throws org.jooq.exception.TooManyRowsException if the query returned more than one record.
+   * @see ResultQuery#fetchOptional()
+   */
+  protected <R extends Record, F extends Mapper<R, M>> Optional<M> fetchOptional(
+      final F factory,
+      final DSLContext dslContext,
+      final Function<DSLContext, ResultQuery<R>> query) {
+    return persistenceContext.fetchOptional(factory, dslContext, query);
   }
 
   /**
@@ -371,11 +394,12 @@ public abstract class Repository<M extends Model> {
   // Migration
   // *******************************************************************************************************************
 
+  @SuppressWarnings("java:S119")
   protected final <V,
       RF2 extends UpdatableRecord<RF2>,
       RT1 extends UpdatableRecord<RT1>,
       RT2 extends UpdatableRecord<RT2>,
-      F extends DeletableModel<V, RF2>, T extends PersistableModel2<RT1, RT2> & ValidatableModel<V>> T migrate(
+      T extends PersistableModel2<RT1, RT2> & ValidatableModel<V>> T migrate(
       final Function<DSLContext, RF2> recordToDelete, final T resultingModel) {
     return persistenceContext.migrate(recordToDelete, resultingModel);
   }
@@ -406,28 +430,33 @@ public abstract class Repository<M extends Model> {
    *
    * @param key the key.
    * @param fetcher the {@link BiFunction} that will be used to fetch.
+   * @param modelActionsCreator the {@link Function3} that will return a {@link List} of {@link ModelAction} instances,
+   * that will be executed during the persistence process.
    * @param <K> the type of the key.
    *
    * @return an instance of {@link ManyModelsLoader}.
    */
   protected final <K> ManyModelsLoader<K, M> createManyModelsLoader(
       final K key,
-      final BiFunction<DSLContext, K, List<M>> fetcher) {
-    return new ManyModelsLoader<>(persistenceContext, key, fetcher);
+      final BiFunction<DSLContext, K, List<M>> fetcher,
+      final Function3<DSLContext, K, List<M>, List<ModelAction>> modelActionsCreator) {
+    return new ManyModelsLoader<>(persistenceContext, key, fetcher, modelActionsCreator);
   }
 
   /**
    * Constructs an instance of {@link ModelLoader}.
    *
    * @param fetcher the {@link BiFunction} that will be used to fetch.
+   * @param modelActionsCreator the {@link Function3} that will return a {@link List} of {@link ModelAction} instances,
+   * that will be executed during the persistence process.
    * @param <K> the type of the key.
    *
    * @return an instance of {@link ModelLoader}.
    */
   protected final <K> ModelLoader<K, M> createModelLoader(
-      final BiFunction<DSLContext, K, M> fetcher/*,
-      final Function4<DSLContext, K, M, M, List<ModelAction>> modelActionsCreator*/) {
-    return new ModelLoader<>(persistenceContext, fetcher/*, modelActionsCreator*/);
+      final BiFunction<DSLContext, K, M> fetcher,
+      final Function3<DSLContext, K, M, List<ModelAction>> modelActionsCreator) {
+    return new ModelLoader<>(persistenceContext, fetcher, modelActionsCreator);
   }
 
   /**
@@ -435,15 +464,17 @@ public abstract class Repository<M extends Model> {
    *
    * @param key the key.
    * @param fetcher the {@link BiFunction} that will be used to fetch.
+   * @param modelActionsCreator the {@link Function3} that will return a {@link List} of {@link ModelAction} instances,
+   * that will be executed during the persistence process.
    * @param <K> the type of the key.
    *
    * @return an instance of {@link ModelLoader}.
    */
   protected final <K> ModelLoader<K, M> createModelLoader(
       final K key,
-      final BiFunction<DSLContext, K, M> fetcher/*,
-      final Function4<DSLContext, K, M, M, List<ModelAction>> modelActionsCreator*/) {
-    return new ModelLoader<>(persistenceContext, key, fetcher/*, modelActionsCreator*/);
+      final BiFunction<DSLContext, K, M> fetcher,
+      final Function3<DSLContext, K, M, List<ModelAction>> modelActionsCreator) {
+    return new ModelLoader<>(persistenceContext, key, fetcher, modelActionsCreator);
   }
 
   /**
@@ -451,12 +482,15 @@ public abstract class Repository<M extends Model> {
    *
    * @param fetcher the {@link BiFunction} that will be used to fetch.
    * @param <K> the type of the key.
+   * @param modelActionsCreator the {@link Function3} that will return a {@link List} of {@link ModelAction} instances,
+   * that will be executed during the persistence process.
    *
    * @return an instance of {@link OptionalModelLoader}.
    */
   protected final <K> OptionalModelLoader<K, M> createOptionalModelLoader(
-      final BiFunction<DSLContext, K, Optional<M>> fetcher) {
-    return new OptionalModelLoader<>(persistenceContext, fetcher);
+      final BiFunction<DSLContext, K, Optional<M>> fetcher,
+      final Function3<DSLContext, K, Optional<M>, List<ModelAction>> modelActionsCreator) {
+    return new OptionalModelLoader<>(persistenceContext, fetcher, modelActionsCreator);
   }
 
   /**
@@ -465,13 +499,16 @@ public abstract class Repository<M extends Model> {
    * @param key the key.
    * @param fetcher the {@link BiFunction} that will be used to fetch.
    * @param <K> the type of the key.
+   * @param modelActionsCreator the {@link Function3} that will return a {@link List} of {@link ModelAction} instances,
+   * that will be executed during the persistence process.
    *
    * @return an instance of {@link OptionalModelLoader}.
    */
   protected final <K> OptionalModelLoader<K, M> createOptionalModelLoader(
       final K key,
-      final BiFunction<DSLContext, K, Optional<M>> fetcher) {
-    return new OptionalModelLoader<>(persistenceContext, key, fetcher);
+      final BiFunction<DSLContext, K, Optional<M>> fetcher,
+      final Function3<DSLContext, K, Optional<M>, List<ModelAction>> modelActionsCreator) {
+    return new OptionalModelLoader<>(persistenceContext, key, fetcher, modelActionsCreator);
   }
 
   /**
@@ -479,8 +516,8 @@ public abstract class Repository<M extends Model> {
    *
    * @param key the key.
    * @param fetcher the {@link BiFunction} that will be used to fetch.
-   * @param modelActionCreator the {@link Function3} that will be used to create the corresponding instances of
-   * {@link ModelActions}.
+   * @param modelActionsCreator the {@link Function3} that will be used to create the corresponding instances of
+   * {@link ModelAction}.
    * @param <K> the type of the key.
    * @param <V> the type of the value.
    *
@@ -489,8 +526,8 @@ public abstract class Repository<M extends Model> {
   protected final <K, V> RecordLoader<K, V> createRecordLoader(
       final K key,
       final BiFunction<DSLContext, K, V> fetcher,
-      final Function3<DSLContext, K, V, ModelAction> modelActionCreator) {
-    return new RecordLoader<>(persistenceContext, key, fetcher, modelActionCreator);
+      final Function3<DSLContext, K, V, List<ModelAction>> modelActionsCreator) {
+    return new RecordLoader<>(persistenceContext, key, fetcher, modelActionsCreator);
   }
 
 }

@@ -1,7 +1,9 @@
 package orm;
 
 import org.jooq.DSLContext;
+import org.jooq.Function3;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -36,6 +38,11 @@ public abstract class LazyLoader<K, V> {
   private V value;
   /** The {@link BiFunction} that will perform the data fetch. */
   private final BiFunction<DSLContext, K, V> fetcher;
+  /**
+   * The function that will produce the corresponding {@link ModelAction} instances, depending on the key and the
+   * value.
+   */
+  private final Function3<DSLContext, K, V, List<ModelAction>> modelActionsCreator;
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -46,10 +53,15 @@ public abstract class LazyLoader<K, V> {
    *
    * @param persistenceContext the {@link PersistenceContext}.
    * @param fetcher the {@link BiFunction} that will perform the data fetch.
+   * @param modelActionsCreator the {@link Function3} that will return a {@link List} of {@link ModelAction} instances,
+   * that will be executed during the persistence process.
    */
-  protected LazyLoader(final PersistenceContext persistenceContext, final BiFunction<DSLContext, K, V> fetcher) {
+  protected LazyLoader(final PersistenceContext persistenceContext,
+                       final BiFunction<DSLContext, K, V> fetcher,
+                       final Function3<DSLContext, K, V, List<ModelAction>> modelActionsCreator) {
     this.persistenceContext = persistenceContext;
     this.fetcher = fetcher;
+    this.modelActionsCreator = modelActionsCreator;
   }
 
   /**
@@ -58,15 +70,19 @@ public abstract class LazyLoader<K, V> {
    * @param persistenceContext the {@link PersistenceContext}.
    * @param key the key.
    * @param fetcher the {@link BiFunction} that will perform the data fetch.
+   * @param modelActionsCreator the {@link Function3} that will return a {@link List} of {@link ModelAction} instances,
+   * that will be executed during the persistence process.
    */
-  protected LazyLoader(final PersistenceContext persistenceContext, final K key,
-                       final BiFunction<DSLContext, K, V> fetcher) {
-    this(persistenceContext, fetcher);
+  protected LazyLoader(final PersistenceContext persistenceContext,
+                       final K key,
+                       final BiFunction<DSLContext, K, V> fetcher,
+                       final Function3<DSLContext, K, V, List<ModelAction>> modelActionsCreator) {
+    this(persistenceContext, fetcher, modelActionsCreator);
     this.key = key;
   }
 
   // *******************************************************************************************************************
-  // Abstract & Protected Methods
+  // ModelActions Matters
   // *******************************************************************************************************************
 
   /**
@@ -76,7 +92,11 @@ public abstract class LazyLoader<K, V> {
    *
    * @return a {@link List} of {@link ModelAction} instances.
    */
-  abstract List<ModelAction> createModelActions(DSLContext dslContext);
+  final List<ModelAction> createModelActions(final DSLContext dslContext) {
+    if (isFetched() && hasChanged(dslContext))
+      return modelActionsCreator.apply(dslContext, getKey(), getValue());
+    return Collections.emptyList();
+  }
 
   // *******************************************************************************************************************
   // Getters & Setters
