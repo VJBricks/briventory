@@ -9,6 +9,7 @@ import me.gosimple.nbvcxz.resources.Dictionary;
 import me.gosimple.nbvcxz.resources.DictionaryBuilder;
 import models.Account;
 import models.BrickLinkTokens;
+import models.BrickSetTokens;
 import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
@@ -147,7 +148,9 @@ public final class AccountsController extends Controller {
                                              routes.javascript.AccountsController.updateEmail(),
                                              routes.javascript.AccountsController.updateCredentials(),
                                              routes.javascript.AccountsController.updateBrickLinkTokens(),
-                                             routes.javascript.AccountsController.deleteBrickLinkTokens()))
+                                             routes.javascript.AccountsController.deleteBrickLinkTokens(),
+                                             routes.javascript.AccountsController.updateBrickSetTokens(),
+                                             routes.javascript.AccountsController.deleteBrickSetTokens()))
         .as(JAVASCRIPT);
   }
 
@@ -179,11 +182,16 @@ public final class AccountsController extends Controller {
                                                                        .fill(new BrickLinkTokensForm(
                                                                            optionalAccount.get().getBrickLinkTokens()));
 
+      final Form<BrickSetTokensForm> brickSetTokensForm = formFactory.form(BrickSetTokensForm.class)
+                                                                     .fill(new BrickSetTokensForm(
+                                                                         optionalAccount.get().getBrickSetTokens()));
+
       return ok(settings.render(optionalAccount.get(),
                                 emailForm,
                                 nameForm,
                                 credentialsForm,
                                 brickLinkTokensForm,
+                                brickSetTokensForm,
                                 request,
                                 preferred));
     }
@@ -298,6 +306,13 @@ public final class AccountsController extends Controller {
     return errorsController.forbidden(request);
   }
 
+  /**
+   * Deletes the {@link BrickLinkTokens} for the current account.
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return an empty form, if the deletion succeeds.
+   */
   public Result deleteBrickLinkTokens(final Http.Request request) {
     final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
     final var preferred = messagesApi.preferred(request);
@@ -309,6 +324,59 @@ public final class AccountsController extends Controller {
       return ok(views.html.accounts.brickLinkTokensCard.render(formFactory.form(BrickLinkTokensForm.class),
                                                                request,
                                                                preferred));
+    }
+    return errorsController.forbidden(request);
+  }
+
+  /**
+   * update the BrickSet tokens and returns the related form.
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return the related form with the new values or the errors.
+   */
+  public Result updateBrickSetTokens(final Http.Request request) {
+    final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
+    final var preferred = messagesApi.preferred(request);
+
+    if (optionalAccount.isPresent()) {
+      final Form<BrickSetTokensForm> brickSetTokensForm = formFactory.form(BrickSetTokensForm.class)
+                                                                     .bindFromRequest(request);
+
+      final Account account = optionalAccount.get();
+      if (!brickSetTokensForm.hasErrors()) {
+        final BrickSetTokensForm form = brickSetTokensForm.get();
+        account.setBrickSetTokens(new BrickSetTokens(account,
+                                                     form.getApiKey(),
+                                                     form.getUsername(),
+                                                     form.getPassword()));
+        accountsRepository.persist(account);
+        brickSetTokensForm.get().setAsFilled();
+        return ok(views.html.accounts.brickSetTokensCard.render(brickSetTokensForm, request, preferred));
+      }
+      return badRequest(views.html.accounts.brickSetTokensCard.render(brickSetTokensForm, request, preferred));
+    }
+    return errorsController.forbidden(request);
+  }
+
+  /**
+   * Deletes the {@link BrickSetTokens} for the current account.
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return an empty form, if the deletion succeeds.
+   */
+  public Result deleteBrickSetTokens(final Http.Request request) {
+    final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
+    final var preferred = messagesApi.preferred(request);
+
+    if (optionalAccount.isPresent()) {
+      final Account account = optionalAccount.get();
+      account.clearBrickSetTokens();
+      accountsRepository.persist(account);
+      return ok(views.html.accounts.brickSetTokensCard.render(formFactory.form(BrickSetTokensForm.class),
+                                                              request,
+                                                              preferred));
     }
     return errorsController.forbidden(request);
   }

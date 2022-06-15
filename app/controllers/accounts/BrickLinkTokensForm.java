@@ -10,6 +10,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The {@code BrickLinkTokensForm} handle the values of the various tokens and secrets needed to sync with BrickLink .
+ */
 public final class BrickLinkTokensForm implements Validatable<List<ValidationError>> {
 
   // *******************************************************************************************************************

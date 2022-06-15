@@ -2,7 +2,9 @@ package models;
 
 import jooq.tables.records.BricksetTokensRecord;
 import org.jooq.DSLContext;
+import orm.Mapper;
 import orm.Model;
+import orm.models.DeletableModel;
 import orm.models.PersistableModel1;
 import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
@@ -16,8 +18,22 @@ import static jooq.Tables.BRICKSET_TOKENS;
  * The {@code BricksetTokens} class is the representation of the table {@code brickset_tokens} in the
  * <em>Briventory</em> database.
  */
-public final class BricksetTokens extends Model implements PersistableModel1<BricksetTokensRecord>,
-                                                               ValidatableModel<ValidationError> {
+public final class BrickSetTokens extends Model implements PersistableModel1<BricksetTokensRecord>,
+    ValidatableModel<ValidationError>,
+    DeletableModel<ValidationError, BricksetTokensRecord> {
+
+  // *******************************************************************************************************************
+  // Instance factory
+  // *******************************************************************************************************************
+  /**
+   * the {@link Mapper} that will create an instance of {@link BrickSetTokens} from an instance of
+   * {@link BricksetTokensRecord}.
+   */
+  public static final Mapper<BricksetTokensRecord, BrickSetTokens> BRICKSET_TOKENS_MAPPER =
+      bricksetTokensRecord -> new BrickSetTokens(bricksetTokensRecord.getIdAccount(),
+                                                 bricksetTokensRecord.getApiKey(),
+                                                 bricksetTokensRecord.getUsername(),
+                                                 bricksetTokensRecord.getPassword());
 
   // *******************************************************************************************************************
   // Attributes
@@ -31,6 +47,37 @@ public final class BricksetTokens extends Model implements PersistableModel1<Bri
   private String username;
   /** The password. */
   private String password;
+
+  // *******************************************************************************************************************
+  // Construction & Initialization
+  // *******************************************************************************************************************
+
+  /**
+   * Creates a new instance of {@link BrickSetTokens}.
+   *
+   * @param idAccount the identifier of the {@link Account}.
+   * @param apiKey the API key.
+   * @param username the username.
+   * @param password the password.
+   */
+  private BrickSetTokens(final long idAccount, final String apiKey, final String username, final String password) {
+    this.idAccount = idAccount;
+    this.apiKey = apiKey;
+    this.username = username;
+    this.password = password;
+  }
+
+  /**
+   * Creates a new instance of {@link BrickSetTokens}.
+   *
+   * @param account the {@link Account}.
+   * @param apiKey the API key.
+   * @param username the username.
+   * @param password the password.
+   */
+  public BrickSetTokens(final Account account, final String apiKey, final String username, final String password) {
+    this(account.getId(), apiKey, username, password);
+  }
 
   // *******************************************************************************************************************
   // PersistableModel1 Overrides
@@ -66,6 +113,16 @@ public final class BricksetTokens extends Model implements PersistableModel1<Bri
   }
 
   // *******************************************************************************************************************
+  // DeletableModel Overrides
+  // *******************************************************************************************************************
+
+  /** {@inheritDoc} */
+  @Override
+  public BricksetTokensRecord createDeletionRecord(final DSLContext dslContext) {
+    return createRecord1(dslContext);
+  }
+
+  // *******************************************************************************************************************
   // Getters and Setters
   // *******************************************************************************************************************
 
@@ -76,7 +133,7 @@ public final class BricksetTokens extends Model implements PersistableModel1<Bri
    *
    * @return the current instance.
    */
-  public BricksetTokens setIdAccount(final long idAccount) {
+  public BrickSetTokens setIdAccount(final long idAccount) {
     this.idAccount = idAccount;
     return this;
   }
@@ -91,7 +148,7 @@ public final class BricksetTokens extends Model implements PersistableModel1<Bri
    *
    * @return the current instance.
    */
-  public BricksetTokens setApiKey(final String apiKey) {
+  public BrickSetTokens setApiKey(final String apiKey) {
     this.apiKey = apiKey;
     return this;
   }
@@ -106,7 +163,7 @@ public final class BricksetTokens extends Model implements PersistableModel1<Bri
    *
    * @return the current instance.
    */
-  public BricksetTokens setUsername(final String username) {
+  public BrickSetTokens setUsername(final String username) {
     this.username = username;
     return this;
   }
@@ -121,7 +178,7 @@ public final class BricksetTokens extends Model implements PersistableModel1<Bri
    *
    * @return the current instance.
    */
-  public BricksetTokens setPassword(final String password) {
+  public BrickSetTokens setPassword(final String password) {
     this.password = password;
     return this;
   }

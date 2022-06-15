@@ -1,6 +1,6 @@
 package controllers.accounts;
 
-import models.BrickLinkTokens;
+import models.BrickSetTokens;
 import play.data.validation.Constraints.MaxLength;
 import play.data.validation.Constraints.Required;
 import play.data.validation.Constraints.Validatable;
@@ -10,30 +10,28 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The {@code BrickSetTokensForm} handle the values of the various tokens and secrets needed to sync with BrickSet .
+ */
 public final class BrickSetTokensForm implements Validatable<List<ValidationError>> {
 
   // *******************************************************************************************************************
   // Attributes
   // *******************************************************************************************************************
-  /** The consumer key. */
+  /** The API key. */
   @Required
   @MaxLength(database.Constraints.TOKEN_DOMAIN_LENGTH)
-  private String consumerKey;
+  private String apiKey;
 
-  /** The consumer secret. */
+  /** The username. */
   @Required
   @MaxLength(database.Constraints.TOKEN_DOMAIN_LENGTH)
-  private String consumerSecret;
+  private String username;
 
-  /** The access token value. */
+  /** The password. */
   @Required
   @MaxLength(database.Constraints.TOKEN_DOMAIN_LENGTH)
-  private String tokenValue;
-
-  /** The access token secret. */
-  @Required
-  @MaxLength(database.Constraints.TOKEN_DOMAIN_LENGTH)
-  private String tokenSecret;
+  private String password;
 
   /** The form contains new entries. */
   private boolean isNew = true;
@@ -48,15 +46,14 @@ public final class BrickSetTokensForm implements Validatable<List<ValidationErro
   /**
    * Creates a new instance of {@link BrickSetTokensForm}.
    *
-   * @param optionalBricklinkTokens the instance of {@link BrickLinkTokens}, wrapped into an {@link Optional} instance,
-   * to fill this form.
+   * @param optionalBrickSetTokens the instance of {@link BrickSetTokens}, wrapped into an {@link Optional} instance, to
+   * fill this form.
    */
-  public BrickSetTokensForm(final Optional<BrickLinkTokens> optionalBricklinkTokens) {
-    optionalBricklinkTokens.ifPresent(bricklinkTokens -> {
-      consumerKey = bricklinkTokens.getConsumerKey();
-      consumerSecret = bricklinkTokens.getConsumerSecret();
-      tokenValue = bricklinkTokens.getTokenValue();
-      tokenSecret = bricklinkTokens.getTokenSecret();
+  public BrickSetTokensForm(final Optional<BrickSetTokens> optionalBrickSetTokens) {
+    optionalBrickSetTokens.ifPresent(brickSetTokens -> {
+      apiKey = brickSetTokens.getApiKey();
+      username = brickSetTokens.getUsername();
+      password = brickSetTokens.getPassword();
       isNew = false;
     });
   }
@@ -85,44 +82,34 @@ public final class BrickSetTokensForm implements Validatable<List<ValidationErro
   /** Sets this form as a filled form. */
   public void setAsFilled() { isNew = false; }
 
-  /** @return the consumer key. */
-  public String getConsumerKey() { return consumerKey; }
+  /** @return the API key. */
+  public String getApiKey() { return apiKey; }
 
   /**
-   * Sets the consumer key.
+   * Sets the API key.
    *
-   * @param consumerKey the consumer key.
+   * @param apiKey the API key.
    */
-  public void setConsumerKey(final String consumerKey) { this.consumerKey = consumerKey; }
+  public void setApiKey(final String apiKey) { this.apiKey = apiKey; }
 
-  /** @return the consumer secret. */
-  public String getConsumerSecret() { return consumerSecret; }
+  /** @return the username. */
+  public String getUsername() { return username; }
 
   /**
-   * Sets the consumer secret.
+   * Sets the username.
    *
-   * @param consumerSecret the consumer secret.
+   * @param username the username.
    */
-  public void setConsumerSecret(final String consumerSecret) { this.consumerSecret = consumerSecret; }
+  public void setUsername(final String username) { this.username = username; }
 
-  /** @return the token value. */
-  public String getTokenValue() { return tokenValue; }
+  /** @return the password. */
+  public String getPassword() { return password; }
 
   /**
-   * Sets the token value.
+   * Sets the password.
    *
-   * @param tokenValue the token value.
+   * @param password the password.
    */
-  public void setTokenValue(final String tokenValue) { this.tokenValue = tokenValue; }
-
-  /** @return the token secret. */
-  public String getTokenSecret() { return tokenSecret; }
-
-  /**
-   * Sets the token secret.
-   *
-   * @param tokenSecret the token secret.
-   */
-  public void setTokenSecret(final String tokenSecret) { this.tokenSecret = tokenSecret; }
+  public void setPassword(final String password) { this.password = password; }
 
 }

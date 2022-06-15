@@ -1,0 +1,108 @@
+@import controllers.accounts.BrickSetTokensForm
+@import views.html.helper.FieldConstructor
+
+@(brickSetTokensForm: Form[BrickSetTokensForm])(implicit request: Http.Request, messages: play.i18n.Messages)
+
+@implicitField = @{
+  FieldConstructor(templates.bootstrapFieldConstructor.f)
+}
+
+<div id="brickset-tokens-card" class="card h-100">
+  <div class="card-header">@messages("account.settings.sync.brickset.title")</div>
+  <div class="card-body">
+    <p>@Html(messages("account.settings.sync.brickset.explained"))</p>
+    <hr>
+    @if(brickSetTokensForm.hasGlobalErrors()) {
+      @for(error <- brickSetTokensForm.globalErrors()) {
+        <p class="form-message text-danger">@error.format(messages)</p>
+      }
+    }
+    <form id="brickset-tokens-card-form">
+      @helper.CSRF.formField
+      @helper.input(brickSetTokensForm("idAccount"), Symbol("type") -> "hidden") { (id, name, value, args) =>
+        <input type="hidden" name="@name" id="@id" value="@value" @toHtmlArgs(args)>
+      }
+      @helper.inputText(brickSetTokensForm("apiKey"),
+        Symbol("class") -> "form-control",
+        Symbol("_label") -> messages.at("account.settings.sync.brickset.apiKey.label"))
+      @helper.inputText(brickSetTokensForm("username"),
+        Symbol("class") -> "form-control",
+        Symbol("_label") -> messages.at("account.settings.sync.brickset.username.label"))
+      @helper.inputText(brickSetTokensForm("password"),
+        Symbol("class") -> "form-control",
+        Symbol("type") -> "password",
+        Symbol("_label") -> messages.at("account.settings.sync.brickset.password.label"))
+    </form>
+  </div>
+  <div class="card-footer text-end">
+    @if(brickSetTokensForm != null && brickSetTokensForm.value().isPresent && !brickSetTokensForm.get().isNew()) {
+      <button type="button" id="brickset-tokens-card-delete" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#brickset-tokens-card-clearance-modal">@messages("button.delete.caption")</button>
+    }
+    <button type="submit" id="brickset-tokens-card-submit" class="btn btn-primary" onclick="brickSetTokensCardFormSubmission()">@messages("button.update.caption")</button>
+  </div>
+
+  @if(brickSetTokensForm != null && brickSetTokensForm.value().isPresent && !brickSetTokensForm.get().isNew()) {
+    <div class="modal fade" id="brickset-tokens-card-clearance-modal" tabindex="-1" aria-labelledby="brickset-tokens-card-clearance-modal-label" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="brickset-tokens-card-clearance-modal-label">@messages.at("account.settings.sync.brickset.title")</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>@Html(messages.at("account.settings.sync.brickset.delete.explain"))</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@messages.at("button.cancel.caption")</button>
+            <button type="button" class="btn btn-primary" onclick="deleteBrickSetTokens()" data-bs-dismiss="modal">@messages.at("button.delete.caption")</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <script>
+          /** Performs the submission of the <code>email-card-form</code>. */
+          function brickSetTokensCardFormSubmission() {
+            blockWithSpinner("#brickset-tokens-card");
+
+            settingsJSRoutes.controllers.accounts.AccountsController.updateBrickSetTokens().ajax({
+              async: true,
+              method: "POST",
+              data: $("#brickset-tokens-card-form").serialize(),
+              success: function (data) {
+                $("#brickset-tokens-card").replaceWith(data);
+                classTransition("#brickset-tokens-card-submit", "btn-success", 3000);
+              },
+              error: function (data) {
+                $("#brickset-tokens-card").replaceWith(data.responseText);
+                classTransition("#brickset-tokens-card-submit", "btn-danger", 3000);
+              }
+            });
+          }
+
+          $("#brickset-tokens-card-form").submit(function () {
+            brickSetTokensCardFormSubmission();
+            return false;
+          });
+
+          @if(brickSetTokensForm != null && brickSetTokensForm.value().isPresent && !brickSetTokensForm.get().isNew) {
+
+          function deleteBrickSetTokens() {
+            blockWithSpinner("#brickset-tokens-card");
+
+            settingsJSRoutes.controllers.accounts.AccountsController.deleteBrickSetTokens().ajax({
+              async: true,
+              method: "DELETE",
+              success: function (data) {
+                $("#brickset-tokens-card").replaceWith(data);
+              },
+              error: function (data) {
+                $("#brickset-tokens-card").replaceWith(data.responseText);
+              }
+            });
+          }
+
+          }
+  </script>
+</div>
