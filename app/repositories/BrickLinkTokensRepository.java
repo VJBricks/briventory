@@ -3,7 +3,7 @@ package repositories;
 import database.BriventoryDB;
 import jooq.tables.records.BricklinkTokensRecord;
 import models.Account;
-import models.BricklinkTokens;
+import models.BrickLinkTokens;
 import org.jooq.DSLContext;
 import orm.DeleteRecordAction;
 import orm.ModelAction;
@@ -18,21 +18,21 @@ import java.util.Optional;
 
 import static jooq.Tables.BRICKLINK_TOKENS;
 
-/** The {@code BricklinkTokensRepository} handler the BrickLink tokens, needed to sync an inventory from BrickLink. */
+/** The {@code BrickLinkTokensRepository} handler the BrickLink tokens, needed to sync an inventory from BrickLink. */
 @Singleton
-public final class BricklinkTokensRepository extends Repository<BricklinkTokens> {
+public final class BrickLinkTokensRepository extends Repository<BrickLinkTokens> {
 
   // *******************************************************************************************************************
   // Construction & Initialization
   // *******************************************************************************************************************
 
   /**
-   * Creates a new instance of {@link BricklinkTokensRepository}.
+   * Creates a new instance of {@link BrickLinkTokensRepository}.
    *
    * @param briventoryDB the {@link BriventoryDB} injected instance.
    */
   @Inject
-  public BricklinkTokensRepository(final BriventoryDB briventoryDB) {
+  public BrickLinkTokensRepository(final BriventoryDB briventoryDB) {
     super(briventoryDB);
   }
 
@@ -41,19 +41,19 @@ public final class BricklinkTokensRepository extends Repository<BricklinkTokens>
   // *******************************************************************************************************************
 
   /**
-   * Creates a new {@link OptionalModelLoader} to load {@link BricklinkTokens} lazily.
+   * Creates a new {@link OptionalModelLoader} to load {@link BrickLinkTokens} lazily.
    *
    * @param account the associated {@link Account}.
    *
    * @return an instance of {@link OptionalModelLoader}.
    */
-  public OptionalModelLoader<Account, BricklinkTokens> createBricklinkTokensLoader(final Account account) {
+  public OptionalModelLoader<Account, BrickLinkTokens> createBrickLinkTokensLoader(final Account account) {
     return createOptionalModelLoader(account,
                                      this::findByAccount,
-                                     (dslContext, a, optionalBricklinkTokens) -> {
+                                     (dslContext, a, optionalBrickLinkTokens) -> {
                                        ModelAction modelAction;
-                                       if (optionalBricklinkTokens.isPresent()) {
-                                         modelAction = new PersistAction1<>(optionalBricklinkTokens.get());
+                                       if (optionalBrickLinkTokens.isPresent()) {
+                                         modelAction = new PersistAction1<>(optionalBrickLinkTokens.get());
                                        } else {
                                          modelAction = new DeleteRecordAction<>(
                                              new BricklinkTokensRecord().setIdAccount(a.getId()));
@@ -67,15 +67,15 @@ public final class BricklinkTokensRepository extends Repository<BricklinkTokens>
   // *******************************************************************************************************************
 
   /**
-   * Retrieves from the database the {@link BricklinkTokens} linked with the {@link Account} provided.
+   * Retrieves from the database the {@link BrickLinkTokens} linked with the {@link Account} provided.
    *
    * @param dslContext the {@link DSLContext}.
    * @param account the {@link Account}.
    *
-   * @return an {@link Optional} instance, containing the existing {@link BricklinkTokens}.
+   * @return an {@link Optional} instance, containing the existing {@link BrickLinkTokens}.
    */
-  private Optional<BricklinkTokens> findByAccount(final DSLContext dslContext, final Account account) {
-    return fetchOptional(BricklinkTokens.BRICKLINK_TOKENS_MAPPER,
+  private Optional<BrickLinkTokens> findByAccount(final DSLContext dslContext, final Account account) {
+    return fetchOptional(BrickLinkTokens.BRICKLINK_TOKENS_MAPPER,
                          dslContext,
                          ctx -> ctx.selectFrom(BRICKLINK_TOKENS)
                                    .where(BRICKLINK_TOKENS.ID_ACCOUNT.eq(account.getId())));

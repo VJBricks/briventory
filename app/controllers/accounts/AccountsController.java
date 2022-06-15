@@ -8,7 +8,7 @@ import me.gosimple.nbvcxz.resources.ConfigurationBuilder;
 import me.gosimple.nbvcxz.resources.Dictionary;
 import me.gosimple.nbvcxz.resources.DictionaryBuilder;
 import models.Account;
-import models.BricklinkTokens;
+import models.BrickLinkTokens;
 import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
@@ -146,8 +146,8 @@ public final class AccountsController extends Controller {
                                              routes.javascript.AccountsController.updateName(),
                                              routes.javascript.AccountsController.updateEmail(),
                                              routes.javascript.AccountsController.updateCredentials(),
-                                             routes.javascript.AccountsController.updateBricklinkTokens(),
-                                             routes.javascript.AccountsController.deleteBricklinkTokens()))
+                                             routes.javascript.AccountsController.updateBrickLinkTokens(),
+                                             routes.javascript.AccountsController.deleteBrickLinkTokens()))
         .as(JAVASCRIPT);
   }
 
@@ -177,7 +177,7 @@ public final class AccountsController extends Controller {
 
       final Form<BrickLinkTokensForm> brickLinkTokensForm = formFactory.form(BrickLinkTokensForm.class)
                                                                        .fill(new BrickLinkTokensForm(
-                                                                           optionalAccount.get().getBricklinkTokens()));
+                                                                           optionalAccount.get().getBrickLinkTokens()));
 
       return ok(settings.render(optionalAccount.get(),
                                 emailForm,
@@ -273,7 +273,7 @@ public final class AccountsController extends Controller {
    *
    * @return the related form with the new values or the errors.
    */
-  public Result updateBricklinkTokens(final Http.Request request) {
+  public Result updateBrickLinkTokens(final Http.Request request) {
     final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
     final var preferred = messagesApi.preferred(request);
 
@@ -284,29 +284,29 @@ public final class AccountsController extends Controller {
       final Account account = optionalAccount.get();
       if (!brickLinkTokensForm.hasErrors()) {
         final BrickLinkTokensForm form = brickLinkTokensForm.get();
-        account.setBricklinkTokens(new BricklinkTokens(account,
+        account.setBrickLinkTokens(new BrickLinkTokens(account,
                                                        form.getConsumerKey(),
                                                        form.getConsumerSecret(),
                                                        form.getTokenValue(),
                                                        form.getTokenSecret()));
         accountsRepository.persist(account);
         brickLinkTokensForm.get().setAsFilled();
-        return ok(views.html.accounts.bricklinkTokensCard.render(brickLinkTokensForm, request, preferred));
+        return ok(views.html.accounts.brickLinkTokensCard.render(brickLinkTokensForm, request, preferred));
       }
-      return badRequest(views.html.accounts.bricklinkTokensCard.render(brickLinkTokensForm, request, preferred));
+      return badRequest(views.html.accounts.brickLinkTokensCard.render(brickLinkTokensForm, request, preferred));
     }
     return errorsController.forbidden(request);
   }
 
-  public Result deleteBricklinkTokens(final Http.Request request) {
+  public Result deleteBrickLinkTokens(final Http.Request request) {
     final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
     final var preferred = messagesApi.preferred(request);
 
     if (optionalAccount.isPresent()) {
       final Account account = optionalAccount.get();
-      account.clearBricklinkTokens();
+      account.clearBrickLinkTokens();
       accountsRepository.persist(account);
-      return ok(views.html.accounts.bricklinkTokensCard.render(formFactory.form(BrickLinkTokensForm.class),
+      return ok(views.html.accounts.brickLinkTokensCard.render(formFactory.form(BrickLinkTokensForm.class),
                                                                request,
                                                                preferred));
     }

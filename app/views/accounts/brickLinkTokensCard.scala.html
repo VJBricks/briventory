@@ -56,7 +56,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@messages.at("button.cancel.caption")</button>
-            <button type="button" class="btn btn-primary" onclick="deleteBricklinkTokens()" data-bs-dismiss="modal">@messages.at("button.delete.caption")</button>
+            <button type="button" class="btn btn-primary" onclick="deleteBrickLinkTokens()" data-bs-dismiss="modal">@messages.at("button.delete.caption")</button>
           </div>
         </div>
       </div>
@@ -68,7 +68,7 @@
           function bricklinkTokensCardFormSubmission() {
             blockWithSpinner("#bricklink-tokens-card");
 
-            settingsJSRoutes.controllers.accounts.AccountsController.updateBricklinkTokens().ajax({
+            settingsJSRoutes.controllers.accounts.AccountsController.updateBrickLinkTokens().ajax({
               async: true,
               method: "POST",
               data: $("#bricklink-tokens-card-form").serialize(),
@@ -90,10 +90,10 @@
 
           @if(bricklinkTokensForm != null && bricklinkTokensForm.value().isPresent && !bricklinkTokensForm.get().isNew) {
 
-          function deleteBricklinkTokens() {
+          function deleteBrickLinkTokens() {
             blockWithSpinner("#bricklink-tokens-card");
 
-            settingsJSRoutes.controllers.accounts.AccountsController.deleteBricklinkTokens().ajax({
+            settingsJSRoutes.controllers.accounts.AccountsController.deleteBrickLinkTokens().ajax({
               async: true,
               method: "DELETE",
               success: function (data) {

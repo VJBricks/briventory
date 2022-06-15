@@ -20,9 +20,9 @@ GET         /account/settings/js              controllers.accounts.AccountsContr
 POST        /account/settings/email           controllers.accounts.AccountsController.updateEmail(request: Request)
 POST        /account/settings/name            controllers.accounts.AccountsController.updateName(request: Request)
 POST        /account/settings/credentials     controllers.accounts.AccountsController.updateCredentials(request: Request)
-POST        /account/settings/bricklink       controllers.accounts.AccountsController.updateBricklinkTokens(request: Request)
+POST        /account/settings/bricklink       controllers.accounts.AccountsController.updateBrickLinkTokens(request: Request)
 +noCSRF
-DELETE      /account/settings/bricklink       controllers.accounts.AccountsController.deleteBricklinkTokens(request: Request)
+DELETE      /account/settings/bricklink       controllers.accounts.AccountsController.deleteBrickLinkTokens(request: Request)
 
 GET         /storage/containers               controllers.storage.StorageController.containers(request: Request)
 

@@ -16,7 +16,7 @@ import orm.models.PersistableModel1;
 import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
 import repositories.AccountsRepository;
-import repositories.BricklinkTokensRepository;
+import repositories.BrickLinkTokensRepository;
 import repositories.ColorsSourcesRepository;
 
 import java.util.LinkedList;
@@ -77,10 +77,10 @@ public final class Account extends Model implements PersistableModel1<AccountRec
       RepositoriesHandler.of(AccountsRepository.class)
                          .createLockedAccountLoader(this);
 
-  /** The {@link BricklinkTokens} instance loader. */
-  private final OptionalModelLoader<Account, BricklinkTokens> bricklinkTokensLoader =
-      RepositoriesHandler.of(BricklinkTokensRepository.class)
-                         .createBricklinkTokensLoader(this);
+  /** The {@link BrickLinkTokens} instance loader. */
+  private final OptionalModelLoader<Account, BrickLinkTokens> brickLinkTokensLoader =
+      RepositoriesHandler.of(BrickLinkTokensRepository.class)
+                         .createBrickLinkTokensLoader(this);
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -209,7 +209,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
 
     actions.addAll(ModelActions.fromLazyLoader(dslContext, administratorLoader));
     actions.addAll(ModelActions.fromLazyLoader(dslContext, isLockedLoader));
-    actions.addAll(ModelActions.fromLazyLoader(dslContext, bricklinkTokensLoader));
+    actions.addAll(ModelActions.fromLazyLoader(dslContext, brickLinkTokensLoader));
 
     return actions;
   }
@@ -446,21 +446,21 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   // BrickLink Synchronisation Matters
   // *******************************************************************************************************************
 
-  /** @return the {@link Optional} instance, containing the {@link BricklinkTokens}. */
-  public Optional<BricklinkTokens> getBricklinkTokens() { return bricklinkTokensLoader.getValue(); }
+  /** @return the {@link Optional} instance, containing the {@link BrickLinkTokens}. */
+  public Optional<BrickLinkTokens> getBrickLinkTokens() { return brickLinkTokensLoader.getValue(); }
 
   /**
-   * Sets the {@link BricklinkTokens}.
+   * Sets the {@link BrickLinkTokens}.
    *
-   * @param bricklinkTokens the {@link BricklinkTokens}.
+   * @param brickLinkTokens the {@link BrickLinkTokens}.
    */
-  public void setBricklinkTokens(final BricklinkTokens bricklinkTokens) {
-    bricklinkTokensLoader.setValue(Optional.of(bricklinkTokens));
+  public void setBrickLinkTokens(final BrickLinkTokens brickLinkTokens) {
+    brickLinkTokensLoader.setValue(Optional.of(brickLinkTokens));
   }
 
-  /** Clears the {@link BricklinkTokens}. */
-  public void clearBricklinkTokens() {
-    bricklinkTokensLoader.setValue(Optional.empty());
+  /** Clears the {@link BrickLinkTokens}. */
+  public void clearBrickLinkTokens() {
+    brickLinkTokensLoader.setValue(Optional.empty());
   }
 
 }

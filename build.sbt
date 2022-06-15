@@ -7,7 +7,7 @@ maintainer := "briventory@varani.ch"
 scalaVersion := "2.13.8"
 
 organization := "ch.varani"
-version := "1.0.0-SNAPSHOT"
+version := "0.1.0-SNAPSHOT"
 
 // Disable the ScalaDoc generation
 Compile / doc / sources := Seq.empty

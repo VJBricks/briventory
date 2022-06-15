@@ -23,18 +23,18 @@ import static jooq.Tables.BRICKLINK_TOKENS;
  * obtained from <a href="https://www.bricklink.com/v2/api/register_consumer.page">BrickLink</a>.
  * </p>
  */
-public final class BricklinkTokens extends Model implements PersistableModel1<BricklinkTokensRecord>,
+public final class BrickLinkTokens extends Model implements PersistableModel1<BricklinkTokensRecord>,
     ValidatableModel<ValidationError>, DeletableModel<ValidationError, BricklinkTokensRecord> {
 
   // *******************************************************************************************************************
   // Instance factory
   // *******************************************************************************************************************
   /**
-   * the {@link Mapper} that will create an instance of {@link BricklinkTokens} from an instance of
+   * the {@link Mapper} that will create an instance of {@link BrickLinkTokens} from an instance of
    * {@link BricklinkTokensRecord}.
    */
-  public static final Mapper<BricklinkTokensRecord, BricklinkTokens> BRICKLINK_TOKENS_MAPPER =
-      bricklinkTokensRecord -> new BricklinkTokens(bricklinkTokensRecord.getIdAccount(),
+  public static final Mapper<BricklinkTokensRecord, BrickLinkTokens> BRICKLINK_TOKENS_MAPPER =
+      bricklinkTokensRecord -> new BrickLinkTokens(bricklinkTokensRecord.getIdAccount(),
                                                    bricklinkTokensRecord.getConsumerKey(),
                                                    bricklinkTokensRecord.getConsumerSecret(),
                                                    bricklinkTokensRecord.getTokenValue(),
@@ -63,7 +63,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
   // *******************************************************************************************************************
 
   /**
-   * Creates a new instance of {@link BricklinkTokens}.
+   * Creates a new instance of {@link BrickLinkTokens}.
    *
    * @param idAccount the identifier of the {@link Account}.
    * @param consumerKey the consumer key.
@@ -72,7 +72,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
    * @param tokenSecret the token secret.
    * @param validUntil the validity of the tokens.
    */
-  private BricklinkTokens(final long idAccount, final String consumerKey, final String consumerSecret,
+  private BrickLinkTokens(final long idAccount, final String consumerKey, final String consumerSecret,
                           final String tokenValue, final String tokenSecret, final LocalDate validUntil) {
     this.idAccount = idAccount;
     this.consumerKey = consumerKey;
@@ -83,7 +83,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
   }
 
   /**
-   * Creates a new instance of {@link BricklinkTokens}.
+   * Creates a new instance of {@link BrickLinkTokens}.
    *
    * @param account the {@link Account}.
    * @param consumerKey the consumer key.
@@ -91,8 +91,8 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
    * @param tokenValue the token value.
    * @param tokenSecret the token secret.
    */
-  public BricklinkTokens(final Account account, final String consumerKey, final String consumerSecret,
-                          final String tokenValue, final String tokenSecret) {
+  public BrickLinkTokens(final Account account, final String consumerKey, final String consumerSecret,
+                         final String tokenValue, final String tokenSecret) {
     this(account.getId(), consumerKey, consumerSecret, tokenValue, tokenSecret, LocalDate.now());
   }
 
@@ -154,7 +154,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
    *
    * @return the current instance.
    */
-  public BricklinkTokens setIdAccount(final long idAccount) {
+  public BrickLinkTokens setIdAccount(final long idAccount) {
     this.idAccount = idAccount;
     return this;
   }
@@ -169,7 +169,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
    *
    * @return the current instance.
    */
-  public BricklinkTokens setConsumerKey(final String consumerKey) {
+  public BrickLinkTokens setConsumerKey(final String consumerKey) {
     this.consumerKey = consumerKey;
     return this;
   }
@@ -184,7 +184,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
    *
    * @return the current instance.
    */
-  public BricklinkTokens setConsumerSecret(final String consumerSecret) {
+  public BrickLinkTokens setConsumerSecret(final String consumerSecret) {
     this.consumerSecret = consumerSecret;
     return this;
   }
@@ -199,7 +199,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
    *
    * @return the current instance.
    */
-  public BricklinkTokens setTokenValue(final String tokenValue) {
+  public BrickLinkTokens setTokenValue(final String tokenValue) {
     this.tokenValue = tokenValue;
     return this;
   }
@@ -214,7 +214,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
    *
    * @return the current instance.
    */
-  public BricklinkTokens setTokenSecret(final String tokenSecret) {
+  public BrickLinkTokens setTokenSecret(final String tokenSecret) {
     this.tokenSecret = tokenSecret;
     return this;
   }
@@ -229,7 +229,7 @@ public final class BricklinkTokens extends Model implements PersistableModel1<Br
    *
    * @return the current instance.
    */
-  public BricklinkTokens setValidUntil(final LocalDate validUntil) {
+  public BrickLinkTokens setValidUntil(final LocalDate validUntil) {
     this.validUntil = validUntil;
     return this;
   }

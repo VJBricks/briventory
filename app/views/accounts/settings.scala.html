@@ -7,7 +7,7 @@
         emailForm: Form[EmailForm],
         nameForm: Form[NameForm],
         credentialsForm: Form[CredentialsForm],
-        bricklinkTokensForm: Form[BrickLinkTokensForm])(implicit request: Http.Request, messages: play.i18n.Messages)
+        brickLinkTokensForm: Form[BrickLinkTokensForm])(implicit request: Http.Request, messages: play.i18n.Messages)
 
 @implicitField = @{
   FieldConstructor(templates.bootstrapFieldConstructor.f)
@@ -64,13 +64,13 @@
           <div class="accordion-body">
             <div class="row row-cols-1 row-cols-md-3 g-3">
               <div class="col">
-              @views.html.accounts.bricklinkTokensCard(bricklinkTokensForm)
+              @views.html.accounts.brickLinkTokensCard(brickLinkTokensForm)
               </div>
               <div class="col">
-              @views.html.accounts.bricklinkTokensCard(bricklinkTokensForm)
+              @views.html.accounts.brickLinkTokensCard(brickLinkTokensForm)
               </div>
               <div class="col">
-              @views.html.accounts.bricklinkTokensCard(bricklinkTokensForm)
+              @views.html.accounts.brickLinkTokensCard(brickLinkTokensForm)
               </div>
             </div>
           </div>

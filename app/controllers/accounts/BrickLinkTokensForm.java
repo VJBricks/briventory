@@ -1,6 +1,6 @@
 package controllers.accounts;
 
-import models.BricklinkTokens;
+import models.BrickLinkTokens;
 import play.data.validation.Constraints.MaxLength;
 import play.data.validation.Constraints.Required;
 import play.data.validation.Constraints.Validatable;
@@ -48,10 +48,10 @@ public final class BrickLinkTokensForm implements Validatable<List<ValidationErr
   /**
    * Creates a new instance of {@link BrickLinkTokensForm}.
    *
-   * @param optionalBricklinkTokens the instance of {@link BricklinkTokens}, wrapped into an {@link Optional} instance,
+   * @param optionalBricklinkTokens the instance of {@link BrickLinkTokens}, wrapped into an {@link Optional} instance,
    * to fill this form.
    */
-  public BrickLinkTokensForm(final Optional<BricklinkTokens> optionalBricklinkTokens) {
+  public BrickLinkTokensForm(final Optional<BrickLinkTokens> optionalBricklinkTokens) {
     optionalBricklinkTokens.ifPresent(bricklinkTokens -> {
       consumerKey = bricklinkTokens.getConsumerKey();
       consumerSecret = bricklinkTokens.getConsumerSecret();
