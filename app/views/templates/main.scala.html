@@ -1,5 +1,4 @@
 @import org.webjars.play.WebJarsUtil
-@import utils.BriventoryBuildInfo
 
 @this(webJarsUtil: WebJarsUtil)
 @(title: String, stylesheets: List[Call] = Nil, javascripts: List[Call] = Nil, jsRoutes: List[Call] = Nil, webJarsJsAssets: List[WebJarsUtil#WebJarAsset] = Nil)(content: Html)(implicit messages: play.i18n.Messages)
@@ -11,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-    <title>@(BriventoryBuildInfo.name + ": " + title)</title>
+    <title>@(utils.BriventoryBuildInfo.name + ": " + title)</title>
 
     <link rel="apple-touch-icon" sizes="180x180" href="@routes.Assets.versioned("images/apple-touch-icon.png")">
     <link rel="icon" type="image/png" sizes="32x32" href="@routes.Assets.versioned("images/favicon-32x32.png")">
@@ -27,6 +26,7 @@
 
     @webJarsUtil.locate("font-awesome", "all.css").css()
     @webJarsUtil.locate("bootstrap", "bootstrap.min.css").css()
+
     @styles = @{
       routes.Assets.versioned("stylesheets/main.css") :: stylesheets.toList
     }
@@ -45,6 +45,7 @@
     @for(route <- jsRoutes) {
       <script defer src="@route" type="text/javascript"></script>
     }
+
     @scripts = @{
       routes.Assets.versioned("javascripts/main.js") :: javascripts.toList
     }
@@ -56,17 +57,17 @@
   <body>
     @content
 
-    <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 px-3 my-4 border-top">
-      <div class="col-md-6 d-flex align-items-center">
-        <a href="https://www.varani.ch/briventory" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
-          <img src="@routes.Assets.versioned("images/varani_logo_small.png")" alt="Varani.ch Logo" width="133" height="25" class="d-inline-block align-text-top">
-        </a>
-        <span class="text-muted">© 2022 varani.ch | @messages("lego.disclaimer")</span>
-      </div>
+  <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 px-3 my-4 border-top">
+    <div class="col-md-6 d-flex align-items-center">
+      <a href="https://www.varani.ch/briventory" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
+        <img src="@routes.Assets.versioned("images/varani_logo_small.png")" alt="Varani.ch Logo" width="133" height="25" class="d-inline-block align-text-top">
+      </a>
+      <span class="text-muted">© 2022 varani.ch | @messages("lego.disclaimer")</span>
+    </div>
 
-      <ul class="nav col-md-3 justify-content-end list-unstyled d-flex">
-        <li class="ms-3"><a class="text-muted" href="@routes.PublicController.credits()"><i aria-hidden="true" class="fab fa-osi"></i></a></li>
-      </ul>
-    </footer>
+    <ul class="nav col-md-3 justify-content-end list-unstyled d-flex">
+      <li class="ms-3"><a class="text-muted" href="@routes.PublicController.credits()"><i aria-hidden="true" class="fab fa-osi"></i></a></li>
+    </ul>
+  </footer>
   </body>
 </html>

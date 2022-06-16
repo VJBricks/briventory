@@ -1,4 +1,4 @@
-@import controllers.accounts.{BrickLinkTokensForm, CredentialsForm, EmailForm, NameForm, BrickSetTokensForm}
+@import controllers.accounts.{BrickLinkTokensForm, BrickSetTokensForm, CredentialsForm, EmailForm, NameForm, RebrickableTokensForm}
 @import play.data.Form
 @import views.html.helper.FieldConstructor
 
@@ -8,7 +8,8 @@
         nameForm: Form[NameForm],
         credentialsForm: Form[CredentialsForm],
         brickLinkTokensForm: Form[BrickLinkTokensForm],
-        brickSetTokensForm: Form[BrickSetTokensForm])(implicit request: Http.Request, messages: play.i18n.Messages)
+        brickSetTokensForm: Form[BrickSetTokensForm],
+        rebrickableTokensForm: Form[RebrickableTokensForm])(implicit request: Http.Request, messages: play.i18n.Messages)
 
 @implicitField = @{
   FieldConstructor(templates.bootstrapFieldConstructor.f)
@@ -71,7 +72,7 @@
               @views.html.accounts.brickSetTokensCard(brickSetTokensForm)
               </div>
               <div class="col">
-              @views.html.accounts.brickLinkTokensCard(brickLinkTokensForm)
+              @views.html.accounts.rebrickableTokensCard(rebrickableTokensForm)
               </div>
             </div>
           </div>

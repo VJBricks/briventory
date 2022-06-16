@@ -19,6 +19,7 @@ import repositories.AccountsRepository;
 import repositories.BrickLinkTokensRepository;
 import repositories.BrickSetTokensRepository;
 import repositories.ColorsSourcesRepository;
+import repositories.RebrickableTokensRepository;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -87,6 +88,11 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   private final OptionalModelLoader<Account, BrickSetTokens> brickSetTokensLoader =
       RepositoriesHandler.of(BrickSetTokensRepository.class)
                          .createBrickSetTokensLoader(this);
+
+  /** The {@link RebrickableTokens} instance loader. */
+  private final OptionalModelLoader<Account, RebrickableTokens> rebrickableTokensLoader =
+      RepositoriesHandler.of(RebrickableTokensRepository.class)
+                         .createRebrickableLoader(this);
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -217,6 +223,7 @@ public final class Account extends Model implements PersistableModel1<AccountRec
     actions.addAll(ModelActions.fromLazyLoader(dslContext, isLockedLoader));
     actions.addAll(ModelActions.fromLazyLoader(dslContext, brickLinkTokensLoader));
     actions.addAll(ModelActions.fromLazyLoader(dslContext, brickSetTokensLoader));
+    actions.addAll(ModelActions.fromLazyLoader(dslContext, rebrickableTokensLoader));
 
     return actions;
   }
@@ -489,6 +496,27 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   /** Clears the {@link BrickSetTokens}. */
   public void clearBrickSetTokens() {
     brickSetTokensLoader.setValue(Optional.empty());
+  }
+
+  // *******************************************************************************************************************
+  // Rebrickable Synchronisation Matters
+  // *******************************************************************************************************************
+
+  /** @return the {@link Optional} instance, containing the {@link RebrickableTokens}. */
+  public Optional<RebrickableTokens> getRebrickableTokens() { return rebrickableTokensLoader.getValue(); }
+
+  /**
+   * Sets the {@link RebrickableTokens}.
+   *
+   * @param rebrickableTokens the {@link RebrickableTokens}.
+   */
+  public void setRebrickableTokens(final RebrickableTokens rebrickableTokens) {
+    rebrickableTokensLoader.setValue(Optional.of(rebrickableTokens));
+  }
+
+  /** Clears the {@link RebrickableTokens}. */
+  public void clearRebrickableTokens() {
+    rebrickableTokensLoader.setValue(Optional.empty());
   }
 
 }

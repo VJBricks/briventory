@@ -1,0 +1,101 @@
+@import controllers.accounts.RebrickableTokensForm
+@import views.html.helper.FieldConstructor
+
+@(rebrickableTokensForm: Form[RebrickableTokensForm])(implicit request: Http.Request, messages: play.i18n.Messages)
+
+@implicitField = @{
+  FieldConstructor(templates.bootstrapFieldConstructor.f)
+}
+
+<div id="rebrickable-tokens-card" class="card h-100">
+  <div class="card-header">@messages("account.settings.sync.rebrickable.title")</div>
+  <div class="card-body">
+    <p>@Html(messages("account.settings.sync.rebrickable.explained"))</p>
+    <hr>
+    @if(rebrickableTokensForm.hasGlobalErrors()) {
+      @for(error <- rebrickableTokensForm.globalErrors()) {
+        <p class="form-message text-danger">@error.format(messages)</p>
+      }
+    }
+    <form id="rebrickable-tokens-card-form">
+      @helper.CSRF.formField
+      @helper.input(rebrickableTokensForm("idAccount"), Symbol("type") -> "hidden") { (id, name, value, args) =>
+        <input type="hidden" name="@name" id="@id" value="@value" @toHtmlArgs(args)>
+      }
+      @helper.inputText(rebrickableTokensForm("key"),
+        Symbol("class") -> "form-control",
+        Symbol("_label") -> messages.at("account.settings.sync.rebrickable.apiKey.label"))
+    </form>
+  </div>
+  <div class="card-footer text-end">
+    @if(rebrickableTokensForm != null && rebrickableTokensForm.value().isPresent && !rebrickableTokensForm.get().isNew()) {
+      <button type="button" id="rebrickable-tokens-card-delete" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#rebrickable-tokens-card-clearance-modal">@messages("button.delete.caption")</button>
+    }
+    <button type="submit" id="rebrickable-tokens-card-submit" class="btn btn-primary" onclick="rebrickableTokensCardFormSubmission()">@messages("button.update.caption")</button>
+  </div>
+
+  @if(rebrickableTokensForm != null && rebrickableTokensForm.value().isPresent && !rebrickableTokensForm.get().isNew()) {
+    <div class="modal fade" id="rebrickable-tokens-card-clearance-modal" tabindex="-1" aria-labelledby="rebrickable-tokens-card-clearance-modal-label" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="rebrickable-tokens-card-clearance-modal-label">@messages.at("account.settings.sync.rebrickable.title")</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>@Html(messages.at("account.settings.sync.rebrickable.delete.explain"))</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@messages.at("button.cancel.caption")</button>
+            <button type="button" class="btn btn-primary" onclick="deleteRebrickableTokens()" data-bs-dismiss="modal">@messages.at("button.delete.caption")</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <script>
+          /** Performs the submission of the <code>email-card-form</code>. */
+          function rebrickableTokensCardFormSubmission() {
+            blockWithSpinner("#rebrickable-tokens-card");
+
+            settingsJSRoutes.controllers.accounts.AccountsController.updateRebrickableTokens().ajax({
+              async: true,
+              method: "POST",
+              data: $("#rebrickable-tokens-card-form").serialize(),
+              success: function (data) {
+                $("#rebrickable-tokens-card").replaceWith(data);
+                classTransition("#rebrickable-tokens-card-submit", "btn-success", 3000);
+              },
+              error: function (data) {
+                $("#rebrickable-tokens-card").replaceWith(data.responseText);
+                classTransition("#rebrickable-tokens-card-submit", "btn-danger", 3000);
+              }
+            });
+          }
+
+          $("#rebrickable-tokens-card-form").submit(function () {
+            rebrickableTokensCardFormSubmission();
+            return false;
+          });
+
+          @if(rebrickableTokensForm != null && rebrickableTokensForm.value().isPresent && !rebrickableTokensForm.get().isNew) {
+
+          function deleteRebrickableTokens() {
+            blockWithSpinner("#rebrickable-tokens-card");
+
+            settingsJSRoutes.controllers.accounts.AccountsController.deleteRebrickableTokens().ajax({
+              async: true,
+              method: "DELETE",
+              success: function (data) {
+                $("#rebrickable-tokens-card").replaceWith(data);
+              },
+              error: function (data) {
+                $("#rebrickable-tokens-card").replaceWith(data.responseText);
+              }
+            });
+          }
+
+          }
+  </script>
+</div>

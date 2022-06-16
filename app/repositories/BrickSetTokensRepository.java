@@ -56,8 +56,9 @@ public final class BrickSetTokensRepository extends Repository<BrickSetTokens> {
                                        if (optionalBrickSetTokens.isPresent()) {
                                          modelAction = new PersistAction1<>(optionalBrickSetTokens.get());
                                        } else {
-                                         modelAction = new DeleteRecordAction<>(
-                                             new BricksetTokensRecord().setIdAccount(a.getId()));
+                                         final BricksetTokensRecord bricksetTokensRecord =
+                                             dslContext.newRecord(BRICKSET_TOKENS).setIdAccount(a.getId());
+                                         modelAction = new DeleteRecordAction<>(bricksetTokensRecord);
                                        }
                                        return Collections.singletonList(modelAction);
                                      });

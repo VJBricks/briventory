@@ -1,9 +1,9 @@
 package repositories;
 
 import database.BriventoryDB;
-import jooq.tables.records.BricklinkTokensRecord;
+import jooq.tables.records.RebrickableTokensRecord;
 import models.Account;
-import models.BrickLinkTokens;
+import models.RebrickableTokens;
 import org.jooq.DSLContext;
 import orm.DeleteRecordAction;
 import orm.ModelAction;
@@ -16,23 +16,27 @@ import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.Optional;
 
-import static jooq.Tables.BRICKLINK_TOKENS;
+import static jooq.Tables.REBRICKABLE_TOKENS;
+import static models.RebrickableTokens.REBRICKABLE_TOKENS_MAPPER;
 
-/** The {@code BrickLinkTokensRepository} handler the BrickLink tokens, needed to sync an inventory from BrickLink. */
+/**
+ * The {@code RebrickableTokensRepository} handler the Rebrickable tokens, needed to sync an inventory from
+ * Rebrickable.
+ */
 @Singleton
-public final class BrickLinkTokensRepository extends Repository<BrickLinkTokens> {
+public final class RebrickableTokensRepository extends Repository<RebrickableTokens> {
 
   // *******************************************************************************************************************
   // Construction & Initialization
   // *******************************************************************************************************************
 
   /**
-   * Creates a new instance of {@link BrickLinkTokensRepository}.
+   * Creates a new instance of {@link RebrickableTokensRepository}.
    *
    * @param briventoryDB the {@link BriventoryDB} injected instance.
    */
   @Inject
-  public BrickLinkTokensRepository(final BriventoryDB briventoryDB) {
+  public RebrickableTokensRepository(final BriventoryDB briventoryDB) {
     super(briventoryDB);
   }
 
@@ -41,23 +45,23 @@ public final class BrickLinkTokensRepository extends Repository<BrickLinkTokens>
   // *******************************************************************************************************************
 
   /**
-   * Creates a new {@link OptionalModelLoader} to load {@link BrickLinkTokens} lazily.
+   * Creates a new {@link OptionalModelLoader} to load {@link RebrickableTokens} lazily.
    *
    * @param account the associated {@link Account}.
    *
    * @return an instance of {@link OptionalModelLoader}.
    */
-  public OptionalModelLoader<Account, BrickLinkTokens> createBrickLinkTokensLoader(final Account account) {
+  public OptionalModelLoader<Account, RebrickableTokens> createRebrickableLoader(final Account account) {
     return createOptionalModelLoader(account,
                                      this::findByAccount,
-                                     (dslContext, a, optionalBrickLinkTokens) -> {
+                                     (dslContext, a, optionalRebrickableTokens) -> {
                                        ModelAction modelAction;
-                                       if (optionalBrickLinkTokens.isPresent()) {
-                                         modelAction = new PersistAction1<>(optionalBrickLinkTokens.get());
+                                       if (optionalRebrickableTokens.isPresent()) {
+                                         modelAction = new PersistAction1<>(optionalRebrickableTokens.get());
                                        } else {
-                                         final BricklinkTokensRecord bricklinkTokensRecord =
-                                             dslContext.newRecord(BRICKLINK_TOKENS).setIdAccount(a.getId());
-                                         modelAction = new DeleteRecordAction<>(bricklinkTokensRecord);
+                                         final RebrickableTokensRecord rebrickableTokensRecord =
+                                             dslContext.newRecord(REBRICKABLE_TOKENS).setIdAccount(a.getId());
+                                         modelAction = new DeleteRecordAction<>(rebrickableTokensRecord);
                                        }
                                        return Collections.singletonList(modelAction);
                                      });
@@ -68,18 +72,18 @@ public final class BrickLinkTokensRepository extends Repository<BrickLinkTokens>
   // *******************************************************************************************************************
 
   /**
-   * Retrieves from the database the {@link BrickLinkTokens} linked with the {@link Account} provided.
+   * Retrieves from the database the {@link RebrickableTokens} linked with the {@link Account} provided.
    *
    * @param dslContext the {@link DSLContext}.
    * @param account the {@link Account}.
    *
-   * @return an {@link Optional} instance, containing the existing {@link BrickLinkTokens}.
+   * @return an {@link Optional} instance, containing the existing {@link RebrickableTokens}.
    */
-  private Optional<BrickLinkTokens> findByAccount(final DSLContext dslContext, final Account account) {
-    return fetchOptional(BrickLinkTokens.BRICKLINK_TOKENS_MAPPER,
+  private Optional<RebrickableTokens> findByAccount(final DSLContext dslContext, final Account account) {
+    return fetchOptional(REBRICKABLE_TOKENS_MAPPER,
                          dslContext,
-                         ctx -> ctx.selectFrom(BRICKLINK_TOKENS)
-                                   .where(BRICKLINK_TOKENS.ID_ACCOUNT.eq(account.getId())));
+                         ctx -> ctx.selectFrom(REBRICKABLE_TOKENS)
+                                   .where(REBRICKABLE_TOKENS.ID_ACCOUNT.eq(account.getId())));
   }
 
 }

@@ -2,6 +2,7 @@ package models;
 
 import jooq.tables.records.RebrickableTokensRecord;
 import org.jooq.DSLContext;
+import orm.Mapper;
 import orm.Model;
 import orm.models.PersistableModel1;
 import orm.models.ValidatableModel;
@@ -14,7 +15,19 @@ import java.util.List;
 import static jooq.Tables.REBRICKABLE_TOKENS;
 
 public final class RebrickableTokens extends Model implements PersistableModel1<RebrickableTokensRecord>,
-                                                                  ValidatableModel<ValidationError> {
+    ValidatableModel<ValidationError> {
+
+  // *******************************************************************************************************************
+  // Instance factory
+  // *******************************************************************************************************************
+  /**
+   * the {@link Mapper} that will create an instance of {@link RebrickableTokens} from an instance of
+   * {@link RebrickableTokensRecord}.
+   */
+  public static final Mapper<RebrickableTokensRecord, RebrickableTokens> REBRICKABLE_TOKENS_MAPPER =
+      rebrickableTokensRecord -> new RebrickableTokens(rebrickableTokensRecord.getIdAccount(),
+                                                       rebrickableTokensRecord.getKey(),
+                                                       rebrickableTokensRecord.getValidUntil());
 
   // *******************************************************************************************************************
   // Attributes
@@ -25,6 +38,33 @@ public final class RebrickableTokens extends Model implements PersistableModel1<
   private String key;
   /** The validity of the tokens. */
   private LocalDate validUntil;
+
+  // *******************************************************************************************************************
+  // Construction & Initialization
+  // *******************************************************************************************************************
+
+  /**
+   * Creates a new instance of {@link RebrickableTokens}.
+   *
+   * @param idAccount the identifier of the {@link Account}.
+   * @param key the API key.
+   * @param validUntil the validity of the tokens.
+   */
+  private RebrickableTokens(final long idAccount, final String key, final LocalDate validUntil) {
+    this.idAccount = idAccount;
+    this.key = key;
+    this.validUntil = validUntil;
+  }
+
+  /**
+   * Creates a new instance of {@link RebrickableTokens}.
+   *
+   * @param account the {@link Account}.
+   * @param key the API key.
+   */
+  public RebrickableTokens(final Account account, final String key) {
+    this(account.getId(), key, LocalDate.now());
+  }
 
   // *******************************************************************************************************************
   // PersistableModel1 Overrides

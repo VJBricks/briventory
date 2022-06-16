@@ -26,6 +26,9 @@ DELETE      /account/settings/bricklink       controllers.accounts.AccountsContr
 POST        /account/settings/brickset        controllers.accounts.AccountsController.updateBrickSetTokens(request: Request)
 +noCSRF
 DELETE      /account/settings/brickset        controllers.accounts.AccountsController.deleteBrickSetTokens(request: Request)
+POST        /account/settings/rebrickable     controllers.accounts.AccountsController.updateRebrickableTokens(request: Request)
++noCSRF
+DELETE      /account/settings/rebrickable     controllers.accounts.AccountsController.deleteRebrickableTokens(request: Request)
 
 GET         /storage/containers               controllers.storage.StorageController.containers(request: Request)
 

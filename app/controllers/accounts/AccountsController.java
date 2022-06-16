@@ -10,6 +10,7 @@ import me.gosimple.nbvcxz.resources.DictionaryBuilder;
 import models.Account;
 import models.BrickLinkTokens;
 import models.BrickSetTokens;
+import models.RebrickableTokens;
 import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
@@ -150,7 +151,9 @@ public final class AccountsController extends Controller {
                                              routes.javascript.AccountsController.updateBrickLinkTokens(),
                                              routes.javascript.AccountsController.deleteBrickLinkTokens(),
                                              routes.javascript.AccountsController.updateBrickSetTokens(),
-                                             routes.javascript.AccountsController.deleteBrickSetTokens()))
+                                             routes.javascript.AccountsController.deleteBrickSetTokens(),
+                                             routes.javascript.AccountsController.updateRebrickableTokens(),
+                                             routes.javascript.AccountsController.deleteRebrickableTokens()))
         .as(JAVASCRIPT);
   }
 
@@ -178,13 +181,17 @@ public final class AccountsController extends Controller {
           formFactory.form(CredentialsForm.class)
                      .fill(new CredentialsForm(optionalAccount.get().getId()));
 
-      final Form<BrickLinkTokensForm> brickLinkTokensForm = formFactory.form(BrickLinkTokensForm.class)
-                                                                       .fill(new BrickLinkTokensForm(
-                                                                           optionalAccount.get().getBrickLinkTokens()));
+      final Form<BrickLinkTokensForm> brickLinkTokensForm =
+          formFactory.form(BrickLinkTokensForm.class)
+                     .fill(new BrickLinkTokensForm(optionalAccount.get().getBrickLinkTokens()));
 
-      final Form<BrickSetTokensForm> brickSetTokensForm = formFactory.form(BrickSetTokensForm.class)
-                                                                     .fill(new BrickSetTokensForm(
-                                                                         optionalAccount.get().getBrickSetTokens()));
+      final Form<BrickSetTokensForm> brickSetTokensForm =
+          formFactory.form(BrickSetTokensForm.class)
+                     .fill(new BrickSetTokensForm(optionalAccount.get().getBrickSetTokens()));
+
+      final Form<RebrickableTokensForm> rebrickableTokensForm =
+          formFactory.form(RebrickableTokensForm.class)
+                     .fill(new RebrickableTokensForm(optionalAccount.get().getRebrickableTokens()));
 
       return ok(settings.render(optionalAccount.get(),
                                 emailForm,
@@ -192,6 +199,7 @@ public final class AccountsController extends Controller {
                                 credentialsForm,
                                 brickLinkTokensForm,
                                 brickSetTokensForm,
+                                rebrickableTokensForm,
                                 request,
                                 preferred));
     }
@@ -377,6 +385,57 @@ public final class AccountsController extends Controller {
       return ok(views.html.accounts.brickSetTokensCard.render(formFactory.form(BrickSetTokensForm.class),
                                                               request,
                                                               preferred));
+    }
+    return errorsController.forbidden(request);
+  }
+
+  /**
+   * update the Rebrickable tokens and returns the related form.
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return the related form with the new values or the errors.
+   */
+  public Result updateRebrickableTokens(final Http.Request request) {
+    final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
+    final var preferred = messagesApi.preferred(request);
+
+    if (optionalAccount.isPresent()) {
+      final Form<RebrickableTokensForm> rebrickableTokensForm = formFactory.form(RebrickableTokensForm.class)
+                                                                           .bindFromRequest(request);
+
+      final Account account = optionalAccount.get();
+      if (!rebrickableTokensForm.hasErrors()) {
+        final RebrickableTokensForm form = rebrickableTokensForm.get();
+        account.setRebrickableTokens(new RebrickableTokens(account,
+                                                           form.getKey()));
+        accountsRepository.persist(account);
+        rebrickableTokensForm.get().setAsFilled();
+        return ok(views.html.accounts.rebrickableTokensCard.render(rebrickableTokensForm, request, preferred));
+      }
+      return badRequest(views.html.accounts.rebrickableTokensCard.render(rebrickableTokensForm, request, preferred));
+    }
+    return errorsController.forbidden(request);
+  }
+
+  /**
+   * Deletes the {@link RebrickableTokens} for the current account.
+   *
+   * @param request the {@link Http.Request}.
+   *
+   * @return an empty form, if the deletion succeeds.
+   */
+  public Result deleteRebrickableTokens(final Http.Request request) {
+    final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
+    final var preferred = messagesApi.preferred(request);
+
+    if (optionalAccount.isPresent()) {
+      final Account account = optionalAccount.get();
+      account.clearRebrickableTokens();
+      accountsRepository.persist(account);
+      return ok(views.html.accounts.rebrickableTokensCard.render(formFactory.form(RebrickableTokensForm.class),
+                                                                 request,
+                                                                 preferred));
     }
     return errorsController.forbidden(request);
   }

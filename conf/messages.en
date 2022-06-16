@@ -95,6 +95,12 @@ account.settings.sync.brickset.username.label = Username
 account.settings.sync.brickset.password.label = Password
 account.settings.sync.brickset.delete.explain = <p>Do you really want to delete the BrickSet tokens ?</p>
 
+
+account.settings.sync.rebrickable.title = Rebrickable Synchronization
+account.settings.sync.rebrickable.explained = <p>Set or update Web Services Key of Rebrickable. You can get a key on the <em>Settings</em> page of your account.</p><p>To get more information about the Rebrickable API, go to the <a href="https://rebrickable.com/api/">Rebrickable API</a> page.</p>
+account.settings.sync.rebrickable.apiKey.label = API Key
+account.settings.sync.rebrickable.delete.explain = <p>Do you really want to delete the Rebrickable tokens ?</p>
+
 account.signOut.title = Sign Out
 
 admin.title = Administration
