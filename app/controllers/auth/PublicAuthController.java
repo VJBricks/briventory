@@ -117,7 +117,7 @@ public final class PublicAuthController extends Controller {
 
     if (optionalAccount.isEmpty()) {
       return CompletableFuture.completedStage(
-          badRequest(signIn.render(form.withGlobalError("auth.signin.error.badcredentials"),
+          badRequest(signIn.render(form.withGlobalError("auth.signIn.error.badCredentials"),
                                    messagesApi.preferred(request),
                                    request)));
     }
@@ -127,7 +127,7 @@ public final class PublicAuthController extends Controller {
 
     if (!passVerified) {
       return CompletableFuture.completedStage(
-          badRequest(signIn.render(form.withGlobalError("auth.signin.error.badcredentials"),
+          badRequest(signIn.render(form.withGlobalError("auth.signIn.error.badCredentials"),
                                    messagesApi.preferred(request),
                                    request)));
     }

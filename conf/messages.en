@@ -1,4 +1,4 @@
-lego.disclamer = LEGO is a trademark of the LEGO Group, which does not sponsor, authorize or endorse this web site.
+lego.disclaimer = LEGO is a trademark of the LEGO Group, which does not sponsor, authorize or endorse this web site.
 
 button.search.caption = Search
 button.save.caption = Save
@@ -18,10 +18,10 @@ auth.signup.error.currentPassword.mismatch = the current password do not match
 
 auth.admin.signup.title = Administrator Sign Up
 
-auth.signin=Sign In
-auth.signin.title=Sign In
-auth.signin.error=An error occurs during the authentication process.
-auth.signin.error.badcredentials=Bad credentials, check your entries
+auth.signIn=Sign In
+auth.signIn.title=Sign In
+auth.signIn.error=An error occurs during the authentication process.
+auth.signIn.error.badCredentials=Bad credentials, check your entries
 
 briventory.title = Briventory
 
@@ -34,18 +34,15 @@ error.maxLength=maximum length: {0} characters
 # Implicitly called by the form helper
 error.email=this is not a valid e-mail address
 
-forbidden.title=Forbidden
-forbidden.string=You''re not allowed to access this resource.
+forbidden.title = Forbidden
+forbidden.string = You''re not allowed to access this resource.
 
-jdbcconnection.title=JDBC Connection
-jdbcconnection=The database connection cannot be established, check your config.
+maintenance.title = Maintenance
+maintenance.string = This site is currently under maintenance
+maintenance.substring = Come back soon
 
-maintenance.title=Maintenance
-maintenance.string=This site is currently under maintenance
-maintenance.substring=Come back soon
-
-notfound.title=Not found
-notfound.string=The resource has not been founded.
+notfound.title = Not found
+notfound.string = The resource has not been founded.
 
 status.databaseVersion.description=Database initialized and corresponding to the App major version
 status.databaseVersion.tips=Check if the database is reachable and inspect the application log file to get the error.
@@ -98,7 +95,7 @@ account.settings.sync.brickset.username.label = Username
 account.settings.sync.brickset.password.label = Password
 account.settings.sync.brickset.delete.explain = <p>Do you really want to delete the BrickSet tokens ?</p>
 
-account.signout.title = Sign Out
+account.signOut.title = Sign Out
 
 admin.title = Administration
 admin.members.title = Manage Members
@@ -111,7 +108,7 @@ users.passwordRepetition=Password confirmation
 
 inventory.title = Inventory
 inventory.items.title = Items
-inventory.partout.title = Part Out
+inventory.partOut.title = Part Out
 inventory.settings.title = Inventory Settings
 inventory.sync.title = Sync
 inventory.tools.title = Tools
@@ -119,7 +116,7 @@ inventory.tools.consolidation.title = Consolidation
 
 mocs.title = MOCs
 mocs.models.title = Models
-mocs.wantedlist.title = Wanted Lists
+mocs.wantedList.title = Wanted Lists
 
 orders.title = Orders
 orders.received.title = Received

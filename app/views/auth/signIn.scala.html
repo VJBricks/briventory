@@ -10,12 +10,12 @@
     FieldConstructor(templates.bootstrapFieldConstructor.f)
   }
 
-  @lite(title = messages("auth.signin.title")) {
+  @lite(title = messages("auth.signIn.title")) {
 
     <div class="container-fluid">
       <div class="row h-100 justify-content-center align-items-center">
         <div class="light-gray-box col-10 col-md-8 col-lg-6">
-          <h2 class="form-title">@messages("auth.signin.title")</h2>
+          <h2 class="form-title">@messages("auth.signIn.title")</h2>
           @if(form.hasGlobalErrors) {
             <div class="alert alert-danger" role="alert">
             @for(error <- form.globalErrors) {
@@ -44,7 +44,7 @@
 
             <div class="form-group row">
               <div class="col-12">
-                <button type="submit" class="btn btn-primary float-end">@messages("auth.signin")</button>
+                <button type="submit" class="btn btn-primary float-end">@messages("auth.signIn")</button>
               </div>
             </div>
           }
