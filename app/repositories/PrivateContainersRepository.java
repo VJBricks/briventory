@@ -2,8 +2,10 @@ package repositories;
 
 import com.google.inject.Inject;
 import database.BriventoryDB;
+import models.Account;
 import models.Locker;
 import models.PrivateContainer;
+import models.SharedContainer;
 import org.jooq.DSLContext;
 import org.jooq.Record4;
 import org.jooq.ResultQuery;
@@ -46,8 +48,12 @@ public final class PrivateContainersRepository extends Repository<PrivateContain
     super.persist(privateContainer);
   }
 
-  public void delete(final PrivateContainer privateContainer) {
-    super.deleteInTransaction(privateContainer);
+  // *******************************************************************************************************************
+  // Migration
+  // *******************************************************************************************************************
+  public PrivateContainer migrate(final SharedContainer sharedContainer, final Account account) {
+    return migrate(sharedContainer::createRecord2,
+                   new PrivateContainer(sharedContainer, account));
   }
 
   Tuple2<Mapper<Record4<Long, Long, List<Locker>, Long>,
@@ -61,6 +67,34 @@ public final class PrivateContainersRepository extends Repository<PrivateContain
                                          PRIVATE_CONTAINER.ID_ACCOUNT)
                                  .from(CONTAINER)
                                  .innerJoin(PRIVATE_CONTAINER).on(CONTAINER.ID.eq(PRIVATE_CONTAINER.ID_CONTAINER)));
+  }
+
+  Tuple2<Mapper<Record4<Long, Long, List<Locker>, Long>,
+      PrivateContainer>,
+      ResultQuery<Record4<Long, Long, List<Locker>, Long>>> getPrivateContainersQuery(
+      final DSLContext dslContext,
+      final Account account,
+      final boolean alsoPrivateContainer,
+      final Long idContainerType,
+      final Long idLockerSize) {
+    return Tuple.tuple(PRIVATE_CONTAINER_MAPPER,
+                       dslContext.select(CONTAINER.ID,
+                                         CONTAINER.ID_CONTAINER_TYPE,
+                                         inline((List<Locker>) null).as(LOCKER_ALIAS),
+                                         PRIVATE_CONTAINER.ID_ACCOUNT)
+                                 .from(CONTAINER)
+                                 .innerJoin(PRIVATE_CONTAINER).on(CONTAINER.ID.eq(PRIVATE_CONTAINER.ID_CONTAINER))
+                                 .innerJoin(CONTAINER_COMPOSITION)
+                                 .on(CONTAINER.ID.eq(CONTAINER_COMPOSITION.ID_CONTAINER))
+                                 .innerJoin(LOCKER).on(CONTAINER_COMPOSITION.ID_LOCKER.eq(LOCKER.ID))
+                                 .where(PRIVATE_CONTAINER.ID_ACCOUNT.eq(account.getId()))
+                                 .and(condition(inline(alsoPrivateContainer)))
+                                 .and(condition(coalesce(
+                                     field(CONTAINER.ID_CONTAINER_TYPE.eq(idContainerType)),
+                                     inline(true))))
+                                 .and(condition(coalesce(
+                                     field(LOCKER.ID_LOCKER_SIZE.eq(idLockerSize)),
+                                     inline(true)))));
   }
 
   public List<PrivateContainer> getPrivateContainers() {

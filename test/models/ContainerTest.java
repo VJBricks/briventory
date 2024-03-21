@@ -4,11 +4,7 @@ import junit5.J5WithApplication;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import repositories.AccountsRepository;
-import repositories.ContainerTypesRepository;
-import repositories.ContainersRepository;
-import repositories.PrivateContainersRepository;
-import repositories.SharedContainersRepository;
+import repositories.*;
 
 import java.util.List;
 
@@ -73,11 +69,8 @@ class ContainerTest extends J5WithApplication {
 
   @AfterEach
   public void tearDown() {
-    containersRepository.getContainers().forEach(container -> {
-      if (container instanceof SharedContainer sharedContainer)
-        sharedContainersRepository.delete(sharedContainer);
-      if (container instanceof PrivateContainer privateContainer)
-        privateContainersRepository.delete(privateContainer);
+    containersRepository.getAll().forEach(container -> {
+      containersRepository.delete(container);
     });
     containerTypesRepository.delete(containerType);
   }
@@ -89,13 +82,13 @@ class ContainerTest extends J5WithApplication {
     sharedContainersRepository.persist(sharedContainer);
     assertEquals(1, sharedContainersRepository.getSharedContainers().size());
     assertNotNull(sharedContainer.getId());
-    sharedContainersRepository.delete(sharedContainer);
+    containersRepository.delete(sharedContainer);
     assertEquals(0, sharedContainersRepository.getSharedContainers().size());
   }
 
   @Test
   void containersGetAll() {
-    List<Container> containers = containersRepository.getContainers();
+    List<Container> containers = containersRepository.getAll();
     for (Container container : containers)
       System.out.println(container);
     assertTrue(containers.isEmpty());
@@ -107,7 +100,7 @@ class ContainerTest extends J5WithApplication {
     final SharedContainer sharedContainer = new SharedContainer(containerType);
     sharedContainersRepository.persist(sharedContainer);
     final long idSharedContainer = sharedContainer.getId();
-    final PrivateContainer privateContainer = containersRepository.migrate(sharedContainer, account);
+    final PrivateContainer privateContainer = privateContainersRepository.migrate(sharedContainer, account);
     assertNotNull(privateContainer);
     assertEquals(idSharedContainer, privateContainer.getId());
     assertEquals(0, sharedContainersRepository.getSharedContainers().size());
@@ -120,7 +113,7 @@ class ContainerTest extends J5WithApplication {
     final PrivateContainer privateContainer = new PrivateContainer(containerType, account);
     privateContainersRepository.persist(privateContainer);
     final long idPrivateContainer = privateContainer.getId();
-    final SharedContainer sharedContainer = containersRepository.migrate(privateContainer);
+    final SharedContainer sharedContainer = sharedContainersRepository.migrate(privateContainer);
     assertNotNull(sharedContainer);
     assertEquals(idPrivateContainer, sharedContainer.getId());
     assertEquals(1, sharedContainersRepository.getSharedContainers().size());

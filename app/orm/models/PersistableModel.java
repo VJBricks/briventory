@@ -1,7 +1,8 @@
 package orm.models;
 
 import org.jooq.DSLContext;
-import orm.ModelAction;
+import orm.Action;
+import orm.Model;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,25 +12,28 @@ import java.util.List;
  * {@link PersistableModel} can be passed to {@code persist} methods of the class {@link orm.PersistenceContext}.
  * <p>This class is the base class for the sub-interfaces that specialized the amount of {@link org.jooq.Record} that
  * has be be used to persist the {@link orm.Model}.</p>
+ *
+ * @param <M> the specific {@link Model}.
  */
-public interface PersistableModel {
+public interface PersistableModel<M extends Model> {
 
   /**
-   * Creates all {@link ModelAction} that will be performed before the persistence of the model.
+   * Creates all {@link orm.ModelAction} that will be performed before the persistence of the model.
    *
    * @param dslContext the {@link DSLContext}.
    *
-   * @return a {@link List} of {@link ModelAction} instances. By default, this method returns an empty list.
+   * @return a {@link List} of {@link Action} instances. By default, this method returns an empty list.
    */
-  default List<ModelAction> getPrePersistenceActions(final DSLContext dslContext) { return Collections.emptyList(); }
+  default List<Action> getPrePersistenceActions(final DSLContext dslContext) { return Collections.emptyList(); }
 
   /**
-   * Creates all {@link ModelAction} that will be performed after the persistence of the model.
+   * Creates all {@link Action} that will be performed after the persistence of the model.
    *
    * @param dslContext the {@link DSLContext}.
    *
-   * @return a {@link List} of {@link ModelAction} instances. By default, this method returns an empty list.
+   * @return a {@link List} of {@link Action} instances. By default, this method returns an empty list.
    */
-  default List<ModelAction> getPostPersistenceActions(final DSLContext dslContext) { return Collections.emptyList(); }
+  default List<Action> getPostPersistenceActions(
+      final DSLContext dslContext) { return Collections.emptyList(); }
 
 }

@@ -16,8 +16,8 @@ import static jooq.Tables.COLOR_SOURCE;
  * The {@code ColorsSource} class is the representation of the table {@code colors_source} in the <em>Briventory</em>
  * database.
  */
-public final class ColorsSource extends Model implements PersistableModel1<ColorSourceRecord>,
-                                                             ValidatableModel<ValidationError> {
+public final class ColorsSource extends Model implements PersistableModel1<ColorsSource, ColorSourceRecord>,
+    ValidatableModel<ValidationError> {
 
   // *******************************************************************************************************************
   // Attributes

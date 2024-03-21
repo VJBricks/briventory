@@ -2,6 +2,7 @@ package orm.models;
 
 import org.jooq.DSLContext;
 import org.jooq.UpdatableRecord;
+import orm.Model;
 import orm.ModelAction;
 
 import java.util.Collections;
@@ -10,10 +11,11 @@ import java.util.List;
 /**
  * A {@code DeletableModel} allows a model to be handled by the deletion process.
  *
+ * @param <M> the specific type of {@link Model}.
  * @param <E> the type of the errors for the validation process.
  * @param <R> the specific subtype of {@link UpdatableRecord} that will be used to delete the model.
  */
-public interface DeletableModel<E, R extends UpdatableRecord<R>> {
+public interface DeletableModel<M extends Model, E, R extends UpdatableRecord<R>> {
 
   /**
    * Validates the deletion process for this model and exports all errors found.
@@ -41,7 +43,7 @@ public interface DeletableModel<E, R extends UpdatableRecord<R>> {
    *
    * @return a {@link List} containing the {@link ModelAction} instances to perform before the deletion of this model.
    */
-  default List<ModelAction> getPreDeletionActions(final DSLContext dslContext) {
+  default List<ModelAction<M>> getPreDeletionActions(final DSLContext dslContext) {
     return Collections.emptyList();
   }
 
@@ -52,7 +54,7 @@ public interface DeletableModel<E, R extends UpdatableRecord<R>> {
    *
    * @return a {@link List} containing the {@link ModelAction} instances to perform after the deletion of this model.
    */
-  default List<ModelAction> getPostDeletionActions(final DSLContext dslContext) {
+  default List<ModelAction<M>> getPostDeletionActions(final DSLContext dslContext) {
     return Collections.emptyList();
   }
 

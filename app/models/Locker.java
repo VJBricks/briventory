@@ -14,9 +14,9 @@ import repositories.LockerSizesRepository;
 import static jooq.Tables.LOCKER;
 
 public final class Locker extends Model implements
-    PersistableModel1<LockerRecord>,
+    PersistableModel1<Locker, LockerRecord>,
     ValidatableModel<ValidationError>,
-    DeletableModel<ValidationError, LockerRecord> {
+    DeletableModel<Locker, ValidationError, LockerRecord> {
 
   // *******************************************************************************************************************
   // Attributes

@@ -5,12 +5,7 @@ import models.Container;
 import models.Locker;
 import org.jooq.DSLContext;
 import org.jooq.Record3;
-import orm.DeleteAction;
-import orm.ManyModelsLoader;
-import orm.Mapper;
-import orm.ModelAction;
-import orm.PersistAction1;
-import orm.Repository;
+import orm.*;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -53,11 +48,11 @@ public final class LockersRepository extends Repository<Locker> {
     return createManyModelsLoader(container,
                                   this::findAll,
                                   (dslContext, c, lockers) -> {
-                                    final List<ModelAction> actions = new LinkedList<>();
+                                    final List<Action> actions = new LinkedList<>();
                                     List<Locker> dbLockers = findAll(dslContext, c);
                                     dbLockers.removeAll(lockers);
-                                    actions.add(new DeleteAction<>(dbLockers));
-                                    actions.add(new PersistAction1<>(lockers));
+                                    actions.add(new DeleteAction<>(this, dbLockers));
+                                    actions.add(new PersistAction1<>(this, lockers));
                                     return actions;
                                   });
   }

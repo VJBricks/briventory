@@ -1,6 +1,5 @@
 package models;
 
-import jooq.tables.records.AdministratorRecord;
 import jooq.tables.records.LockedAccountRecord;
 import org.jooq.DSLContext;
 import orm.Mapper;
@@ -16,16 +15,16 @@ import static jooq.Tables.LOCKED_ACCOUNT;
  * {@code LockedAccount} represents the week entity, identifying that the corresponding {@link models.Account} is
  * locked.
  */
-public final class LockedAccount extends Model implements PersistableModel1<LockedAccountRecord>,
-                                                              ValidatableModel<ValidationError>,
-                                                              DeletableModel<ValidationError, LockedAccountRecord> {
+public final class LockedAccount extends Model implements PersistableModel1<LockedAccount, LockedAccountRecord>,
+    ValidatableModel<ValidationError>,
+    DeletableModel<LockedAccount, ValidationError, LockedAccountRecord> {
 
   // *******************************************************************************************************************
   // Instance factory
   // *******************************************************************************************************************
   /**
    * the {@link Mapper} that will create an instance of {@link Administrator} from an instance of
-   * {@link AdministratorRecord}.
+   * {@link LockedAccountRecord}.
    */
   public static final Mapper<LockedAccountRecord, LockedAccount> LOCKED_ACCOUNT_MAPPER =
       lockedAccountRecord -> new LockedAccount(lockedAccountRecord.getIdAccount());

@@ -10,15 +10,15 @@ import java.util.function.BiFunction;
 public class OptionalModelLoader<K, M extends Model> extends LazyLoader<K, Optional<M>> {
   OptionalModelLoader(final PersistenceContext persistenceContext,
                       final BiFunction<DSLContext, K, Optional<M>> fetcher,
-                      final Function3<DSLContext, K, Optional<M>, List<ModelAction>> modelActionsCreator) {
-    super(persistenceContext, fetcher, modelActionsCreator);
+                      final Function3<DSLContext, K, Optional<M>, List<Action>> actionsCreator) {
+    super(persistenceContext, fetcher, actionsCreator);
   }
 
   OptionalModelLoader(final PersistenceContext persistenceContext,
                       final K key,
                       final BiFunction<DSLContext, K, Optional<M>> fetcher,
-                      final Function3<DSLContext, K, Optional<M>, List<ModelAction>> modelActionsCreator) {
-    super(persistenceContext, key, fetcher, modelActionsCreator);
+                      final Function3<DSLContext, K, Optional<M>, List<Action>> actionsCreator) {
+    super(persistenceContext, key, fetcher, actionsCreator);
   }
 
 }

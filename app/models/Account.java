@@ -4,22 +4,12 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import jooq.tables.records.AccountRecord;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.jooq.DSLContext;
-import orm.Mapper;
-import orm.Model;
-import orm.ModelAction;
-import orm.ModelActions;
-import orm.OptionalModelLoader;
-import orm.RecordLoader;
-import orm.RepositoriesHandler;
+import orm.*;
 import orm.models.DeletableModel;
 import orm.models.PersistableModel1;
 import orm.models.ValidatableModel;
 import play.data.validation.ValidationError;
-import repositories.AccountsRepository;
-import repositories.BrickLinkTokensRepository;
-import repositories.BrickSetTokensRepository;
-import repositories.ColorsSourcesRepository;
-import repositories.RebrickableTokensRepository;
+import repositories.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,9 +19,11 @@ import java.util.Optional;
 import static jooq.Tables.ACCOUNT;
 
 /** The {@code Account} class is the representation of the table {@code account} in the <em>Briventory</em> database. */
-public final class Account extends Model implements PersistableModel1<AccountRecord>,
+public final class Account
+    extends Model
+    implements PersistableModel1<Account, AccountRecord>,
     ValidatableModel<ValidationError>,
-    DeletableModel<ValidationError, AccountRecord> {
+    DeletableModel<Account, ValidationError, AccountRecord> {
 
   // *******************************************************************************************************************
   // Instance factory
@@ -209,15 +201,15 @@ public final class Account extends Model implements PersistableModel1<AccountRec
   // *******************************************************************************************************************
 
   /**
-   * Creates all {@link ModelAction} that will be performed after the persistence of the model.
+   * Creates all {@link orm.ModelAction} that will be performed after the persistence of the model.
    *
    * @param dslContext the {@link DSLContext}.
    *
-   * @return a {@link List} of {@link ModelAction} instances. By default, this method returns an empty list.
+   * @return a {@link List} of {@link orm.ModelAction} instances. By default, this method returns an empty list.
    */
   @Override
-  public List<ModelAction> getPostPersistenceActions(final DSLContext dslContext) {
-    final List<ModelAction> actions = new LinkedList<>();
+  public List<Action> getPostPersistenceActions(final DSLContext dslContext) {
+    final List<Action> actions = new LinkedList<>();
 
     actions.addAll(ModelActions.fromLazyLoader(dslContext, administratorLoader));
     actions.addAll(ModelActions.fromLazyLoader(dslContext, isLockedLoader));

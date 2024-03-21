@@ -54,7 +54,7 @@ class ContainerTypeTest extends J5WithApplication {
   @Test
   void containerTypesAdditionAndRemoval() {
     assertDoesNotThrow(() -> {
-      assertEquals(0, containerTypesRepository.getContainerTypes().size());
+      assertEquals(0, containerTypesRepository.getAll().size());
 
       final ContainerType stanleySmall = new ContainerType("Stanley small lockers",
                                                            (short) 1,
@@ -62,7 +62,7 @@ class ContainerTypeTest extends J5WithApplication {
                                                            "%04d");
       containerTypesRepository.persist(stanleySmall);
 
-      assertEquals(1, containerTypesRepository.getContainerTypes().size());
+      assertEquals(1, containerTypesRepository.getAll().size());
 
       final ContainerType stanleyBig = new ContainerType("Stanley big lockers",
                                                          (short) 1,
@@ -70,7 +70,7 @@ class ContainerTypeTest extends J5WithApplication {
                                                          "%04d");
       containerTypesRepository.persist(stanleyBig);
 
-      assertEquals(2, containerTypesRepository.getContainerTypes().size());
+      assertEquals(2, containerTypesRepository.getAll().size());
 
       final ContainerType rothoClearBox = new ContainerType("Rotho Clear Box",
                                                             (short) 3,
@@ -78,12 +78,12 @@ class ContainerTypeTest extends J5WithApplication {
                                                             "Box%03d");
       containerTypesRepository.persist(rothoClearBox);
 
-      assertEquals(3, containerTypesRepository.getContainerTypes().size());
+      assertEquals(3, containerTypesRepository.getAll().size());
 
-      for (ContainerType containerType : containerTypesRepository.getContainerTypes())
+      for (ContainerType containerType : containerTypesRepository.getAll())
         containerTypesRepository.delete(containerType);
 
-      assertEquals(0, containerTypesRepository.getContainerTypes().size());
+      assertEquals(0, containerTypesRepository.getAll().size());
     });
   }
 

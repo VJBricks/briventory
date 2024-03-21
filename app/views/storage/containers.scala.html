@@ -1,6 +1,20 @@
-@this(signedin: templates.signedin)
-@(account: Account)(implicit messages: play.i18n.Messages)
+@(containers: List[Container])(implicit messages: play.i18n.Messages)
 
-@signedin(title = messages("storage.containers.title"), account) {
-
-}
+<table class="table">
+  <thead>
+    <tr>
+      <th>@messages.at("storage.container.name.title")</th>
+      <th>@messages.at("storage.container.type.title")</th>
+      <th>@messages.at("table.actions.title")</th>
+    </tr>
+  </thead>
+  <tbody>
+  @for(container <- containers) {
+    <tr>
+      <td>container.getName()</td>
+      <td>container.getContainerType().getName()</td>
+      <td></td>
+    </tr>
+  }
+  </tbody>
+</table>

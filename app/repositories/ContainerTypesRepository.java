@@ -15,6 +15,7 @@ import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 
+import static jooq.Tables.CONTAINER;
 import static jooq.Tables.CONTAINER_TYPE;
 
 @Singleton
@@ -54,35 +55,9 @@ public final class ContainerTypesRepository extends Repository<ContainerType> {
 
   /** @return the {@link ModelLoader} to lazy load a {@link ContainerType} instance. */
   public ModelLoader<Long, ContainerType> createModelLoader() {
-    return createModelLoader(this::findContainerTypeById,
+    return createModelLoader(this::findById,
                              (dslContext, idContainer, containerType) -> Collections.singletonList(
-                                 new PersistAction1<>(containerType)));
-  }
-
-  // *******************************************************************************************************************
-  // General Data Retrieval
-  // *******************************************************************************************************************
-
-  /** @return all {@link ContainerType} instances that are stored in the database. */
-  public List<ContainerType> getContainerTypes() {
-    return fetch(CONTAINER_TYPE_MAPPER, dslContext -> dslContext.selectFrom(CONTAINER_TYPE));
-  }
-
-  /**
-   * find the {@link ContainerType} corresponding to the identifier given.
-   *
-   * @param dslContext the {@link DSLContext}.
-   * @param id the identifier of the {@link ContainerType} to find.
-   *
-   * @return the instance of {@link ContainerType} corresponding to the identifier given, or {@code null} if the
-   * identifier does not correspond to any container type.
-   */
-  private ContainerType findContainerTypeById(final DSLContext dslContext, final Long id) {
-    if (id == null) return null;
-    return fetchOne(CONTAINER_TYPE_MAPPER,
-                    dslContext,
-                    ctx -> ctx.selectFrom(CONTAINER_TYPE)
-                              .where(CONTAINER_TYPE.ID.eq(id)));
+                                 new PersistAction1<>(this, containerType)));
   }
 
   // *******************************************************************************************************************
@@ -112,6 +87,42 @@ public final class ContainerTypesRepository extends Repository<ContainerType> {
    */
   public List<ValidationError> validate(final ContainerType containerType) {
     return super.validate(containerType);
+  }
+
+  // *******************************************************************************************************************
+  // General Data Retrieval
+  // *******************************************************************************************************************
+
+  /** @return all {@link ContainerType} instances that are stored in the database. */
+  public List<ContainerType> getAll() {
+    return fetch(CONTAINER_TYPE_MAPPER, dslContext -> dslContext.selectFrom(CONTAINER_TYPE));
+  }
+
+  /**
+   * find the {@link ContainerType} corresponding to the identifier given.
+   *
+   * @param dslContext the {@link DSLContext}.
+   * @param id the identifier of the {@link ContainerType} to find.
+   *
+   * @return the instance of {@link ContainerType} corresponding to the identifier given, or {@code null} if the
+   * identifier does not correspond to any container type.
+   */
+  private ContainerType findById(final DSLContext dslContext, final Long id) {
+    if (id == null) return null;
+    return fetchOne(CONTAINER_TYPE_MAPPER,
+                    dslContext,
+                    ctx -> ctx.selectFrom(CONTAINER_TYPE)
+                              .where(CONTAINER_TYPE.ID.eq(id)));
+  }
+
+  /** @return all {@link ContainerType} instances that are not used by any {@link models.Container}. */
+  public List<ContainerType> getUnused() {
+    return fetch(CONTAINER_TYPE_MAPPER, dslContext ->
+        dslContext.select(CONTAINER_TYPE.asterisk())
+                  .from(CONTAINER_TYPE)
+                  .leftJoin(CONTAINER).on(CONTAINER_TYPE.ID.eq(CONTAINER.ID_CONTAINER_TYPE))
+                  .where(CONTAINER.ID_CONTAINER_TYPE.isNull())
+                  .coerce(CONTAINER_TYPE));
   }
 
 }

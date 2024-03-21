@@ -14,9 +14,9 @@ import java.util.List;
 
 import static jooq.Tables.CONTAINER_TYPE;
 
-public final class ContainerType extends Model implements PersistableModel1<ContainerTypeRecord>,
-                                                              ValidatableModel<ValidationError>,
-                                                              DeletableModel<ValidationError, ContainerTypeRecord> {
+public final class ContainerType extends Model implements PersistableModel1<ContainerType, ContainerTypeRecord>,
+    ValidatableModel<ValidationError>,
+    DeletableModel<ContainerType, ValidationError, ContainerTypeRecord> {
 
   // *******************************************************************************************************************
   // Attributes

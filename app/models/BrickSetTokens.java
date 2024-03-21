@@ -18,9 +18,9 @@ import static jooq.Tables.BRICKSET_TOKENS;
  * The {@code BricksetTokens} class is the representation of the table {@code brickset_tokens} in the
  * <em>Briventory</em> database.
  */
-public final class BrickSetTokens extends Model implements PersistableModel1<BricksetTokensRecord>,
+public final class BrickSetTokens extends Model implements PersistableModel1<BrickSetTokens, BricksetTokensRecord>,
     ValidatableModel<ValidationError>,
-    DeletableModel<ValidationError, BricksetTokensRecord> {
+    DeletableModel<BrickSetTokens, ValidationError, BricksetTokensRecord> {
 
   // *******************************************************************************************************************
   // Instance factory

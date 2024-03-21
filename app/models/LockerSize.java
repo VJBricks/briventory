@@ -15,7 +15,7 @@ import static jooq.Tables.LOCKER_SIZE;
  * share the same size.
  */
 public final class LockerSize extends Model
-    implements PersistableModel1<LockerSizeRecord>, ValidatableModel<ValidationError> {
+    implements PersistableModel1<LockerSize, LockerSizeRecord>, ValidatableModel<ValidationError> {
 
   // *******************************************************************************************************************
   // Instance factory

@@ -3,6 +3,7 @@ package repositories;
 import com.google.inject.Inject;
 import database.BriventoryDB;
 import models.Locker;
+import models.PrivateContainer;
 import models.SharedContainer;
 import org.jooq.DSLContext;
 import org.jooq.Record3;
@@ -35,7 +36,7 @@ public final class SharedContainersRepository extends Repository<SharedContainer
   // Queries
   // *******************************************************************************************************************
   Tuple2<Mapper<Record3<Long, Long, List<Locker>>, SharedContainer>,
-            ResultQuery<Record3<Long, Long, List<Locker>>>> getSharedContainersQuery(
+      ResultQuery<Record3<Long, Long, List<Locker>>>> getSharedContainersQuery(
       final DSLContext dslContext) {
     return Tuple.tuple(SHARED_CONTAINER_MAPPER,
                        dslContext.select(CONTAINER.ID,
@@ -45,13 +46,37 @@ public final class SharedContainersRepository extends Repository<SharedContainer
                                  .innerJoin(SHARED_CONTAINER).on(CONTAINER.ID.eq(SHARED_CONTAINER.ID_CONTAINER)));
   }
 
+  Tuple2<Mapper<Record3<Long, Long, List<Locker>>, SharedContainer>,
+      ResultQuery<Record3<Long, Long, List<Locker>>>> getSharedContainersQuery(
+      final DSLContext dslContext,
+      final boolean alsoSharedContainers,
+      final Long idContainerType,
+      final Long idLockerSize) {
+    return Tuple.tuple(SHARED_CONTAINER_MAPPER,
+                       dslContext.select(CONTAINER.ID,
+                                         CONTAINER.ID_CONTAINER_TYPE,
+                                         inline((List<Locker>) null).as(LOCKER_ALIAS))
+                                 .from(CONTAINER)
+                                 .innerJoin(SHARED_CONTAINER).on(CONTAINER.ID.eq(SHARED_CONTAINER.ID_CONTAINER))
+                                 .innerJoin(CONTAINER_COMPOSITION)
+                                 .on(CONTAINER.ID.eq(CONTAINER_COMPOSITION.ID_CONTAINER))
+                                 .innerJoin(LOCKER).on(CONTAINER_COMPOSITION.ID_LOCKER.eq(LOCKER.ID))
+                                 .where(condition(inline(alsoSharedContainers)))
+                                 .and(condition(coalesce(
+                                     field(CONTAINER.ID_CONTAINER_TYPE.eq(idContainerType)),
+                                     true)))
+                                 .and(condition(coalesce(
+                                     field(LOCKER.ID_LOCKER_SIZE.eq(idLockerSize)),
+                                     true))));
+  }
+
   public List<SharedContainer> getSharedContainers() {
     return fetch(this::getSharedContainersQuery);
   }
 
   Tuple2<Mapper<Record3<Long, Long, List<Locker>>,
-                   SharedContainer>,
-            ResultQuery<Record3<Long, Long, List<Locker>>>> getSharedContainersWithLockersQuery(
+      SharedContainer>,
+      ResultQuery<Record3<Long, Long, List<Locker>>>> getSharedContainersWithLockersQuery(
       final DSLContext dslContext) {
     return Tuple.tuple(SHARED_CONTAINER_MAPPER,
                        dslContext.select(CONTAINER.ID,
@@ -77,7 +102,12 @@ public final class SharedContainersRepository extends Repository<SharedContainer
     super.persist(sharedContainer);
   }
 
-  public void delete(final SharedContainer sharedContainer) {
-    super.deleteInTransaction(sharedContainer);
+  // *******************************************************************************************************************
+  // Migration
+  // *******************************************************************************************************************
+  public SharedContainer migrate(final PrivateContainer privateContainer) {
+    return migrate(privateContainer::createRecord2,
+                   new SharedContainer(privateContainer));
   }
+
 }

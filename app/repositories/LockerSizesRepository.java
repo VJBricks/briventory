@@ -10,7 +10,9 @@ import orm.Repository;
 
 import javax.inject.Singleton;
 import java.util.Collections;
+import java.util.List;
 
+import static jooq.Tables.LOCKER;
 import static jooq.tables.LockerSize.LOCKER_SIZE;
 import static models.LockerSize.LOCKER_SIZE_MAPPER;
 
@@ -33,7 +35,7 @@ public final class LockerSizesRepository extends Repository<LockerSize> {
   public ModelLoader<Long, LockerSize> createModelLoader() {
     return createModelLoader(this::findById,
                              (dslContext, idLocker, lockerSize) -> Collections.singletonList(
-                                 new PersistAction1<>(lockerSize)));
+                                 new PersistAction1<>(this, lockerSize)));
   }
 
   // *******************************************************************************************************************
@@ -54,6 +56,21 @@ public final class LockerSizesRepository extends Repository<LockerSize> {
                     dslContext,
                     ctx -> ctx.selectFrom(LOCKER_SIZE)
                               .where(LOCKER_SIZE.ID.eq(id)));
+  }
+
+  /** @return all {@link LockerSize} instances that are stored in the database. */
+  public List<LockerSize> getAll() {
+    return fetch(LOCKER_SIZE_MAPPER, dslContext -> dslContext.selectFrom(LOCKER_SIZE));
+  }
+
+  /** @return all {@link LockerSize} instances that are not used by any {@link models.Locker}. */
+  public List<LockerSize> getUnused() {
+    return fetch(LOCKER_SIZE_MAPPER, dslContext ->
+        dslContext.select(LOCKER_SIZE.asterisk())
+                  .from(LOCKER_SIZE)
+                  .leftJoin(LOCKER).on(LOCKER_SIZE.ID.eq(LOCKER.ID_LOCKER_SIZE))
+                  .where(LOCKER.ID_LOCKER_SIZE.isNull())
+                  .coerce(LOCKER_SIZE));
   }
 
 }

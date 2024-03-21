@@ -39,10 +39,9 @@ public abstract class LazyLoader<K, V> {
   /** The {@link BiFunction} that will perform the data fetch. */
   private final BiFunction<DSLContext, K, V> fetcher;
   /**
-   * The function that will produce the corresponding {@link ModelAction} instances, depending on the key and the
-   * value.
+   * The function that will produce the corresponding {@link Action} instances, depending on the key and the value.
    */
-  private final Function3<DSLContext, K, V, List<ModelAction>> modelActionsCreator;
+  private final Function3<DSLContext, K, V, List<Action>> actionsCreator;
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -53,15 +52,15 @@ public abstract class LazyLoader<K, V> {
    *
    * @param persistenceContext the {@link PersistenceContext}.
    * @param fetcher the {@link BiFunction} that will perform the data fetch.
-   * @param modelActionsCreator the {@link Function3} that will return a {@link List} of {@link ModelAction} instances,
-   * that will be executed during the persistence process.
+   * @param actionsCreator the {@link Function3} that will return a {@link List} of {@link Action} instances, that will
+   * be executed during the persistence process.
    */
   protected LazyLoader(final PersistenceContext persistenceContext,
                        final BiFunction<DSLContext, K, V> fetcher,
-                       final Function3<DSLContext, K, V, List<ModelAction>> modelActionsCreator) {
+                       final Function3<DSLContext, K, V, List<Action>> actionsCreator) {
     this.persistenceContext = persistenceContext;
     this.fetcher = fetcher;
-    this.modelActionsCreator = modelActionsCreator;
+    this.actionsCreator = actionsCreator;
   }
 
   /**
@@ -70,14 +69,14 @@ public abstract class LazyLoader<K, V> {
    * @param persistenceContext the {@link PersistenceContext}.
    * @param key the key.
    * @param fetcher the {@link BiFunction} that will perform the data fetch.
-   * @param modelActionsCreator the {@link Function3} that will return a {@link List} of {@link ModelAction} instances,
-   * that will be executed during the persistence process.
+   * @param actionsCreator the {@link Function3} that will return a {@link List} of {@link Action} instances, that will
+   * be executed during the persistence process.
    */
   protected LazyLoader(final PersistenceContext persistenceContext,
                        final K key,
                        final BiFunction<DSLContext, K, V> fetcher,
-                       final Function3<DSLContext, K, V, List<ModelAction>> modelActionsCreator) {
-    this(persistenceContext, fetcher, modelActionsCreator);
+                       final Function3<DSLContext, K, V, List<Action>> actionsCreator) {
+    this(persistenceContext, fetcher, actionsCreator);
     this.key = key;
   }
 
@@ -86,15 +85,15 @@ public abstract class LazyLoader<K, V> {
   // *******************************************************************************************************************
 
   /**
-   * Creates the corresponding {@link ModelAction} to be executed during the persistence or the deletion process.
+   * Creates the corresponding {@link Action} to be executed during the persistence or the deletion process.
    *
    * @param dslContext the {@link DSLContext}.
    *
-   * @return a {@link List} of {@link ModelAction} instances.
+   * @return a {@link List} of {@link Action} instances.
    */
-  final List<ModelAction> createModelActions(final DSLContext dslContext) {
+  final List<Action> createActions(final DSLContext dslContext) {
     if (isFetched() && hasChanged(dslContext))
-      return modelActionsCreator.apply(dslContext, getKey(), getValue());
+      return actionsCreator.apply(dslContext, getKey(), getValue());
     return Collections.emptyList();
   }
 

@@ -20,6 +20,7 @@ import play.mvc.Result;
 import play.mvc.Security;
 import play.routing.JavaScriptReverseRouter;
 import repositories.AccountsRepository;
+import views.html.accounts.*;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -51,11 +52,11 @@ public final class AccountsController extends Controller {
   // Injected Templates
   // *******************************************************************************************************************
 
-  /** The {@link views.html.accounts.settings } template. */
-  private final views.html.accounts.settings settings;
+  /** The {@link settings } template. */
+  private final settings settings;
 
-  /** The {@link views.html.accounts.activity } template. */
-  private final views.html.accounts.activity activity;
+  /** The {@link activity } template. */
+  private final activity activity;
 
   // *******************************************************************************************************************
   // Construction & Initialization
@@ -69,8 +70,8 @@ public final class AccountsController extends Controller {
    * @param errorsController the {@link ErrorsController} instance.
    * @param formFactory the {@link FormFactory} instance.
    * @param accountsRepository the {@link AccountsRepository} instance.
-   * @param settings the {@link views.html.accounts.settings} template.
-   * @param activity the {@link views.html.accounts.activity} template.
+   * @param settings the {@link settings} template.
+   * @param activity the {@link activity} template.
    */
   @Inject
   public AccountsController(final MessagesApi messagesApi,
@@ -78,8 +79,8 @@ public final class AccountsController extends Controller {
                             final ErrorsController errorsController,
                             final FormFactory formFactory,
                             final AccountsRepository accountsRepository,
-                            final views.html.accounts.settings settings,
-                            final views.html.accounts.activity activity) {
+                            final settings settings,
+                            final activity activity) {
     this.messagesApi = messagesApi;
     this.sessionHelper = sessionHelper;
     this.errorsController = errorsController;
@@ -121,7 +122,7 @@ public final class AccountsController extends Controller {
    *
    * @param request the {@link Http.Request}.
    *
-   * @return the {@link views.html.accounts.activity} page.
+   * @return the {@link activity} page.
    */
   public Result activity(final Http.Request request) {
     final Optional<Account> accountOptional = sessionHelper.retrieveAccount(request);
@@ -162,7 +163,7 @@ public final class AccountsController extends Controller {
    *
    * @param request the {@link Http.Request}.
    *
-   * @return the {@link views.html.accounts.settings} page.
+   * @return the {@link settings} page.
    */
   public Result settings(final Http.Request request) {
     final Optional<Account> optionalAccount = sessionHelper.retrieveAccount(request);
@@ -224,9 +225,9 @@ public final class AccountsController extends Controller {
       if (!emailForm.hasErrors() && account.getId().equals(emailForm.get().getIdAccount())) {
         account.setEmail(emailForm.get().getEmail());
         accountsRepository.persist(account);
-        return ok(views.html.accounts.emailCard.render(emailForm, request, preferred));
+        return ok(emailCard.render(emailForm, request, preferred));
       }
-      return badRequest(views.html.accounts.emailCard.render(emailForm, request, preferred));
+      return badRequest(emailCard.render(emailForm, request, preferred));
     }
     return errorsController.forbidden(request);
   }
@@ -250,9 +251,9 @@ public final class AccountsController extends Controller {
         account.setFirstname(nameForm.get().getFirstname());
         account.setLastname(nameForm.get().getLastname());
         accountsRepository.persist(account);
-        return ok(views.html.accounts.nameCard.render(nameForm, request, preferred));
+        return ok(nameCard.render(nameForm, request, preferred));
       }
-      return badRequest(views.html.accounts.nameCard.render(nameForm, request, preferred));
+      return badRequest(nameCard.render(nameForm, request, preferred));
     }
     return errorsController.forbidden(request);
   }
@@ -275,9 +276,9 @@ public final class AccountsController extends Controller {
       if (!credentialsForm.hasErrors() && account.getId().equals(credentialsForm.get().getIdAccount())) {
         account.setClearPassword(credentialsForm.get().getNewPassword());
         accountsRepository.persist(account);
-        return ok(views.html.accounts.credentialsCard.render(credentialsForm, request, preferred));
+        return ok(credentialsCard.render(credentialsForm, request, preferred));
       }
-      return badRequest(views.html.accounts.credentialsCard.render(credentialsForm, request, preferred));
+      return badRequest(credentialsCard.render(credentialsForm, request, preferred));
     }
     return errorsController.forbidden(request);
   }
@@ -307,9 +308,9 @@ public final class AccountsController extends Controller {
                                                        form.getTokenSecret()));
         accountsRepository.persist(account);
         brickLinkTokensForm.get().setAsFilled();
-        return ok(views.html.accounts.brickLinkTokensCard.render(brickLinkTokensForm, request, preferred));
+        return ok(brickLinkTokensCard.render(brickLinkTokensForm, request, preferred));
       }
-      return badRequest(views.html.accounts.brickLinkTokensCard.render(brickLinkTokensForm, request, preferred));
+      return badRequest(brickLinkTokensCard.render(brickLinkTokensForm, request, preferred));
     }
     return errorsController.forbidden(request);
   }
@@ -329,9 +330,9 @@ public final class AccountsController extends Controller {
       final Account account = optionalAccount.get();
       account.clearBrickLinkTokens();
       accountsRepository.persist(account);
-      return ok(views.html.accounts.brickLinkTokensCard.render(formFactory.form(BrickLinkTokensForm.class),
-                                                               request,
-                                                               preferred));
+      return ok(brickLinkTokensCard.render(formFactory.form(BrickLinkTokensForm.class),
+                                           request,
+                                           preferred));
     }
     return errorsController.forbidden(request);
   }
@@ -360,9 +361,9 @@ public final class AccountsController extends Controller {
                                                      form.getPassword()));
         accountsRepository.persist(account);
         brickSetTokensForm.get().setAsFilled();
-        return ok(views.html.accounts.brickSetTokensCard.render(brickSetTokensForm, request, preferred));
+        return ok(brickSetTokensCard.render(brickSetTokensForm, request, preferred));
       }
-      return badRequest(views.html.accounts.brickSetTokensCard.render(brickSetTokensForm, request, preferred));
+      return badRequest(brickSetTokensCard.render(brickSetTokensForm, request, preferred));
     }
     return errorsController.forbidden(request);
   }
@@ -382,9 +383,9 @@ public final class AccountsController extends Controller {
       final Account account = optionalAccount.get();
       account.clearBrickSetTokens();
       accountsRepository.persist(account);
-      return ok(views.html.accounts.brickSetTokensCard.render(formFactory.form(BrickSetTokensForm.class),
-                                                              request,
-                                                              preferred));
+      return ok(brickSetTokensCard.render(formFactory.form(BrickSetTokensForm.class),
+                                          request,
+                                          preferred));
     }
     return errorsController.forbidden(request);
   }
@@ -411,9 +412,9 @@ public final class AccountsController extends Controller {
                                                            form.getKey()));
         accountsRepository.persist(account);
         rebrickableTokensForm.get().setAsFilled();
-        return ok(views.html.accounts.rebrickableTokensCard.render(rebrickableTokensForm, request, preferred));
+        return ok(rebrickableTokensCard.render(rebrickableTokensForm, request, preferred));
       }
-      return badRequest(views.html.accounts.rebrickableTokensCard.render(rebrickableTokensForm, request, preferred));
+      return badRequest(rebrickableTokensCard.render(rebrickableTokensForm, request, preferred));
     }
     return errorsController.forbidden(request);
   }
@@ -433,9 +434,9 @@ public final class AccountsController extends Controller {
       final Account account = optionalAccount.get();
       account.clearRebrickableTokens();
       accountsRepository.persist(account);
-      return ok(views.html.accounts.rebrickableTokensCard.render(formFactory.form(RebrickableTokensForm.class),
-                                                                 request,
-                                                                 preferred));
+      return ok(rebrickableTokensCard.render(formFactory.form(RebrickableTokensForm.class),
+                                             request,
+                                             preferred));
     }
     return errorsController.forbidden(request);
   }

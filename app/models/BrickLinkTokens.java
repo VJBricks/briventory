@@ -23,8 +23,8 @@ import static jooq.Tables.BRICKLINK_TOKENS;
  * obtained from <a href="https://www.bricklink.com/v2/api/register_consumer.page">BrickLink</a>.
  * </p>
  */
-public final class BrickLinkTokens extends Model implements PersistableModel1<BricklinkTokensRecord>,
-    ValidatableModel<ValidationError>, DeletableModel<ValidationError, BricklinkTokensRecord> {
+public final class BrickLinkTokens extends Model implements PersistableModel1<BrickLinkTokens, BricklinkTokensRecord>,
+    ValidatableModel<ValidationError>, DeletableModel<BrickLinkTokens, ValidationError, BricklinkTokensRecord> {
 
   // *******************************************************************************************************************
   // Instance factory

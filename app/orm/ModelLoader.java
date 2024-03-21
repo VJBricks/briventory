@@ -13,16 +13,16 @@ public final class ModelLoader<K, M extends Model> extends LazyLoader<K, M> {
   // *******************************************************************************************************************
   ModelLoader(final PersistenceContext persistenceContext,
               final BiFunction<DSLContext, K, M> fetcher,
-              final Function3<DSLContext, K, M, List<ModelAction>> modelActionsCreator
+              final Function3<DSLContext, K, M, List<Action>> actionsCreator
   ) {
-    super(persistenceContext, fetcher, modelActionsCreator);
+    super(persistenceContext, fetcher, actionsCreator);
   }
 
   ModelLoader(final PersistenceContext persistenceContext,
               final K key,
               final BiFunction<DSLContext, K, M> fetcher,
-              final Function3<DSLContext, K, M, List<ModelAction>> modelActionsCreator) {
-    super(persistenceContext, key, fetcher, modelActionsCreator);
+              final Function3<DSLContext, K, M, List<Action>> actionsCreator) {
+    super(persistenceContext, key, fetcher, actionsCreator);
   }
 
 }

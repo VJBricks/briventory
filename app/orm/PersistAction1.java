@@ -11,12 +11,16 @@ import java.util.List;
 /**
  * {@code PersistAction1} is aims to handle the persistance of a {@link PersistableModel1}.
  *
+ * @param <M> the specific {@link Model}.
  * @param <P> the specific type handled, extending {@link PersistableModel1} and {@link ValidatableModel}.
  * @param <R> the specific type handled, extending {@link UpdatableRecord}.
  * @param <V> the type of the validation errors.
  */
-public final class PersistAction1<V, R extends UpdatableRecord<R>, P extends PersistableModel1<R> & ValidatableModel<V>>
-    extends ModelAction {
+public final class PersistAction1<M extends Model,
+    V,
+    R extends UpdatableRecord<R>,
+    P extends PersistableModel1<M, R> & ValidatableModel<V>>
+    extends ModelAction<M> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -31,18 +35,22 @@ public final class PersistAction1<V, R extends UpdatableRecord<R>, P extends Per
   /**
    * Creates a new instance of {@link orm.PersistAction1}.
    *
+   * @param repository the corresponding {@link Repository} that will handle the persistence.
    * @param persistableModels the {@link List} of instances of {@link P} to persist.
    */
-  public PersistAction1(final List<P> persistableModels) {
+  public PersistAction1(final Repository<M> repository, final List<P> persistableModels) {
+    super(repository);
     this.persistableModels = persistableModels;
   }
 
   /**
    * Creates a new instance of {@link PersistAction1}.
    *
+   * @param repository the corresponding {@link Repository} that will handle the persistence.
    * @param persistableModel the instance of {@link P} to persist.
    */
-  public PersistAction1(final P persistableModel) {
+  public PersistAction1(final Repository<M> repository, final P persistableModel) {
+    super(repository);
     this.persistableModels = Collections.singletonList(persistableModel);
   }
 
@@ -52,9 +60,9 @@ public final class PersistAction1<V, R extends UpdatableRecord<R>, P extends Per
 
   /** {@inheritDoc} */
   @Override
-  void perform(final PersistenceContext persistenceContext, final DSLContext dslContext) {
+  void perform(final DSLContext dslContext) {
     for (P persistableModel : persistableModels)
-      persistenceContext.persist(dslContext, persistableModel);
+      getRepository().persist(dslContext, persistableModel);
   }
 
 }

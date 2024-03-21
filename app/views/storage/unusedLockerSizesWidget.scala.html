@@ -1,0 +1,24 @@
+@(account: Account, unusedLockerSizes: List[LockerSize])(implicit messages: play.i18n.Messages)
+
+@if(account.isAdministrator && unusedLockerSizes.nonEmpty) {
+  <div class="dropdown" id="unused-locker-sizes-dropdown">
+    <button type="button" id="unused-locker-sizes-toggle" class="btn btn-secondary dropdown-toggle mb-1" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="false">
+      @messages.at("storage.delete.unusedSizes.label")
+    </button>
+    <div class="dropdown-menu p-4 text-muted dropdown-menu-end" style="max-width: 70vw">
+      <p class="mb-3">@messages.at("storage.unusedSizes.explain")</p>
+      <ul>
+      @for(unused <- unusedLockerSizes) {
+        <li class="m-2">unused.getName()</li>
+      }
+      </ul>
+      <button type="button" class="btn btn-danger" onclick="deleteUnusedLockerSizes()">@messages.at("button.delete.caption")</button>
+    </div>
+  </div>
+
+  <script>
+    function deleteUnusedLockerSizes() {
+        alert("delete");
+    }
+  </script>
+}

@@ -9,7 +9,7 @@ import org.jooq.UpdatableRecord;
  *
  * @param <R> the specific type handled, extending {@link UpdatableRecord}.
  */
-public final class DeleteRecordAction<R extends UpdatableRecord<R>> extends ModelAction {
+public final class DeleteRecordAction<R extends UpdatableRecord<R>> extends Action {
 
   // *******************************************************************************************************************
   // Attributes
@@ -36,7 +36,7 @@ public final class DeleteRecordAction<R extends UpdatableRecord<R>> extends Mode
 
   /** {@inheritDoc} */
   @Override
-  void perform(final PersistenceContext persistenceContext, final DSLContext dslContext) {
+  void perform(final DSLContext dslContext) {
     dslContext.executeDelete(updatableRecord);
   }
 

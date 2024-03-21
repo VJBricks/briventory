@@ -13,7 +13,7 @@ import static jooq.Tables.SHARED_CONTAINER;
 
 public final class SharedContainer
     extends Container
-    implements PersistableModel2<ContainerRecord, SharedContainerRecord> {
+    implements PersistableModel2<SharedContainer, ContainerRecord, SharedContainerRecord> {
 
   // *******************************************************************************************************************
   // Instance factory
@@ -46,7 +46,7 @@ public final class SharedContainer
   }
 
   // *******************************************************************************************************************
-  // PersistableModel1 Overrides
+  // PersistableModel2 Overrides
   // *******************************************************************************************************************
 
   @Override

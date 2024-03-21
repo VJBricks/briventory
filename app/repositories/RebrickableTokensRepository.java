@@ -5,11 +5,7 @@ import jooq.tables.records.RebrickableTokensRecord;
 import models.Account;
 import models.RebrickableTokens;
 import org.jooq.DSLContext;
-import orm.DeleteRecordAction;
-import orm.ModelAction;
-import orm.OptionalModelLoader;
-import orm.PersistAction1;
-import orm.Repository;
+import orm.*;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -55,15 +51,15 @@ public final class RebrickableTokensRepository extends Repository<RebrickableTok
     return createOptionalModelLoader(account,
                                      this::findByAccount,
                                      (dslContext, a, optionalRebrickableTokens) -> {
-                                       ModelAction modelAction;
+                                       Action action;
                                        if (optionalRebrickableTokens.isPresent()) {
-                                         modelAction = new PersistAction1<>(optionalRebrickableTokens.get());
+                                         action = new PersistAction1<>(this, optionalRebrickableTokens.get());
                                        } else {
                                          final RebrickableTokensRecord rebrickableTokensRecord =
                                              dslContext.newRecord(REBRICKABLE_TOKENS).setIdAccount(a.getId());
-                                         modelAction = new DeleteRecordAction<>(rebrickableTokensRecord);
+                                         action = new DeleteRecordAction<>(rebrickableTokensRecord);
                                        }
-                                       return Collections.singletonList(modelAction);
+                                       return Collections.singletonList(action);
                                      });
   }
 

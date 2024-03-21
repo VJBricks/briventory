@@ -63,21 +63,21 @@ public final class BriventoryDB extends PersistenceContext {
   /** {@inheritDoc} */
   @Override
   protected void consumeInTransaction(final Consumer<DSLContext> usingTransaction) {
-    database.withTransaction((ConnectionRunnable) c -> usingTransaction.accept(DSL.using(c, SQLDialect.POSTGRES)));
+    database.withTransaction((ConnectionRunnable) c -> usingTransaction.accept(DSL.using(c, getDialect())));
   }
 
   /** {@inheritDoc} */
   @Override
   protected <T> T produceInConnection(final Function<DSLContext, T> usingConnection) {
     return database.withConnection(
-        (ConnectionCallable<T>) c -> usingConnection.apply(DSL.using(c, SQLDialect.POSTGRES)));
+        (ConnectionCallable<T>) c -> usingConnection.apply(DSL.using(c, getDialect())));
   }
 
   /** {@inheritDoc} */
   @Override
   protected <T> T produceInTransaction(final Function<DSLContext, T> usingTransaction) {
     return database.withTransaction(
-        (ConnectionCallable<T>) c -> usingTransaction.apply(DSL.using(c, SQLDialect.POSTGRES)));
+        (ConnectionCallable<T>) c -> usingTransaction.apply(DSL.using(c, getDialect())));
   }
 
 }

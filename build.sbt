@@ -4,7 +4,7 @@ name := """Briventory"""
 maintainer := "briventory@varani.ch"
 
 // Common Settings
-scalaVersion := "2.13.8"
+scalaVersion := "2.13.13"
 
 organization := "ch.varani"
 version := "0.1.0-SNAPSHOT"
@@ -29,82 +29,84 @@ testOptions += Tests.Argument(jupiterTestFramework, "-v")
 checkstyleConfigLocation := CheckstyleConfigLocation.File("varani_java_checks.xml")
 checkstyleSeverityLevel := Some(CheckstyleSeverityLevel.Error)
 
-lazy val root = project.in(file(".")).enablePlugins(PlayJava, BuildInfoPlugin).settings(
+lazy val root = project.in(file(".")).enablePlugins(PlayJava, SbtWeb, BuildInfoPlugin).settings(
   buildInfoKeys := Seq[BuildInfoKey](name, version),
   buildInfoObject := "BriventoryBuildInfo",
   buildInfoPackage := "utils"
 )
+
+// To check the the updatable plugin version, do the following steps:
+// 1. sbt project plugins
+// 2. sbt dependencyUpdates
+// 3. sbt project root
+// Note: most of the plugins need Scala 2.12, it is not possible to switch to Scala 2.13, for now.
+lazy val plugins = project in file("./project")
 
 // JPA Dependencies
 libraryDependencies ++= Seq(
   javaJdbc,
 
   guice,
-  "com.google.inject" % "guice" % "5.1.0",
 
   "javax.validation" % "validation-api" % "2.0.1.Final",
   "jakarta.persistence" % "jakarta.persistence-api" % "3.1.0",
   "jakarta.validation" % "jakarta.validation-api" % "3.0.2",
-  "org.jooq" % "jooq" % "3.16.6",
-  "org.jooq" % "jooq-codegen" % "3.16.6",
-  "org.jooq" % "jooq-meta" % "3.16.6",
-  "org.jooq" % "jool" % "0.9.14",
-
-  /* Both dependencies below are necessary to have validator working. */
-  "org.glassfish" % "javax.el" % "3.0.1-b12",
+  "org.jooq" % "jooq" % "3.19.5",
+  "org.jooq" % "jooq-codegen" % "3.19.5",
+  "org.jooq" % "jooq-meta" % "3.19.5",
+  "org.jooq" % "jool" % "0.9.15",
 
   /*"javax.cache" % "cache-api" % "1.1.1",*/
-  "org.ehcache" % "ehcache" % "3.10.0",
-  "io.dropwizard.metrics" % "metrics-core" % "4.2.9"
+  "org.ehcache" % "ehcache" % "3.10.8",
+  "io.dropwizard.metrics" % "metrics-core" % "4.2.25"
 )
 
 // Libraries
 libraryDependencies ++= Seq(
-  "org.apache.commons" % "commons-text" % "1.9",
-  "commons-validator" % "commons-validator" % "1.7",
-  "org.postgresql" % "postgresql" % "42.4.0",
-  "org.hsqldb" % "hsqldb" % "2.6.1",
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.12.5",
-  "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.13.3",
+  "org.apache.commons" % "commons-text" % "1.11.0",
+  "commons-validator" % "commons-validator" % "1.8.0",
+  "org.postgresql" % "postgresql" % "42.7.2",
+  "org.hsqldb" % "hsqldb" % "2.7.2",
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.16.1",
+  "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.16.1",
   "org.semver" % "api" % "0.9.33",
-  "me.gosimple" % "nbvcxz" % "1.5.0",
-  "at.favre.lib" % "bcrypt" % "0.9.0"
+  "me.gosimple" % "nbvcxz" % "1.5.1",
+  "at.favre.lib" % "bcrypt" % "0.10.2"
 )
 
 // To remove when Play2.9 is released
 libraryDependencies ++= Seq(
-  "io.jsonwebtoken" % "jjwt-api" % "0.11.5",
-  "io.jsonwebtoken" % "jjwt-impl" % "0.11.5",
-  "io.jsonwebtoken" % "jjwt-jackson" % "0.11.5"
+  "io.jsonwebtoken" % "jjwt-api" % "0.12.5",
+  "io.jsonwebtoken" % "jjwt-impl" % "0.12.5",
+  "io.jsonwebtoken" % "jjwt-jackson" % "0.12.5"
 )
 
 // WebJars
 libraryDependencies ++= Seq(
-  "org.webjars" %% "webjars-play" % "2.8.13",
-  "org.webjars" % "jquery" % "3.6.0",
-  "org.webjars" % "jquery-ui" % "1.13.1",
-  "org.webjars" % "popper.js" % "2.9.3",
-  "org.webjars" % "bootstrap" % "5.1.3",
-  "org.webjars" % "font-awesome" % "6.1.1",
+  "org.webjars" %% "webjars-play" % "3.0.1",
+  "org.webjars" % "jquery" % "3.7.1",
+  "org.webjars" % "jquery-ui" % "1.13.2",
+  "org.webjars" % "popper.js" % "2.11.7",
+  "org.webjars" % "bootstrap" % "5.3.3",
+  "org.webjars" % "font-awesome" % "6.5.1",
   "org.webjars.bowergithub.dropbox" % "zxcvbn" % "4.4.2"
 )
 
 // Tests libraries
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++= Seq(
-  "org.assertj" % "assertj-core" % "3.23.1" % Test,
+  "org.assertj" % "assertj-core" % "3.25.3" % Test,
   "org.awaitility" % "awaitility" % "4.2.0" % Test,
-  "net.aichler" % "jupiter-interface" % "0.10.0" % Test,
-  "org.junit.jupiter" % "junit-jupiter-api" % "5.8.2" % Test,
-  "org.junit.jupiter" % "junit-jupiter-engine" % "5.8.2" % Test,
-  "org.junit.jupiter" % "junit-jupiter-params" % "5.8.2" % Test,
-  "org.junit.platform" % "junit-platform-runner" % "1.8.2" % Test
+  "net.aichler" % "jupiter-interface" % "0.11.1" % Test,
+  "org.junit.jupiter" % "junit-jupiter-api" % "5.10.2" % Test,
+  "org.junit.jupiter" % "junit-jupiter-engine" % "5.10.2" % Test,
+  "org.junit.jupiter" % "junit-jupiter-params" % "5.10.2" % Test,
+  "org.junit.platform" % "junit-platform-runner" % "1.10.2" % Test
 )
 
 // Dependencies Check Directives
 dependencyUpdatesFailBuild := true
 dependencyUpdatesFilter -= moduleFilter(organization = "org.jacoco", name = "org.jacoco.agent")
-dependencyUpdatesFilter -= moduleFilter(organization = "com.fasterxml.jackson.core", name = "jackson-databind")
 
 // SonarQube parameters
 sonarProperties ++= Map(

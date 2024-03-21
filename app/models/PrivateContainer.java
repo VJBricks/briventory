@@ -13,7 +13,7 @@ import static jooq.Tables.PRIVATE_CONTAINER;
 
 public final class PrivateContainer
     extends Container
-    implements PersistableModel2<ContainerRecord, PrivateContainerRecord> {
+    implements PersistableModel2<PrivateContainer, ContainerRecord, PrivateContainerRecord> {
 
   // *******************************************************************************************************************
   // Attributes

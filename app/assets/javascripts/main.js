@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 /**
  * Adds a div above the element and display a spinner.
  * @param id the identifier of the element.
@@ -19,7 +21,7 @@ function blockWithSpinner(id) {
  */
 function classTransition(id, newClass, duration) {
     $(id).addClass(newClass);
-    setTimeout(function() {
+    setTimeout(function () {
         $(id).removeClass(newClass);
     }, duration);
 }

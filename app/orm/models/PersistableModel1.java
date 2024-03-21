@@ -2,14 +2,16 @@ package orm.models;
 
 import org.jooq.DSLContext;
 import org.jooq.UpdatableRecord;
+import orm.Model;
 
 /**
  * The {@code PersistableModel1} should be used for models that only needs one {@link UpdatableRecord} to be persisted
  * into the database.
  *
+ * @param <M> the specific {@link Model}.
  * @param <R> the precise subtype of {@link UpdatableRecord}.
  */
-public interface PersistableModel1<R extends UpdatableRecord<R>> extends PersistableModel {
+public interface PersistableModel1<M extends Model, R extends UpdatableRecord<R>> extends PersistableModel<M> {
 
   /**
    * Creates the instance of {@link R}, matching this model.

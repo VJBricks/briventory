@@ -30,10 +30,13 @@ POST        /account/settings/rebrickable     controllers.accounts.AccountsContr
 +noCSRF
 DELETE      /account/settings/rebrickable     controllers.accounts.AccountsController.deleteRebrickableTokens(request: Request)
 
-GET         /storage/containers               controllers.storage.StorageController.containers(request: Request)
+GET         /storage                          controllers.storage.StorageController.storage(request: Request)
+GET         /storage/js                       controllers.storage.StorageController.js(request: Request)
++noCSRF
+POST        /storage/containers               controllers.storage.StorageController.containers(request: Request)
+GET         /storage/lockers                  controllers.storage.StorageController.lockers(request: Request)
+GET         /storage/lockerSizes              controllers.storage.StorageController.lockerSizes(request: Request)
 
-GET         /settings/lockers                 controllers.settings.SettingsController.lockers(request: Request)
-GET         /settings/lockertypes             controllers.settings.SettingsController.lockerTypes(request: Request)
 GET         /settings/bricklink               controllers.settings.SettingsController.bricklink(request: Request)
 GET         /settings/colors                  controllers.settings.SettingsController.colors(request: Request)
 GET         /settings/categories              controllers.settings.SettingsController.categories(request: Request)
@@ -44,6 +47,11 @@ GET         /settings/gears                   controllers.settings.SettingsContr
 GET         /settings/elements                controllers.settings.SettingsController.elements(request: Request)
 
 GET         /mf                               controllers.MiniFiguresController.index(request: Request)
+
+POST        /bricklink/callback               controllers.BrickLinkController.callback(request: Request)
+GET         /bricklink/sync/catalog           controllers.BrickLinkController.syncCatalog(request: Request)
+GET         /bricklink/sync/inventory         controllers.BrickLinkController.syncInventory(request: Request)
+GET         /bricklink/sync/orders            controllers.BrickLinkController.syncOrders(request: Request)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                     controllers.Assets.versioned(path="/public", file: Asset)

@@ -14,7 +14,8 @@ import java.util.List;
 
 import static jooq.Tables.REBRICKABLE_TOKENS;
 
-public final class RebrickableTokens extends Model implements PersistableModel1<RebrickableTokensRecord>,
+public final class RebrickableTokens extends Model implements
+    PersistableModel1<RebrickableTokens, RebrickableTokensRecord>,
     ValidatableModel<ValidationError> {
 
   // *******************************************************************************************************************

@@ -1,0 +1,24 @@
+@(account: Account, unusedContainerTypes: List[ContainerType])(implicit messages: play.i18n.Messages)
+
+@if(account.isAdministrator && unusedContainerTypes.nonEmpty) {
+  <div class="dropdown" id="unused-container-types-dropdown">
+    <button type="button" id="unused-container-types-toggle" class="btn btn-secondary dropdown-toggle mb-1" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="false">
+      @messages.at("storage.delete.unusedTypes.label")
+    </button>
+    <div class="dropdown-menu p-4 text-muted dropdown-menu-end" style="max-width: 70vw">
+      <p class="mb-3">@messages.at("storage.unusedTypes.explain")</p>
+      <ul>
+      @for(unused <- unusedContainerTypes) {
+        <li class="m-2">unused.getName()</li>
+      }
+      </ul>
+      <button type="button" class="btn btn-danger" onclick="deleteUnusedContainerTypes()">@messages.at("button.delete.caption")</button>
+    </div>
+  </div>
+
+  <script>
+    function deleteUnusedContainerTypes() {
+        alert("delete");
+    }
+  </script>
+}

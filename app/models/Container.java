@@ -19,8 +19,10 @@ import java.util.List;
 
 import static jooq.Tables.CONTAINER;
 
-public abstract class Container extends Model implements ValidatableModel<ValidationError>,
-    DeletableModel<ValidationError, ContainerRecord> {
+public abstract class Container
+    extends Model
+    implements ValidatableModel<ValidationError>,
+    DeletableModel<Container, ValidationError, ContainerRecord> {
 
   // *******************************************************************************************************************
   // Attributes
@@ -32,6 +34,7 @@ public abstract class Container extends Model implements ValidatableModel<Valida
       RepositoriesHandler.of(ContainerTypesRepository.class)
                          .createModelLoader();
   /** The {@link ManyModelsLoader} instance to retrieve the associated {@link Locker} instances. */
+  @SuppressWarnings("this-escape")
   private final ManyModelsLoader<Container, Locker> lockersLoader =
       RepositoriesHandler.of(LockersRepository.class)
                          .createLockersLoader(this);
@@ -48,6 +51,7 @@ public abstract class Container extends Model implements ValidatableModel<Valida
    * @param lockers the {@link List} of {@link Locker} instances. If set to {@code null}, the {@link List} has not been
    * fetched yet.
    */
+  @SuppressWarnings("this-escape")
   protected Container(final long id, final long idContainerType, final List<Locker> lockers) {
     this.id = id;
     containerTypeLoader.setKey(idContainerType);
@@ -165,7 +169,7 @@ public abstract class Container extends Model implements ValidatableModel<Valida
   }
 
   public static List<Container> getAll() {
-    return RepositoriesHandler.of(ContainersRepository.class).getContainers();
+    return RepositoriesHandler.of(ContainersRepository.class).getAll();
   }
 
 }

@@ -27,8 +27,7 @@
               <li><a class="dropdown-item" href="@controllers.accounts.routes.AccountsController.settings()">@messages("account.settings.title")</a></li>
 
               <li><hr class="dropdown-divider"></li>
-              <li><h6 class="dropdown-header">@messages("user.storage.title")</h6></li>
-              <li><a class="dropdown-item" href="@controllers.storage.routes.StorageController.containers()">@messages("storage.containers.title")</a></li>
+              <li><a class="dropdown-item" href="@controllers.storage.routes.StorageController.storage()">@messages("storage.title")</a></li>
               @if(account.isAdministrator) {
                 <li><hr class="dropdown-divider"></li>
                 <li><h6 class="dropdown-header">@messages("admin.title")</h6></li>

@@ -5,11 +5,7 @@ import jooq.tables.records.BricklinkTokensRecord;
 import models.Account;
 import models.BrickLinkTokens;
 import org.jooq.DSLContext;
-import orm.DeleteRecordAction;
-import orm.ModelAction;
-import orm.OptionalModelLoader;
-import orm.PersistAction1;
-import orm.Repository;
+import orm.*;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -51,15 +47,15 @@ public final class BrickLinkTokensRepository extends Repository<BrickLinkTokens>
     return createOptionalModelLoader(account,
                                      this::findByAccount,
                                      (dslContext, a, optionalBrickLinkTokens) -> {
-                                       ModelAction modelAction;
+                                       Action action;
                                        if (optionalBrickLinkTokens.isPresent()) {
-                                         modelAction = new PersistAction1<>(optionalBrickLinkTokens.get());
+                                         action = new PersistAction1<>(this, optionalBrickLinkTokens.get());
                                        } else {
                                          final BricklinkTokensRecord bricklinkTokensRecord =
                                              dslContext.newRecord(BRICKLINK_TOKENS).setIdAccount(a.getId());
-                                         modelAction = new DeleteRecordAction<>(bricklinkTokensRecord);
+                                         action = new DeleteRecordAction<>(bricklinkTokensRecord);
                                        }
-                                       return Collections.singletonList(modelAction);
+                                       return Collections.singletonList(action);
                                      });
   }
 

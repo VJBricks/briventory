@@ -17,7 +17,7 @@ import static jooq.Tables.CONFIGURATION;
  * This table is a read-only one.
  */
 @Singleton
-public class ConfigurationRepository extends Repository<Configuration> {
+public final class ConfigurationRepository extends Repository<Configuration> {
 
   // *******************************************************************************************************************
   // Instance factory

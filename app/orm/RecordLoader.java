@@ -23,8 +23,8 @@ public final class RecordLoader<K, V> extends LazyLoader<K, V> {
   RecordLoader(final PersistenceContext persistenceContext,
                final K key,
                final BiFunction<DSLContext, K, V> fetcher,
-               final Function3<DSLContext, K, V, List<ModelAction>> modelActionsCreator) {
-    super(persistenceContext, key, fetcher, modelActionsCreator);
+               final Function3<DSLContext, K, V, List<Action>> actionsCreator) {
+    super(persistenceContext, key, fetcher, actionsCreator);
   }
 
 }

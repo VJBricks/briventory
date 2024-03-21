@@ -6,11 +6,7 @@ import jooq.tables.records.LockedAccountRecord;
 import models.Account;
 import org.jooq.DSLContext;
 import org.jooq.Select;
-import orm.DeleteRecordAction;
-import orm.ModelAction;
-import orm.PersistRecordAction;
-import orm.RecordLoader;
-import orm.Repository;
+import orm.*;
 import play.data.validation.ValidationError;
 
 import javax.inject.Inject;
@@ -79,12 +75,12 @@ public final class AccountsRepository extends Repository<Account> {
                               (dslContext, a, isLocked) -> {
                                 final LockedAccountRecord lockedAccountRecord = dslContext.newRecord(LOCKED_ACCOUNT)
                                                                                           .setIdAccount(a.getId());
-                                ModelAction modelAction;
+                                Action action;
                                 if (Boolean.TRUE.equals(isLocked))
-                                  modelAction = new PersistRecordAction<>(lockedAccountRecord);
+                                  action = new PersistRecordAction<>(lockedAccountRecord);
                                 else
-                                  modelAction = new DeleteRecordAction<>(lockedAccountRecord);
-                                return Collections.singletonList(modelAction);
+                                  action = new DeleteRecordAction<>(lockedAccountRecord);
+                                return Collections.singletonList(action);
                               });
   }
 
@@ -139,12 +135,12 @@ public final class AccountsRepository extends Repository<Account> {
                               (dslContext, a, isAdministrator) -> {
                                 final AdministratorRecord administratorRecord = dslContext.newRecord(ADMINISTRATOR)
                                                                                           .setIdAccount(a.getId());
-                                ModelAction modelAction;
+                                Action action;
                                 if (Boolean.TRUE.equals(isAdministrator))
-                                  modelAction = new PersistRecordAction<>(administratorRecord);
+                                  action = new PersistRecordAction<>(administratorRecord);
                                 else
-                                  modelAction = new DeleteRecordAction<>(administratorRecord);
-                                return Collections.singletonList(modelAction);
+                                  action = new DeleteRecordAction<>(administratorRecord);
+                                return Collections.singletonList(action);
                               });
   }
 

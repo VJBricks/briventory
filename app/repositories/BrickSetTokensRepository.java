@@ -5,11 +5,7 @@ import jooq.tables.records.BricksetTokensRecord;
 import models.Account;
 import models.BrickSetTokens;
 import org.jooq.DSLContext;
-import orm.DeleteRecordAction;
-import orm.ModelAction;
-import orm.OptionalModelLoader;
-import orm.PersistAction1;
-import orm.Repository;
+import orm.*;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -52,15 +48,15 @@ public final class BrickSetTokensRepository extends Repository<BrickSetTokens> {
     return createOptionalModelLoader(account,
                                      this::findByAccount,
                                      (dslContext, a, optionalBrickSetTokens) -> {
-                                       ModelAction modelAction;
+                                       Action action;
                                        if (optionalBrickSetTokens.isPresent()) {
-                                         modelAction = new PersistAction1<>(optionalBrickSetTokens.get());
+                                         action = new PersistAction1<>(this, optionalBrickSetTokens.get());
                                        } else {
                                          final BricksetTokensRecord bricksetTokensRecord =
                                              dslContext.newRecord(BRICKSET_TOKENS).setIdAccount(a.getId());
-                                         modelAction = new DeleteRecordAction<>(bricksetTokensRecord);
+                                         action = new DeleteRecordAction<>(bricksetTokensRecord);
                                        }
-                                       return Collections.singletonList(modelAction);
+                                       return Collections.singletonList(action);
                                      });
   }
 

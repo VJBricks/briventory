@@ -15,9 +15,11 @@ import static jooq.Tables.ADMINISTRATOR;
  * {@code Administrator} represents the week entity, identifying that the corresponding {@link models.Account} is an
  * administrator.
  */
-public class Administrator extends Model implements PersistableModel1<AdministratorRecord>,
-                                                        ValidatableModel<ValidationError>,
-                                                        DeletableModel<ValidationError, AdministratorRecord> {
+public class Administrator
+    extends Model
+    implements PersistableModel1<Administrator, AdministratorRecord>,
+    ValidatableModel<ValidationError>,
+    DeletableModel<Administrator, ValidationError, AdministratorRecord> {
 
   // *******************************************************************************************************************
   // Instance factory

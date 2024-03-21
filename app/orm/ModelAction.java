@@ -1,22 +1,23 @@
 package orm;
 
-import org.jooq.DSLContext;
-
 /**
  * {@code ModelAction} is the base class for every actions that will be performed before or after a persistence or
  * deletion.
  * <p><strong>Note</strong>: {@code ModelAction} is not an interface, to avoid any access to the
- * {@link ModelAction#perform(PersistenceContext, DSLContext)} method outside the package (<em>java:S1610</em>).</p>
+ * {@link ModelAction#perform(Repository, org.jooq.DSLContext)} method outside the package (<em>java:S1610</em>).</p>
+ *
+ * @param <M> the specific {@link Model}.
  */
 @SuppressWarnings("java:S1610")
-public abstract class ModelAction {
+public abstract class ModelAction<M extends Model> extends Action {
 
-  /**
-   * Performs the corresponding action.
-   *
-   * @param persistenceContext the {@link PersistenceContext}, needed to call the corresponding {@code persist} method.
-   * @param dslContext the {@link DSLContext}.
-   */
-  abstract void perform(PersistenceContext persistenceContext, DSLContext dslContext);
+
+  private final Repository<M> repository;
+
+  public ModelAction(final Repository<M> repository) {
+    this.repository = repository;
+  }
+
+  protected final Repository<M> getRepository() { return repository; }
 
 }

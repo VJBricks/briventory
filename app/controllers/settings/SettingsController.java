@@ -6,14 +6,6 @@ import play.mvc.Result;
 
 public final class SettingsController extends Controller {
 
-  public Result lockers(final Http.Request request) {
-    return status(Http.Status.NOT_IMPLEMENTED);
-  }
-
-  public Result lockerTypes(final Http.Request request) {
-    return status(Http.Status.NOT_IMPLEMENTED);
-  }
-
   public Result bricklink(final Http.Request request) {
     return status(Http.Status.NOT_IMPLEMENTED);
   }
